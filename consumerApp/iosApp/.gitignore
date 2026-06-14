@@ -1,5 +1,8 @@
-# Generated from project.yml by xcodegen — regenerate with `xcodegen generate`.
-ConsumerApp.xcodeproj/
+# The .xcodeproj IS committed (like the other AppToLast iOS apps) so it opens directly
+# in Android Studio / Xcode. It stays regeneratable from project.yml (`xcodegen generate`).
+# The repo-root .gitignore has `*.xcodeproj`; re-include ours here. Only per-user state is ignored.
+!ConsumerApp.xcodeproj
+!ConsumerApp.xcodeproj/**
 
 # Xcode
 xcuserdata/
