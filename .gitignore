@@ -585,7 +585,7 @@ iOSInjectionProject/
 ### SwiftPackageManager ###
 Packages
 xcuserdata
-*.xcodeproj
+#*.xcodeproj
 
 
 ### Windows ###
@@ -618,7 +618,7 @@ $RECYCLE.BIN/
 
 
 ### Xcode Patch ###
-*.xcodeproj/*
+#*.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
