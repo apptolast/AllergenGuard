@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.util.JsonExporter
 import org.apptolast.menuadmin.domain.platform.FileHandler
 import org.apptolast.menuadmin.domain.repository.FileUploadRepository
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
-import org.apptolast.menuadmin.domain.util.JsonExporter
 
 data class BackupUiState(
     val isExporting: Boolean = false,

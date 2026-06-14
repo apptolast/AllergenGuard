@@ -2,6 +2,7 @@ package org.apptolast.menuadmin.domain.util
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.util.JsonExporter
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Dish
 import org.apptolast.menuadmin.domain.model.Ingredient

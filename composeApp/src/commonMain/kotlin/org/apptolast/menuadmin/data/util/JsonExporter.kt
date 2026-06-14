@@ -1,4 +1,4 @@
-package org.apptolast.menuadmin.domain.util
+package org.apptolast.menuadmin.data.util
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json

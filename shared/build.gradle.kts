@@ -10,8 +10,11 @@ plugins {
 
 kotlin {
     compilerOptions {
-        // Room/expect-actual and KT-61573 note; harmless for a plain library.
-        freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.addAll(
+            "-Xexpect-actual-classes",
+            "-opt-in=kotlin.time.ExperimentalTime",
+            "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+        )
     }
 
     androidLibrary {
@@ -46,6 +49,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
         }
     }
 }
