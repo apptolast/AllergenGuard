@@ -1,9 +1,11 @@
 import SwiftUI
 import ConsumerApp
+import FirebaseCore
 
 @main
 struct iOSApp: App {
     init() {
+        FirebaseApp.configure()
         MainViewControllerKt.doInitKoinIos()
     }
 

@@ -12,12 +12,23 @@ settings:
     # The "Compile Kotlin Framework" run script writes the framework into the build
     # dir, which Xcode's script sandbox would otherwise block.
     ENABLE_USER_SCRIPT_SANDBOXING: NO
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: "11.0.0"
 targets:
   ConsumerApp:
     type: application
     platform: iOS
     sources:
       - path: iosApp
+    dependencies:
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: Firebase
+        product: FirebaseCrashlytics
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

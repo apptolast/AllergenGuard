@@ -6,3 +6,7 @@ xcuserdata/
 DerivedData/
 build/
 *.xcuserstate
+
+# Firebase config — kept out of git like google-services.json (Android). Provided per environment.
+# Regenerate: firebase apps:sdkconfig IOS 1:151008360567:ios:bcab3ae9e63b63c9d46e72 --project menusmati
+iosApp/GoogleService-Info.plist
