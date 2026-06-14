@@ -17,7 +17,6 @@ import org.apptolast.menuadmin.data.remote.menu.MenuService
 import org.apptolast.menuadmin.data.remote.menudigitalcard.MenuDigitalCardService
 import org.apptolast.menuadmin.data.remote.recipe.RecipeService
 import org.apptolast.menuadmin.data.remote.restaurant.RestaurantService
-import org.apptolast.menuadmin.data.remote.upload.FileUploadService
 import org.apptolast.menuadmin.data.repository.ApiDashboardRepository
 import org.apptolast.menuadmin.data.repository.FirebaseAuthRepository
 import org.apptolast.menuadmin.data.repository.FirestoreDashboardRepository
@@ -27,7 +26,6 @@ import org.apptolast.menuadmin.data.repository.FirestoreRecipeRepository
 import org.apptolast.menuadmin.data.repository.FirestoreRestaurantRepository
 import org.apptolast.menuadmin.data.repository.RemoteAuthRepository
 import org.apptolast.menuadmin.data.repository.RemoteDishRepository
-import org.apptolast.menuadmin.data.repository.RemoteFileUploadRepository
 import org.apptolast.menuadmin.data.repository.RemoteIngredientRepository
 import org.apptolast.menuadmin.data.repository.RemoteMenuDigitalCardRepository
 import org.apptolast.menuadmin.data.repository.RemoteMenuRepository
@@ -36,7 +34,6 @@ import org.apptolast.menuadmin.data.repository.RemoteRestaurantRepository
 import org.apptolast.menuadmin.domain.repository.AuthRepository
 import org.apptolast.menuadmin.domain.repository.DashboardRepository
 import org.apptolast.menuadmin.domain.repository.DishRepository
-import org.apptolast.menuadmin.domain.repository.FileUploadRepository
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.MenuDigitalCardRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
@@ -69,7 +66,6 @@ val dataModule = module {
     singleOf(::IngredientService)
     singleOf(::RecipeService)
     singleOf(::MenuDigitalCardService)
-    singleOf(::FileUploadService)
 
     // Firebase (Auth REST + Firestore REST) — works on all targets incl. wasmJs
     single { FirebaseAuthService(get(named("auth"))) }
@@ -93,10 +89,9 @@ val dataModule = module {
         singleOf(::ApiDashboardRepository) bind DashboardRepository::class
     }
 
-    // Still backend-backed (dishes/digital-cards dropped in the simplified model; upload → Storage later)
+    // Still backend-backed (dishes/digital-cards dropped in the simplified model — inert, no UI uses them)
     singleOf(::RemoteDishRepository) bind DishRepository::class
     singleOf(::RemoteMenuDigitalCardRepository) bind MenuDigitalCardRepository::class
-    singleOf(::RemoteFileUploadRepository) bind FileUploadRepository::class
 
     // Local preferences
     single { ThemePreferences() }

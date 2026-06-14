@@ -28,9 +28,6 @@ object ApiConstants {
     // Admin - Menu Digital Cards
     const val ADMIN_MENU_DIGITAL_CARDS = "/api/v1/admin/menu-digital-cards"
 
-    // Admin - File Upload
-    const val ADMIN_UPLOAD = "/api/v1/admin/upload"
-
     // Public
     const val ALLERGENS = "/api/v1/allergens"
     const val RESTAURANTS = "/api/v1/restaurants"

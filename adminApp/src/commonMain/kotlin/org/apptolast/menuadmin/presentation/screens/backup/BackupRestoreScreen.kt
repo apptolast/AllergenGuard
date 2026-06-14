@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,10 +27,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +54,9 @@ fun BackupRestoreScreen(viewModel: BackupViewModel = koinViewModel()) {
     BackupRestoreContent(
         uiState = uiState,
         onExport = viewModel::exportData,
-        onImport = viewModel::importData,
+        onAnalyzeImport = viewModel::analyzeImport,
+        onConfirmImport = viewModel::confirmImport,
+        onCancelImport = viewModel::cancelImport,
         onClearMessage = viewModel::clearMessage,
     )
 }
@@ -56,10 +65,24 @@ fun BackupRestoreScreen(viewModel: BackupViewModel = koinViewModel()) {
 fun BackupRestoreContent(
     uiState: BackupUiState,
     onExport: () -> Unit,
-    onImport: () -> Unit,
+    onAnalyzeImport: () -> Unit,
+    onConfirmImport: (ImportMode) -> Unit,
+    onCancelImport: () -> Unit,
     onClearMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // UI-only flag: which import strategy the user wants. Persisted across the confirm dialog.
+    var importMode by remember { mutableStateOf(ImportMode.MERGE) }
+
+    uiState.preview?.let { preview ->
+        ImportConfirmDialog(
+            preview = preview,
+            mode = importMode,
+            onConfirm = { onConfirmImport(importMode) },
+            onDismiss = onCancelImport,
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -187,15 +210,37 @@ fun BackupRestoreContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Restaura tus datos desde un archivo JSON (formato interno o externo)",
+                    text = "Restaura tus datos desde un archivo JSON. Antes de aplicar se descarga " +
+                        "automaticamente una copia de seguridad del estado actual.",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                Text(
+                    text = "Modo de importacion",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                ImportModeOption(
+                    selected = importMode == ImportMode.MERGE,
+                    title = "Combinar",
+                    description = "Actualiza los existentes y anade los nuevos. No borra nada.",
+                    onSelect = { importMode = ImportMode.MERGE },
+                )
+                ImportModeOption(
+                    selected = importMode == ImportMode.REPLACE,
+                    title = "Reemplazar",
+                    description = "Deja la base de datos igual que el fichero (borra lo que no este en el).",
+                    onSelect = { importMode = ImportMode.REPLACE },
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 OutlinedButton(
-                    onClick = onImport,
+                    onClick = onAnalyzeImport,
                     enabled = !uiState.isImporting,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     shape = RoundedCornerShape(8.dp),
@@ -225,6 +270,96 @@ fun BackupRestoreContent(
     }
 }
 
+@Composable
+private fun ImportModeOption(
+    selected: Boolean,
+    title: String,
+    description: String,
+    onSelect: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(selected = selected, onClick = onSelect)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        RadioButton(selected = selected, onClick = onSelect)
+        Spacer(modifier = Modifier.width(4.dp))
+        Column(modifier = Modifier.padding(top = 12.dp)) {
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ImportConfirmDialog(
+    preview: ImportPreview,
+    mode: ImportMode,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = if (mode == ImportMode.REPLACE) "Confirmar reemplazo" else "Confirmar importacion") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(text = "Restaurante: ${preview.restaurantName}", fontSize = 14.sp)
+                Text(
+                    text = "Ingredientes: ${preview.ingredientsNew} nuevos, ${preview.ingredientsUpdated} actualizados",
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "Recetas: ${preview.recipesNew} nuevas, ${preview.recipesUpdated} actualizadas",
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = "Menus: ${preview.menusNew} nuevos, ${preview.menusUpdated} actualizados",
+                    fontSize = 14.sp,
+                )
+                if (mode == ImportMode.REPLACE) {
+                    val toDelete = preview.ingredientsToDelete + preview.recipesToDelete + preview.menusToDelete
+                    Text(
+                        text = "Se eliminaran $toDelete elementos que no estan en el fichero " +
+                            "(${preview.ingredientsToDelete} ingredientes, ${preview.recipesToDelete} recetas, " +
+                            "${preview.menusToDelete} menus).",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Copia de seguridad descargada: ${preview.backupFileName}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = if (mode == ImportMode.REPLACE) "Reemplazar" else "Combinar",
+                    color = if (mode == ImportMode.REPLACE) MaterialTheme.colorScheme.error else Blue500,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = "Cancelar") }
+        },
+    )
+}
+
 @Preview
 @Composable
 private fun BackupRestoreContentPreview() {
@@ -232,7 +367,9 @@ private fun BackupRestoreContentPreview() {
         BackupRestoreContent(
             uiState = BackupUiState(),
             onExport = {},
-            onImport = {},
+            onAnalyzeImport = {},
+            onConfirmImport = {},
+            onCancelImport = {},
             onClearMessage = {},
         )
     }
@@ -244,11 +381,38 @@ private fun BackupRestoreContentWithMessagePreview() {
     MenuAdminTheme {
         BackupRestoreContent(
             uiState = BackupUiState(
-                message = "Importacion completada: 45 ingredientes, 12 recetas",
+                message = "Combinacion completado: 45 ingredientes, 12 recetas, 3 menus importados",
             ),
             onExport = {},
-            onImport = {},
+            onAnalyzeImport = {},
+            onConfirmImport = {},
+            onCancelImport = {},
             onClearMessage = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ImportConfirmDialogPreview() {
+    MenuAdminTheme {
+        ImportConfirmDialog(
+            preview = ImportPreview(
+                restaurantName = "El Rincon del Mar",
+                ingredientsNew = 5,
+                ingredientsUpdated = 12,
+                recipesNew = 2,
+                recipesUpdated = 3,
+                menusNew = 1,
+                menusUpdated = 0,
+                ingredientsToDelete = 4,
+                recipesToDelete = 1,
+                menusToDelete = 0,
+                backupFileName = "menuadmin_backup_pre-import_2026-06-14T10-30-00.json",
+            ),
+            mode = ImportMode.REPLACE,
+            onConfirm = {},
+            onDismiss = {},
         )
     }
 }
