@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.remote.dish.DishService
 import org.apptolast.menuadmin.data.remote.mapper.toDomain
 import org.apptolast.menuadmin.data.remote.menu.MenuRequestDto
@@ -15,7 +16,6 @@ import org.apptolast.menuadmin.data.remote.menu.SectionRequestDto
 import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.Section
 import org.apptolast.menuadmin.domain.repository.MenuRepository
-import org.apptolast.menuadmin.presentation.SelectedRestaurantHolder
 
 class RemoteMenuRepository(
     private val menuService: MenuService,

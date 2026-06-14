@@ -1,7 +1,7 @@
 package org.apptolast.menuadmin.di
 
 import kotlinx.serialization.json.Json
-import org.apptolast.menuadmin.BuildKonfig
+import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.local.ThemePreferences
 import org.apptolast.menuadmin.data.remote.auth.AuthService
 import org.apptolast.menuadmin.data.remote.auth.TokenManager
@@ -9,6 +9,7 @@ import org.apptolast.menuadmin.data.remote.createAuthHttpClient
 import org.apptolast.menuadmin.data.remote.createHttpClient
 import org.apptolast.menuadmin.data.remote.dish.DishService
 import org.apptolast.menuadmin.data.remote.firebase.FirebaseAuthService
+import org.apptolast.menuadmin.data.remote.firebase.FirebaseConfig
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.createFirestoreHttpClient
 import org.apptolast.menuadmin.data.remote.ingredient.IngredientService
@@ -41,7 +42,6 @@ import org.apptolast.menuadmin.domain.repository.MenuDigitalCardRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
-import org.apptolast.menuadmin.presentation.SelectedRestaurantHolder
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -77,7 +77,7 @@ val dataModule = module {
     single { FirestoreClient(get(named("firestore"))) }
 
     // Repositories — Auth + Ingredients feature-flagged: Firestore vs custom backend
-    if (BuildKonfig.USE_FIRESTORE.toBoolean()) {
+    if (FirebaseConfig.useFirestore) {
         singleOf(::FirebaseAuthRepository) bind AuthRepository::class
         singleOf(::FirestoreIngredientRepository) bind IngredientRepository::class
         singleOf(::FirestoreRestaurantRepository) bind RestaurantRepository::class

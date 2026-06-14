@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
-import org.apptolast.menuadmin.presentation.SelectedRestaurantHolder
 
 class RestaurantDetailViewModel(
     private val restaurantRepository: RestaurantRepository,

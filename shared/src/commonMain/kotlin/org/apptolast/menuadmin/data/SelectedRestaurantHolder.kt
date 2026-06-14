@@ -1,4 +1,4 @@
-package org.apptolast.menuadmin.presentation
+package org.apptolast.menuadmin.data
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

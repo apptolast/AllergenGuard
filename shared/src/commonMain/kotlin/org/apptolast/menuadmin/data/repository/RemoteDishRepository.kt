@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.remote.dish.DishAllergenRequestDto
 import org.apptolast.menuadmin.data.remote.dish.DishRequestDto
 import org.apptolast.menuadmin.data.remote.dish.DishService
@@ -13,7 +14,6 @@ import org.apptolast.menuadmin.data.remote.mapper.toDomain
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Dish
 import org.apptolast.menuadmin.domain.repository.DishRepository
-import org.apptolast.menuadmin.presentation.SelectedRestaurantHolder
 
 class RemoteDishRepository(
     private val dishService: DishService,

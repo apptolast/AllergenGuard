@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreDocument
 import org.apptolast.menuadmin.domain.model.Menu
@@ -13,7 +14,6 @@ import org.apptolast.menuadmin.domain.model.MenuRecipeSummary
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
-import org.apptolast.menuadmin.presentation.SelectedRestaurantHolder
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

@@ -12,6 +12,12 @@ object FirebaseConfig {
     val apiKey: String = BuildKonfig.FIREBASE_API_KEY
     val projectId: String = BuildKonfig.FIREBASE_PROJECT_ID
 
+    /**
+     * Feature flag: true = Firebase/Firestore data layer, false = legacy VPS backend. Exposed here
+     * (public) because the generated [BuildKonfig] is internal to :shared and not visible to apps.
+     */
+    val useFirestore: Boolean = BuildKonfig.USE_FIRESTORE.toBoolean()
+
     const val IDENTITY_TOOLKIT = "https://identitytoolkit.googleapis.com/v1"
     const val SECURE_TOKEN = "https://securetoken.googleapis.com/v1"
     const val FIRESTORE = "https://firestore.googleapis.com/v1"
