@@ -5,6 +5,21 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>MenuAdmin</title>
     <link href="styles.css" rel="stylesheet" type="text/css">
+    <!-- Firebase Analytics (web). Crashlytics is not available on web; the consumer mobile app uses the native SDK. -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
+        const app = initializeApp({
+            apiKey: "AIzaSyCNV6mF3J2ruBQ0Mi7a0RTqm4Xi5wlqn88",
+            authDomain: "menusmati.firebaseapp.com",
+            projectId: "menusmati",
+            storageBucket: "menusmati.firebasestorage.app",
+            messagingSenderId: "151008360567",
+            appId: "1:151008360567:web:9f1264db91fc348ed46e72",
+            measurementId: "G-247EFBKP11"
+        });
+        getAnalytics(app);
+    </script>
 </head>
 <body style="text-align: center; align-content: center">
 <svg height="40" role="presentation" viewBox="0 0 50 50" width="40" xmlns="http://www.w3.org/2000/svg">
