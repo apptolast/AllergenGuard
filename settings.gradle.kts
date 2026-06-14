@@ -32,4 +32,5 @@ dependencyResolutionManagement {
 }
 
 include(":adminApp")
+include(":consumerApp")
 include(":shared")
