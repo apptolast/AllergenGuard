@@ -1,15 +1,14 @@
 package org.apptolast.menuadmin.domain.model
 
-import androidx.compose.ui.graphics.Color
-
 enum class SafetyLevel(
     val apiValue: String,
     val labelEs: String,
-    val color: Color,
+    // ARGB color as a plain Long so the domain stays free of Compose (see SafetyLevel.color in UI).
+    val colorArgb: Long,
 ) {
-    SAFE("SAFE", "Seguro", Color(0xFF22C55E)),
-    RISK("RISK", "Riesgo", Color(0xFFF59E0B)),
-    DANGER("DANGER", "Peligro", Color(0xFFEF4444)),
+    SAFE("SAFE", "Seguro", 0xFF22C55E),
+    RISK("RISK", "Riesgo", 0xFFF59E0B),
+    DANGER("DANGER", "Peligro", 0xFFEF4444),
     ;
 
     companion object {

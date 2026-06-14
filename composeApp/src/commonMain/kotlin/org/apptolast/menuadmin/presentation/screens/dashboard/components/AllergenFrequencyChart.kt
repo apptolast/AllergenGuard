@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.apptolast.menuadmin.presentation.theme.color
 
 @Composable
 fun AllergenFrequencyChart(

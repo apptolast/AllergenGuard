@@ -27,6 +27,7 @@ import org.apptolast.menuadmin.presentation.components.LucideIcon
 import org.apptolast.menuadmin.presentation.theme.Amber500
 import org.apptolast.menuadmin.presentation.theme.Blue100
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.apptolast.menuadmin.presentation.theme.color
 
 /**
  * Allergen selector with containment level support.

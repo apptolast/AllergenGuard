@@ -33,6 +33,7 @@ import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.LucideIcon
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.apptolast.menuadmin.presentation.theme.color
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
