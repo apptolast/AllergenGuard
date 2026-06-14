@@ -31,5 +31,5 @@ dependencyResolutionManagement {
     }
 }
 
-include(":composeApp")
+include(":adminApp")
 include(":shared")
