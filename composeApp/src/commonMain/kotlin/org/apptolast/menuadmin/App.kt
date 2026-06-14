@@ -28,7 +28,9 @@ fun App() {
                 onLogout = authViewModel::onLogout,
             )
         } else {
-            AuthScreen(onAuthenticated = {})
+            // Share the same AuthViewModel instance App observes, so a successful login flips
+            // authState.isAuthenticated here and navigates to AdminLayout.
+            AuthScreen(viewModel = authViewModel, onAuthenticated = {})
         }
     }
 }

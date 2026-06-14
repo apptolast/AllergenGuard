@@ -72,7 +72,9 @@ kotlin {
             implementation(libs.ktor.client.js)
         }
         wasmJsMain.dependencies {
-            implementation(libs.ktor.client.cio)
+            // Browser-compatible Ktor engine. CIO targets Node (pulls `node:net`) and breaks the
+            // webpack browser bundle; the Js engine uses the browser fetch API.
+            implementation(libs.ktor.client.js)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -150,5 +152,8 @@ buildkonfig {
     packageName = "org.apptolast.menuadmin"
     defaultConfigs {
         buildConfigField(STRING, "API_BASE_URL", localProperties.getProperty("API_BASE_URL", ""))
+        buildConfigField(STRING, "FIREBASE_API_KEY", localProperties.getProperty("FIREBASE_API_KEY", ""))
+        buildConfigField(STRING, "FIREBASE_PROJECT_ID", localProperties.getProperty("FIREBASE_PROJECT_ID", ""))
+        buildConfigField(STRING, "USE_FIRESTORE", localProperties.getProperty("USE_FIRESTORE", "true"))
     }
 }

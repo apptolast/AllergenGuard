@@ -1,12 +1,16 @@
 package org.apptolast.menuadmin.di
 
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.BuildKonfig
 import org.apptolast.menuadmin.data.local.ThemePreferences
 import org.apptolast.menuadmin.data.remote.auth.AuthService
 import org.apptolast.menuadmin.data.remote.auth.TokenManager
 import org.apptolast.menuadmin.data.remote.createAuthHttpClient
 import org.apptolast.menuadmin.data.remote.createHttpClient
 import org.apptolast.menuadmin.data.remote.dish.DishService
+import org.apptolast.menuadmin.data.remote.firebase.FirebaseAuthService
+import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
+import org.apptolast.menuadmin.data.remote.firebase.createFirestoreHttpClient
 import org.apptolast.menuadmin.data.remote.ingredient.IngredientService
 import org.apptolast.menuadmin.data.remote.menu.MenuService
 import org.apptolast.menuadmin.data.remote.menudigitalcard.MenuDigitalCardService
@@ -14,6 +18,12 @@ import org.apptolast.menuadmin.data.remote.recipe.RecipeService
 import org.apptolast.menuadmin.data.remote.restaurant.RestaurantService
 import org.apptolast.menuadmin.data.remote.upload.FileUploadService
 import org.apptolast.menuadmin.data.repository.ApiDashboardRepository
+import org.apptolast.menuadmin.data.repository.FirebaseAuthRepository
+import org.apptolast.menuadmin.data.repository.FirestoreDashboardRepository
+import org.apptolast.menuadmin.data.repository.FirestoreIngredientRepository
+import org.apptolast.menuadmin.data.repository.FirestoreMenuRepository
+import org.apptolast.menuadmin.data.repository.FirestoreRecipeRepository
+import org.apptolast.menuadmin.data.repository.FirestoreRestaurantRepository
 import org.apptolast.menuadmin.data.repository.RemoteAuthRepository
 import org.apptolast.menuadmin.data.repository.RemoteDishRepository
 import org.apptolast.menuadmin.data.repository.RemoteFileUploadRepository
@@ -61,16 +71,32 @@ val dataModule = module {
     singleOf(::MenuDigitalCardService)
     singleOf(::FileUploadService)
 
-    // Repositories (API-backed)
-    singleOf(::RemoteAuthRepository) bind AuthRepository::class
-    singleOf(::RemoteRestaurantRepository) bind RestaurantRepository::class
+    // Firebase (Auth REST + Firestore REST) — works on all targets incl. wasmJs
+    single { FirebaseAuthService(get(named("auth"))) }
+    single(named("firestore")) { createFirestoreHttpClient(get(), get(), get()) }
+    single { FirestoreClient(get(named("firestore"))) }
+
+    // Repositories — Auth + Ingredients feature-flagged: Firestore vs custom backend
+    if (BuildKonfig.USE_FIRESTORE.toBoolean()) {
+        singleOf(::FirebaseAuthRepository) bind AuthRepository::class
+        singleOf(::FirestoreIngredientRepository) bind IngredientRepository::class
+        singleOf(::FirestoreRestaurantRepository) bind RestaurantRepository::class
+        singleOf(::FirestoreRecipeRepository) bind RecipeRepository::class
+        singleOf(::FirestoreMenuRepository) bind MenuRepository::class
+        singleOf(::FirestoreDashboardRepository) bind DashboardRepository::class
+    } else {
+        singleOf(::RemoteAuthRepository) bind AuthRepository::class
+        singleOf(::RemoteIngredientRepository) bind IngredientRepository::class
+        singleOf(::RemoteRestaurantRepository) bind RestaurantRepository::class
+        singleOf(::RemoteRecipeRepository) bind RecipeRepository::class
+        singleOf(::RemoteMenuRepository) bind MenuRepository::class
+        singleOf(::ApiDashboardRepository) bind DashboardRepository::class
+    }
+
+    // Still backend-backed (dishes/digital-cards dropped in the simplified model; upload → Storage later)
     singleOf(::RemoteDishRepository) bind DishRepository::class
-    singleOf(::RemoteMenuRepository) bind MenuRepository::class
-    singleOf(::RemoteIngredientRepository) bind IngredientRepository::class
-    singleOf(::RemoteRecipeRepository) bind RecipeRepository::class
     singleOf(::RemoteMenuDigitalCardRepository) bind MenuDigitalCardRepository::class
     singleOf(::RemoteFileUploadRepository) bind FileUploadRepository::class
-    singleOf(::ApiDashboardRepository) bind DashboardRepository::class
 
     // Local preferences
     single { ThemePreferences() }
