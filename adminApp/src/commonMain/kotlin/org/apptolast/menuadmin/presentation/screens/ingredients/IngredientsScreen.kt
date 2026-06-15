@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -404,7 +403,7 @@ fun IngredientsContent(
 
             // Grid of ingredient cards
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 220.dp),
+                columns = GridCells.Adaptive(minSize = 280.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize(),
@@ -487,19 +486,27 @@ private fun IngredientCard(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
+    val allergens = ingredient.allergenTypes.toList()
+    // Cap the visible badges so a many-allergen ingredient can't outgrow the fixed cell height and
+    // ruin the grid alignment; the rest are summarised with a "+N" chip.
+    val maxVisible = 4
+    val visible = allergens.take(maxVisible)
+    val hidden = allergens.size - visible.size
+
     Column(
         modifier = modifier
+            .fillMaxWidth()
+            .height(150.dp)
             .clip(shape)
             .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = shape)
             .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
-            .defaultMinSize(minHeight = 120.dp)
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
             text = ingredient.name,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
@@ -514,26 +521,48 @@ private fun IngredientCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (ingredient.allergenTypes.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                ingredient.allergenTypes.forEach { allergen ->
-                    AllergenBadge(
-                        allergenType = allergen,
-                        isActive = true,
-                    )
-                }
-            }
-        } else {
+        Spacer(modifier = Modifier.weight(1f))
+        if (allergens.isEmpty()) {
             Text(
                 text = "Sin alergenos",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        } else {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                visible.forEach { allergen ->
+                    AllergenBadge(
+                        allergenType = allergen,
+                        isActive = true,
+                        compact = true,
+                    )
+                }
+                if (hidden > 0) {
+                    ExtraAllergenBadge(count = hidden)
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun ExtraAllergenBadge(
+    count: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = "+$count",
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .padding(vertical = 4.dp, horizontal = 8.dp),
+    )
 }
 
 @Preview
@@ -566,6 +595,17 @@ private fun IngredientsContentPreview() {
                             ),
                         ),
                     ),
+                    Ingredient(
+                        id = "3",
+                        name = "Galletas de Canela",
+                        allergens = listOf(
+                            IngredientAllergen(allergenCode = "GLUTEN", allergenName = "Gluten"),
+                            IngredientAllergen(allergenCode = "SOYA", allergenName = "Soja"),
+                            IngredientAllergen(allergenCode = "MILK", allergenName = "Lacteos"),
+                            IngredientAllergen(allergenCode = "SULPHITES", allergenName = "Sulfitos"),
+                        ),
+                    ),
+                    Ingredient(id = "4", name = "Sal"),
                 ),
             ),
             onNewIngredient = {},

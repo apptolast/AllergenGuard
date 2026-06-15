@@ -37,10 +37,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
 import org.apptolast.menuadmin.navigation.IngredientsRoute
 import org.apptolast.menuadmin.navigation.ProfileRoute
+import org.apptolast.menuadmin.navigation.RestaurantDetailRoute
 import org.apptolast.menuadmin.navigation.RestaurantsRoute
 import org.apptolast.menuadmin.navigation.SettingsRoute
 import org.apptolast.menuadmin.presentation.theme.Blue500
@@ -50,11 +54,14 @@ import org.apptolast.menuadmin.presentation.theme.SidebarDarkSurface
 
 @Composable
 fun Sidebar(
-    currentRoute: String?,
+    currentDestination: NavDestination?,
     onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // True if the given typed route is anywhere in the current destination's hierarchy.
+    fun isRoute(predicate: (NavDestination) -> Boolean): Boolean = currentDestination?.hierarchy?.any(predicate) == true
+
     Column(
         modifier = modifier
             .width(260.dp)
@@ -110,20 +117,19 @@ fun Sidebar(
         NavItem(
             icon = Icons.Outlined.Dashboard,
             label = "Dashboard",
-            isSelected = currentRoute?.contains("DashboardRoute") == true,
+            isSelected = isRoute { it.hasRoute<DashboardRoute>() },
             onClick = { onNavigate(DashboardRoute) },
         )
         NavItem(
             icon = Icons.Outlined.Inventory2,
             label = "Ingredientes",
-            isSelected = currentRoute?.contains("IngredientsRoute") == true,
+            isSelected = isRoute { it.hasRoute<IngredientsRoute>() },
             onClick = { onNavigate(IngredientsRoute) },
         )
         NavItem(
             icon = Icons.Outlined.Storefront,
             label = "Restaurantes",
-            isSelected = currentRoute?.contains("RestaurantsRoute") == true ||
-                currentRoute?.contains("RestaurantDetailRoute") == true,
+            isSelected = isRoute { it.hasRoute<RestaurantsRoute>() || it.hasRoute<RestaurantDetailRoute>() },
             onClick = { onNavigate(RestaurantsRoute) },
         )
 
@@ -137,13 +143,13 @@ fun Sidebar(
         NavItem(
             icon = Icons.Outlined.Storage,
             label = "Backup / Restaurar",
-            isSelected = currentRoute?.contains("BackupRestoreRoute") == true,
+            isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
             onClick = { onNavigate(BackupRestoreRoute) },
         )
         NavItem(
             icon = Icons.Outlined.Settings,
             label = "Configuracion",
-            isSelected = currentRoute?.contains("SettingsRoute") == true,
+            isSelected = isRoute { it.hasRoute<SettingsRoute>() },
             onClick = { onNavigate(SettingsRoute) },
         )
 
@@ -157,7 +163,7 @@ fun Sidebar(
         NavItem(
             icon = Icons.Outlined.Person,
             label = "Mi Perfil",
-            isSelected = currentRoute?.contains("ProfileRoute") == true,
+            isSelected = isRoute { it.hasRoute<ProfileRoute>() },
             onClick = { onNavigate(ProfileRoute) },
         )
 
@@ -200,7 +206,7 @@ private fun SectionHeader(
 private fun PreviewSidebar() {
     MenuAdminTheme {
         Sidebar(
-            currentRoute = null,
+            currentDestination = null,
             onNavigate = {},
             onLogout = {},
         )

@@ -168,6 +168,57 @@ fun RecipesContent(
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
+            } else {
+                // Editing: keep the primary actions in the top bar so they're reachable without
+                // scrolling to the bottom of a long composition list.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (uiState.editingRecipe != null) {
+                        OutlinedButton(
+                            onClick = { onDeleteRecipe(uiState.editingRecipe.id) },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Red500),
+                            border = BorderStroke(1.dp, Red500),
+                            shape = RoundedCornerShape(8.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Eliminar", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                    Button(
+                        onClick = onSaveRecipe,
+                        enabled = !uiState.isSaving,
+                        colors = ButtonDefaults.buttonColors(containerColor = Blue500),
+                        shape = RoundedCornerShape(8.dp),
+                    ) {
+                        if (uiState.isSaving) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Save,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Guardar Cambios",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
             }
         }
 
@@ -181,8 +232,6 @@ fun RecipesContent(
                 onFormPriceChange = onFormPriceChange,
                 onAddIngredientToForm = onAddIngredientToForm,
                 onRemoveIngredientFromForm = onRemoveIngredientFromForm,
-                onSaveRecipe = onSaveRecipe,
-                onDeleteRecipe = onDeleteRecipe,
             )
         } else {
             // Search Bar
@@ -247,8 +296,6 @@ private fun RecipeEditorForm(
     onFormPriceChange: (String) -> Unit,
     onAddIngredientToForm: (RecipeIngredient) -> Unit,
     onRemoveIngredientFromForm: (String) -> Unit,
-    onSaveRecipe: () -> Unit,
-    onDeleteRecipe: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var ingredientSearchQuery by remember { mutableStateOf("") }
@@ -541,59 +588,6 @@ private fun RecipeEditorForm(
                         )
                     }
                 }
-            }
-        }
-
-        // Action Buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (uiState.editingRecipe != null) {
-                OutlinedButton(
-                    onClick = { onDeleteRecipe(uiState.editingRecipe.id) },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Red500),
-                    border = BorderStroke(1.dp, Red500),
-                    shape = RoundedCornerShape(8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Eliminar", fontWeight = FontWeight.SemiBold)
-                }
-            } else {
-                Spacer(modifier = Modifier.width(1.dp))
-            }
-            Button(
-                onClick = onSaveRecipe,
-                enabled = !uiState.isSaving,
-                colors = ButtonDefaults.buttonColors(containerColor = Blue500),
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                if (uiState.isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.Save,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Guardar Cambios",
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                )
             }
         }
     }

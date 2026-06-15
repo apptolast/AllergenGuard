@@ -56,9 +56,10 @@ object JsonExporter {
     fun importExternalData(
         jsonString: String,
         json: Json,
+        restaurantId: String,
     ): ImportResult {
         val dto = json.decodeFromString(ImportDataDto.serializer(), jsonString)
-        return ImportMapper.mapAll(dto)
+        return ImportMapper.mapAll(dto, restaurantId)
     }
 
     fun exportExternalData(
@@ -69,18 +70,18 @@ object JsonExporter {
         val dto = ImportDataDto(
             ingredients = ingredients.map { ingredient ->
                 ImportIngredientDto(
-                    id = ingredient.id.toLongOrNull() ?: 0L,
+                    id = JsonPrimitive(ingredient.id),
                     name = ingredient.name,
+                    brand = ingredient.brand,
                     contains = ingredient.allergenTypes.map { it.jsonKey },
                 )
             },
             recipes = recipes.map { recipe ->
                 ImportRecipeDto(
-                    id = recipe.id.toLongOrNull() ?: 0L,
+                    id = JsonPrimitive(recipe.id),
                     name = recipe.name,
-                    ingredientIds = recipe.ingredients.map { ri ->
-                        JsonPrimitive(ri.ingredientId.toLongOrNull() ?: 0L)
-                    },
+                    category = recipe.category,
+                    ingredientIds = recipe.ingredients.map { ri -> JsonPrimitive(ri.ingredientId) },
                     active = recipe.isActive,
                 )
             },

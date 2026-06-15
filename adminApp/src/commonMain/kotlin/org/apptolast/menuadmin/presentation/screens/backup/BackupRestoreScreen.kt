@@ -1,7 +1,10 @@
 package org.apptolast.menuadmin.presentation.screens.backup
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +19,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material3.AlertDialog
@@ -24,6 +28,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,11 +44,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
@@ -58,6 +66,7 @@ fun BackupRestoreScreen(viewModel: BackupViewModel = koinViewModel()) {
         onConfirmImport = viewModel::confirmImport,
         onCancelImport = viewModel::cancelImport,
         onClearMessage = viewModel::clearMessage,
+        onSelectTargetRestaurant = viewModel::selectTargetRestaurant,
     )
 }
 
@@ -69,6 +78,7 @@ fun BackupRestoreContent(
     onConfirmImport: (ImportMode) -> Unit,
     onCancelImport: () -> Unit,
     onClearMessage: () -> Unit,
+    onSelectTargetRestaurant: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // UI-only flag: which import strategy the user wants. Persisted across the confirm dialog.
@@ -148,7 +158,8 @@ fun BackupRestoreContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Descarga todos tus ingredientes, recetas y menus en formato JSON",
+                    text = "Descarga todos los ingredientes, recetas y menus de todos los restaurantes " +
+                        "en un solo archivo JSON",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -216,6 +227,15 @@ fun BackupRestoreContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
+                if (uiState.restaurants.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TargetRestaurantSelector(
+                        restaurants = uiState.restaurants,
+                        selectedId = uiState.targetRestaurantId,
+                        onSelect = onSelectTargetRestaurant,
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
@@ -271,6 +291,67 @@ fun BackupRestoreContent(
 }
 
 @Composable
+private fun TargetRestaurantSelector(
+    restaurants: List<Restaurant>,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedName = restaurants.find { it.id == selectedId }?.name ?: "Selecciona un restaurante"
+
+    Column {
+        Text(
+            text = "Restaurante destino",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                    .clickable { expanded = true }
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = selectedName,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Desplegar",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                restaurants.forEach { restaurant ->
+                    DropdownMenuItem(
+                        text = { Text(restaurant.name) },
+                        onClick = {
+                            onSelect(restaurant.id)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Solo se usa para archivos antiguos sin restaurante. Los backups de la app restauran " +
+                "todos los restaurantes automaticamente.",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
 private fun ImportModeOption(
     selected: Boolean,
     title: String,
@@ -314,7 +395,7 @@ private fun ImportConfirmDialog(
         title = { Text(text = if (mode == ImportMode.REPLACE) "Confirmar reemplazo" else "Confirmar importacion") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = "Restaurante: ${preview.restaurantName}", fontSize = 14.sp)
+                Text(text = "Destino: ${preview.restaurantName}", fontSize = 14.sp)
                 Text(
                     text = "Ingredientes: ${preview.ingredientsNew} nuevos, ${preview.ingredientsUpdated} actualizados",
                     fontSize = 14.sp,
@@ -365,12 +446,19 @@ private fun ImportConfirmDialog(
 private fun BackupRestoreContentPreview() {
     MenuAdminTheme {
         BackupRestoreContent(
-            uiState = BackupUiState(),
+            uiState = BackupUiState(
+                restaurants = listOf(
+                    Restaurant(id = "1", name = "El Rincon del Mar"),
+                    Restaurant(id = "2", name = "Hotel Valsequillo"),
+                ),
+                targetRestaurantId = "1",
+            ),
             onExport = {},
             onAnalyzeImport = {},
             onConfirmImport = {},
             onCancelImport = {},
             onClearMessage = {},
+            onSelectTargetRestaurant = {},
         )
     }
 }
@@ -388,6 +476,7 @@ private fun BackupRestoreContentWithMessagePreview() {
             onConfirmImport = {},
             onCancelImport = {},
             onClearMessage = {},
+            onSelectTargetRestaurant = {},
         )
     }
 }

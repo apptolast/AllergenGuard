@@ -146,7 +146,7 @@ class JsonExporterTest {
             }
             """.trimIndent()
 
-        val result = JsonExporter.importExternalData(externalJson, json)
+        val result = JsonExporter.importExternalData(externalJson, json, "rest-1")
 
         assertEquals(2, result.ingredients.size)
         assertEquals(1, result.recipes.size)
@@ -155,12 +155,48 @@ class JsonExporterTest {
         assertEquals(setOf(AllergenType.DAIRY), result.ingredients[1].allergenTypes)
         assertEquals("Croquetas", result.recipes[0].name)
         assertEquals(2, result.recipes[0].ingredients.size)
+        assertEquals("rest-1", result.recipes[0].restaurantId)
+    }
+
+    @Test
+    fun importExternalData_parsesLegacyQuotedIdsAndFlattensSubRecipes() {
+        // Mirrors alergenos_backup_*.json: string ids and {"id","type":"recipe"} sub-recipe refs.
+        val externalJson =
+            """
+            {
+                "ingredients": [
+                    {"id": "1778149024105", "name": "Jamón", "brand": "", "contains": []},
+                    {"id": "1778149051695", "name": "Tomate", "contains": ["sulphites"]}
+                ],
+                "recipes": [
+                    {"id": "1778149237711", "name": "Salmorejo", "internalId": "Hotel Valsequillo",
+                     "ingredientIds": [{"id": "1778149051695", "type": "ingredient"}], "active": true},
+                    {"id": "1778149999999", "name": "Tosta con Jamón", "internalId": "Hotel Valsequillo",
+                     "ingredientIds": [
+                        {"id": "1778149024105", "type": "ingredient"},
+                        {"id": "1778149237711", "type": "recipe"}
+                     ], "active": true}
+                ],
+                "timestamp": "2026-05-08T12:33:17.773Z"
+            }
+            """.trimIndent()
+
+        val result = JsonExporter.importExternalData(externalJson, json, "rest-1")
+
+        assertEquals(2, result.ingredients.size)
+        val tosta = result.recipes.first { it.name == "Tosta con Jamón" }
+        // The sub-recipe (Salmorejo) is flattened in, so its tomato ingredient appears on the parent.
+        assertEquals(
+            listOf("1778149024105", "1778149051695"),
+            tosta.ingredients.map { it.ingredientId },
+        )
+        assertEquals("rest-1", tosta.restaurantId)
     }
 
     @Test
     fun exportExternalData_producesCompatibleFormat() {
         val exported = JsonExporter.exportExternalData(sampleIngredients, sampleRecipes, json)
-        val result = JsonExporter.importExternalData(exported, json)
+        val result = JsonExporter.importExternalData(exported, json, "rest-1")
 
         assertEquals(sampleIngredients.size, result.ingredients.size)
         assertEquals(sampleRecipes.size, result.recipes.size)

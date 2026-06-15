@@ -38,18 +38,18 @@ fun AdminLayout(
     modifier: Modifier = Modifier,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentDestination = navBackStackEntry?.destination
 
     Row(modifier = modifier.fillMaxSize()) {
         Sidebar(
-            currentRoute = currentRoute,
+            currentDestination = currentDestination,
             onNavigate = { route ->
                 navController.navigate(route) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        saveState = route !is RestaurantsRoute
-                    }
+                    // Always pop back to Dashboard (the start destination) without removing it, so
+                    // every top-level tab is one hop from the root and Dashboard is always reachable.
+                    // No saveState/restoreState — deterministic on wasmJs.
+                    popUpTo(DashboardRoute) { inclusive = false }
                     launchSingleTop = true
-                    restoreState = route !is RestaurantsRoute
                 }
             },
             onLogout = onLogout,

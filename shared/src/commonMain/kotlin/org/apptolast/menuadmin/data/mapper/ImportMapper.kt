@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
 import org.apptolast.menuadmin.data.dto.ImportDataDto
 import org.apptolast.menuadmin.data.dto.ImportIngredientDto
 import org.apptolast.menuadmin.data.dto.ImportRecipeDto
@@ -18,7 +17,7 @@ import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import kotlin.time.Instant
 
 data class ParsedIngredientRef(
-    val id: Long,
+    val id: String,
     val type: String,
 )
 
@@ -28,7 +27,10 @@ data class ImportResult(
 )
 
 object ImportMapper {
-    fun mapAll(dto: ImportDataDto): ImportResult {
+    fun mapAll(
+        dto: ImportDataDto,
+        restaurantId: String,
+    ): ImportResult {
         val fallbackTimestamp = if (dto.timestamp.isNotBlank()) {
             Instant.parse(dto.timestamp)
         } else {
@@ -37,8 +39,11 @@ object ImportMapper {
 
         val ingredients = dto.ingredients.map { mapIngredient(it, fallbackTimestamp) }
         val ingredientLookup = ingredients.associateBy { it.id }
+        val recipeLookup = dto.recipes.associateBy { it.id.content }
 
-        val recipes = dto.recipes.map { mapRecipe(it, ingredientLookup, fallbackTimestamp) }
+        val recipes = dto.recipes.map {
+            mapRecipe(it, ingredientLookup, recipeLookup, restaurantId, fallbackTimestamp)
+        }
 
         return ImportResult(ingredients = ingredients, recipes = recipes)
     }
@@ -58,8 +63,9 @@ object ImportMapper {
             }
 
         return Ingredient(
-            id = dto.id.toString(),
+            id = dto.id.content,
             name = dto.name,
+            brand = dto.brand,
             allergens = allergens,
             createdAt = fallbackTimestamp,
             updatedAt = fallbackTimestamp,
@@ -69,25 +75,30 @@ object ImportMapper {
     fun mapRecipe(
         dto: ImportRecipeDto,
         ingredientLookup: Map<String, Ingredient>,
+        recipeLookup: Map<String, ImportRecipeDto>,
+        restaurantId: String,
         fallbackTimestamp: Instant,
     ): Recipe {
-        val refs = parseIngredientIds(dto.ingredientIds)
+        // The domain model has no sub-recipes, so a `type == "recipe"` reference is flattened into its
+        // own ingredients (recursively). This preserves the allergens the sub-recipe contributes —
+        // dropping the link would silently under-report allergens on the parent dish.
+        val ingredientIds = linkedSetOf<String>()
+        collectIngredientIds(dto, recipeLookup, ingredientIds, mutableSetOf())
 
-        val recipeIngredients = refs
-            .filter { it.type == "ingredient" }
-            .map { ref ->
-                val ingredientName = ingredientLookup[ref.id.toString()]?.name ?: "Ingrediente ${ref.id}"
-                RecipeIngredient(
-                    ingredientId = ref.id.toString(),
-                    ingredientName = ingredientName,
-                    quantity = 0.0,
-                    unit = "",
-                )
-            }
+        val recipeIngredients = ingredientIds.map { id ->
+            RecipeIngredient(
+                ingredientId = id,
+                ingredientName = ingredientLookup[id]?.name ?: "Ingrediente $id",
+                quantity = 0.0,
+                unit = "",
+            )
+        }
 
         return Recipe(
-            id = dto.id.toString(),
+            id = dto.id.content,
+            restaurantId = restaurantId,
             name = dto.name,
+            category = dto.category,
             ingredients = recipeIngredients,
             ingredientCount = recipeIngredients.size,
             isActive = dto.active,
@@ -96,17 +107,31 @@ object ImportMapper {
         )
     }
 
+    /** Walks [dto]'s references, following `type == "recipe"` refs into their ingredients. */
+    private fun collectIngredientIds(
+        dto: ImportRecipeDto,
+        recipeLookup: Map<String, ImportRecipeDto>,
+        out: LinkedHashSet<String>,
+        visited: MutableSet<String>,
+    ) {
+        if (!visited.add(dto.id.content)) return // cycle guard
+        parseIngredientIds(dto.ingredientIds).forEach { ref ->
+            if (ref.type == "recipe") {
+                recipeLookup[ref.id]?.let { collectIngredientIds(it, recipeLookup, out, visited) }
+            } else {
+                out.add(ref.id)
+            }
+        }
+    }
+
     fun parseIngredientIds(raw: List<JsonElement>): List<ParsedIngredientRef> {
         return raw.mapNotNull { element ->
             when (element) {
-                is JsonPrimitive -> {
-                    val id = element.jsonPrimitive.long
-                    ParsedIngredientRef(id = id, type = "ingredient")
-                }
+                is JsonPrimitive -> ParsedIngredientRef(id = element.content, type = "ingredient")
 
                 is JsonObject -> {
                     val obj = element.jsonObject
-                    val id = obj["id"]?.jsonPrimitive?.long ?: return@mapNotNull null
+                    val id = obj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
                     val type = obj["type"]?.jsonPrimitive?.content ?: "ingredient"
                     ParsedIngredientRef(id = id, type = type)
                 }

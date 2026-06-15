@@ -26,6 +26,7 @@ fun AllergenBadge(
     allergenType: AllergenType,
     isActive: Boolean,
     onClick: (() -> Unit)? = null,
+    compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = if (isActive) {
@@ -36,7 +37,7 @@ fun AllergenBadge(
     val contentColor = if (isActive) allergenType.color else MenuAdminTheme.colors.allergenInactiveText
     val borderColor = if (isActive) allergenType.color else MaterialTheme.colorScheme.outlineVariant
 
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(if (compact) 8.dp else 12.dp)
 
     Row(
         modifier = modifier
@@ -50,20 +51,24 @@ fun AllergenBadge(
                     Modifier
                 },
             )
-            .padding(vertical = 8.dp, horizontal = 14.dp),
+            .padding(
+                vertical = if (compact) 4.dp else 8.dp,
+                horizontal = if (compact) 8.dp else 14.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp),
     ) {
         LucideIcon(
             codepoint = allergenType.icon,
-            size = 18.sp,
+            size = if (compact) 13.sp else 18.sp,
             color = contentColor,
         )
         Text(
             text = allergenType.nameEs,
             color = contentColor,
-            fontSize = 14.sp,
+            fontSize = if (compact) 12.sp else 14.sp,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
         )
     }
 }
