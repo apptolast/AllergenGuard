@@ -1,0 +1,54 @@
+name: ConsumerApp
+options:
+  bundleIdPrefix: com.apptolast.menufrontend
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Configuration/Config.xcconfig
+  Release: Configuration/Config.xcconfig
+settings:
+  base:
+    # The "Compile Kotlin Framework" run script writes the framework into the build
+    # dir, which Xcode's script sandbox would otherwise block.
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: "11.0.0"
+targets:
+  ConsumerApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+    dependencies:
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAnalytics
+      - package: Firebase
+        product: FirebaseCrashlytics
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: iosApp/Info.plist
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: MenuFrontend
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_VERSION: "5.0"
+        # Automatic signing with the AppToLast team (TEAM_ID lives in Config.xcconfig).
+        DEVELOPMENT_TEAM: $(TEAM_ID)
+        CODE_SIGN_STYLE: Automatic
+        # Link the Kotlin/Native framework produced by :consumerApp (baseName = "ConsumerApp").
+        OTHER_LDFLAGS: [$(inherited), -framework, ConsumerApp]
+    preBuildScripts:
+      # Builds + embeds the Compose Multiplatform framework before compiling Swift.
+      # embedAndSignAppleFrameworkForXcode reads Xcode's env (CONFIGURATION, SDK_NAME,
+      # ARCHS, BUILT_PRODUCTS_DIR…) and drops ConsumerApp.framework where Xcode links it.
+      - name: Compile Kotlin Framework
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/../.."
+          ./gradlew :consumerApp:embedAndSignAppleFrameworkForXcode

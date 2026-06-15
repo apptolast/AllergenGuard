@@ -1,0 +1,87 @@
+<resources>
+    <!-- Login -->
+    <string name="login_subtitle">Your allergen guide</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_email_placeholder">you@email.com</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_button">Sign In</string>
+    <string name="login_divider">or</string>
+    <string name="login_google_button">Continue with Google</string>
+    <string name="login_register_prompt">Don\'t have an account?</string>
+    <string name="login_register_link">Sign Up</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_explore">Explore</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Home -->
+    <string name="home_search_placeholder">Search restaurants...</string>
+    <string name="home_nearby_title">Restaurants Near You</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_dishes_count">%d dishes</string>
+    <string name="home_reviews_count">%d reviews</string>
+
+    <!-- Menu -->
+    <string name="menu_interactive_menu">Interactive Menu</string>
+    <string name="menu_select_allergies">Select your allergies</string>
+    <string name="menu_safe_dishes">Safe Dishes</string>
+    <string name="menu_dishes_count">%d dishes</string>
+    <string name="menu_contains">Contains:</string>
+
+    <!-- Dish Detail -->
+    <string name="dish_detail_title">Dish Detail</string>
+    <string name="dish_ingredients">Ingredients</string>
+    <string name="dish_allergens">Allergens</string>
+    <string name="dish_allergen_warning">This dish contains %d allergen from your list. Check the details.</string>
+    <string name="dish_allergen_warning_plural">This dish contains %d allergens from your list. Check the details.</string>
+    <string name="dish_safe_message">This dish is safe for you.</string>
+
+    <!-- Profile -->
+    <string name="profile_my_allergies">My Allergies</string>
+    <string name="profile_edit">Edit</string>
+    <string name="profile_allergies_description">These allergies will be automatically applied when viewing any menu</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_notifications">Notifications</string>
+    <string name="profile_language">Language</string>
+    <string name="profile_language_es">Spanish</string>
+    <string name="profile_favorite_restaurants">Favorite restaurants</string>
+    <string name="profile_help">Help and support</string>
+    <string name="profile_logout">Sign out</string>
+
+    <!-- Allergens -->
+    <string name="allergen_gluten">Gluten</string>
+    <string name="allergen_fish">Fish</string>
+    <string name="allergen_peanuts">Peanuts</string>
+    <string name="allergen_dairy">Dairy</string>
+    <string name="allergen_eggs">Eggs</string>
+    <string name="allergen_soy">Soy</string>
+    <string name="allergen_sulfites">Sulfites</string>
+    <string name="allergen_mollusks">Mollusks</string>
+    <string name="allergen_crustaceans">Crustaceans</string>
+    <string name="allergen_tree_nuts">Tree nuts</string>
+    <string name="allergen_celery">Celery</string>
+    <string name="allergen_mustard">Mustard</string>
+    <string name="allergen_sesame">Sesame</string>
+    <string name="allergen_lupin">Lupin</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Scan QR</string>
+    <string name="scanner_hint">Point at the restaurant\'s QR code to see their menu</string>
+    <string name="scanner_invalid_qr">Invalid QR code. Try again.</string>
+    <string name="scanner_retry">Retry</string>
+    <string name="scanner_demo_button">Demo: Scan restaurant</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">No favorites yet</string>
+    <string name="favorites_empty_message">Explore restaurants and mark them as favorites to see them here</string>
+
+    <!-- Common -->
+    <string name="loading">Loading...</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="retry">Retry</string>
+    <string name="back">Back</string>
+    <string name="currency_format">€%s</string>
+</resources>

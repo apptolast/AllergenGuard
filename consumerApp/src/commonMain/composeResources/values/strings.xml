@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name" translatable="false">AllergenGuard</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">Tu guía de alérgenos</string>
+    <string name="login_email_label">Correo electrónico</string>
+    <string name="login_email_placeholder">tu@email.com</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">••••••••</string>
+    <string name="login_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="login_divider">o</string>
+    <string name="login_google_button">Continuar con Google</string>
+    <string name="login_register_prompt">¿No tienes cuenta?</string>
+    <string name="login_register_link">Regístrate</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_favorites">Favoritos</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- Home -->
+    <string name="home_search_placeholder">Buscar restaurantes...</string>
+    <string name="home_nearby_title">Restaurantes Cerca de Ti</string>
+    <string name="home_see_all">Ver todos</string>
+    <string name="home_dishes_count">%d platos</string>
+    <string name="home_reviews_count">%d reseñas</string>
+
+    <!-- Menu -->
+    <string name="menu_interactive_menu">Carta Interactiva</string>
+    <string name="menu_select_allergies">Selecciona tus alergias</string>
+    <string name="menu_safe_dishes">Platos Seguros</string>
+    <string name="menu_dishes_count">%d platos</string>
+    <string name="menu_contains">Contiene:</string>
+
+    <!-- Dish Detail -->
+    <string name="dish_detail_title">Detalle del Plato</string>
+    <string name="dish_ingredients">Ingredientes</string>
+    <string name="dish_allergens">Alérgenos</string>
+    <string name="dish_allergen_warning">Este plato contiene %d alérgeno de tu lista. Revisa los detalles.</string>
+    <string name="dish_allergen_warning_plural">Este plato contiene %d alérgenos de tu lista. Revisa los detalles.</string>
+    <string name="dish_safe_message">Este plato es seguro para ti.</string>
+
+    <!-- Profile -->
+    <string name="profile_my_allergies">Mis Alergias</string>
+    <string name="profile_edit">Editar</string>
+    <string name="profile_allergies_description">Estas alergias se aplicarán automáticamente al ver cualquier carta</string>
+    <string name="profile_settings">Ajustes</string>
+    <string name="profile_notifications">Notificaciones</string>
+    <string name="profile_language">Idioma</string>
+    <string name="profile_language_es">Español</string>
+    <string name="profile_favorite_restaurants">Restaurantes favoritos</string>
+    <string name="profile_help">Ayuda y soporte</string>
+    <string name="profile_logout">Cerrar sesión</string>
+
+    <!-- Allergens -->
+    <string name="allergen_gluten">Gluten</string>
+    <string name="allergen_fish">Pescado</string>
+    <string name="allergen_peanuts">Cacahuetes</string>
+    <string name="allergen_dairy">Lácteos</string>
+    <string name="allergen_eggs">Huevos</string>
+    <string name="allergen_soy">Soja</string>
+    <string name="allergen_sulfites">Sulfitos</string>
+    <string name="allergen_mollusks">Moluscos</string>
+    <string name="allergen_crustaceans">Crustáceos</string>
+    <string name="allergen_tree_nuts">Frutos secos</string>
+    <string name="allergen_celery">Apio</string>
+    <string name="allergen_mustard">Mostaza</string>
+    <string name="allergen_sesame">Sésamo</string>
+    <string name="allergen_lupin">Altramuces</string>
+
+    <!-- Scanner -->
+    <string name="scanner_title">Escanear QR</string>
+    <string name="scanner_hint">Apunta al código QR del restaurante para ver su carta</string>
+    <string name="scanner_invalid_qr">Código QR no válido. Inténtalo de nuevo.</string>
+    <string name="scanner_retry">Reintentar</string>
+    <string name="scanner_demo_button">Demo: Escanear restaurante</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">Sin favoritos aún</string>
+    <string name="favorites_empty_message">Explora restaurantes y márcalos como favoritos para verlos aquí</string>
+
+    <!-- Common -->
+    <string name="loading">Cargando...</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+    <string name="retry">Reintentar</string>
+    <string name="back">Volver</string>
+    <string name="currency_format">%s €</string>
+</resources>
