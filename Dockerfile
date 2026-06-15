@@ -10,6 +10,14 @@ FROM gradle:8.10-jdk21 AS builder
 ARG API_BASE_URL
 ENV API_BASE_URL=${API_BASE_URL}
 
+# Firebase web config (public client identifiers) + feature flag, consumed by BuildKonfig in :shared.
+ARG FIREBASE_API_KEY=AIzaSyCNV6mF3J2ruBQ0Mi7a0RTqm4Xi5wlqn88
+ARG FIREBASE_PROJECT_ID=menusmati
+ARG USE_FIRESTORE=true
+ENV FIREBASE_API_KEY=${FIREBASE_API_KEY}
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV USE_FIRESTORE=${USE_FIRESTORE}
+
 # Install libatomic1 for Node.js v25+ (required by Kotlin/WASM)
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,21 +34,22 @@ ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m"
 COPY --chown=gradle:gradle gradle/ gradle/
 COPY --chown=gradle:gradle gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties ./
 
-# Copy the compose app module
-COPY --chown=gradle:gradle composeApp/ composeApp/
+# Copy the shared module (data + domain) and the admin app module
+COPY --chown=gradle:gradle shared/ shared/
+COPY --chown=gradle:gradle adminApp/ adminApp/
 
 # Make gradlew executable
 RUN chmod +x gradlew
 
-# Create local.properties with API_BASE_URL from build argument
-RUN echo "API_BASE_URL=${API_BASE_URL}" > local.properties && \
-    echo "Created local.properties with API_BASE_URL"
+# Create local.properties with API base URL + Firebase config (consumed by BuildKonfig in :shared)
+RUN printf 'API_BASE_URL=%s\nFIREBASE_API_KEY=%s\nFIREBASE_PROJECT_ID=%s\nUSE_FIRESTORE=%s\n' \
+    "${API_BASE_URL}" "${FIREBASE_API_KEY}" "${FIREBASE_PROJECT_ID}" "${USE_FIRESTORE}" > local.properties
 
 # Upgrade Yarn lock files (required after dependency changes)
 RUN ./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock --no-daemon
 
 # Build the WASM distribution
-RUN ./gradlew :composeApp:wasmJsBrowserDistribution --no-daemon --stacktrace
+RUN ./gradlew :adminApp:wasmJsBrowserDistribution --no-daemon --stacktrace
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
@@ -51,7 +60,7 @@ RUN apk add --no-cache tzdata
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the built WASM application
-COPY --from=builder /app/composeApp/build/dist/wasmJs/productionExecutable/ /usr/share/nginx/html/
+COPY --from=builder /app/adminApp/build/dist/wasmJs/productionExecutable/ /usr/share/nginx/html/
 
 # Create a simple health check endpoint
 RUN echo "OK" > /usr/share/nginx/html/health
