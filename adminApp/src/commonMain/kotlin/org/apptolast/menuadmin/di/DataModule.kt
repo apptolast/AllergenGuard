@@ -24,6 +24,7 @@ import org.apptolast.menuadmin.data.repository.FirestoreIngredientRepository
 import org.apptolast.menuadmin.data.repository.FirestoreMenuRepository
 import org.apptolast.menuadmin.data.repository.FirestoreRecipeRepository
 import org.apptolast.menuadmin.data.repository.FirestoreRestaurantRepository
+import org.apptolast.menuadmin.data.repository.FirestoreWhitelistRepository
 import org.apptolast.menuadmin.data.repository.RemoteAuthRepository
 import org.apptolast.menuadmin.data.repository.RemoteDishRepository
 import org.apptolast.menuadmin.data.repository.RemoteIngredientRepository
@@ -39,6 +40,7 @@ import org.apptolast.menuadmin.domain.repository.MenuDigitalCardRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
+import org.apptolast.menuadmin.domain.repository.WhitelistRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -71,6 +73,9 @@ val dataModule = module {
     single { FirebaseAuthService(get(named("auth"))) }
     single(named("firestore")) { createFirestoreHttpClient(get(), get(), get()) }
     single { FirestoreClient(get(named("firestore"))) }
+
+    // Admin registration whitelist (Firestore-backed; works in both data-layer modes).
+    singleOf(::FirestoreWhitelistRepository) bind WhitelistRepository::class
 
     // Repositories — Auth + Ingredients feature-flagged: Firestore vs custom backend
     if (FirebaseConfig.useFirestore) {
