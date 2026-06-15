@@ -88,21 +88,21 @@ fun DashboardContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             StatCard(
-                label = "Total Platos",
+                label = "Ingredientes",
                 value = (stats?.totalIngredients ?: 0).toString(),
                 icon = Icons.Outlined.Restaurant,
                 iconTint = Blue500,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Secciones",
+                label = "Recetas activas",
                 value = (stats?.activeRecipes ?: 0).toString(),
                 icon = Icons.Outlined.Fastfood,
                 iconTint = Green500,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Menus Creados",
+                label = "Menus",
                 value = (stats?.totalMenus ?: 0).toString(),
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
                 iconTint = Amber500,

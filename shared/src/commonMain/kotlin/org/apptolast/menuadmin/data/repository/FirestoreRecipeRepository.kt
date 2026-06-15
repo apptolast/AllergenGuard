@@ -13,6 +13,7 @@ import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -127,6 +128,8 @@ class FirestoreRecipeRepository(
             computedAllergens = allergens,
             ingredientCount = ingredients.size,
             allergenCount = allergens.size,
+            createdAt = createTime ?: Instant.DISTANT_PAST,
+            updatedAt = updateTime ?: Instant.DISTANT_PAST,
         )
     }
 
