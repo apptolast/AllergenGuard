@@ -7,17 +7,17 @@ served by Nginx) to the AppToLast Kubernetes cluster.
 
 | Item              | Value                                                                 |
 |-------------------|-----------------------------------------------------------------------|
-| Cluster           | `apptolastserver` (kubeadm, single node), node IP `138.199.157.58`    |
+| Cluster           | AppToLast Kubernetes cluster                                          |
 | Namespace         | `apptolast-menus-admin-dev`                                           |
 | Public URL        | https://menusadmin.apptolast.com                                      |
 | Image             | `apptolast/menus-admin:latest` (public on Docker Hub)                |
 | Ingress           | Traefik (`websecure` entrypoint)                                      |
 | TLS               | cert-manager `ClusterIssuer/cloudflare-clusterissuer` (Let's Encrypt, Cloudflare DNS-01) → secret `menusadmin-tls` |
-| DNS               | Cloudflare A record `menusadmin.apptolast.com → 138.199.157.58` (DNS only, not proxied) |
+| DNS               | Cloudflare A record for `menusadmin.apptolast.com` → cluster ingress (DNS only, not proxied) |
 
-This mirrors the sibling admin frontends already running in the cluster
-(`apptolast-inemsellar-admin-dev` / `inemadmin.apptolast.com`,
-`apptolast-greenhouse-admin-dev` / `greenhouseadmin.apptolast.com`).
+This follows the same pattern as the other admin web frontends deployed in the
+cluster: a Traefik Ingress fronting an Nginx pod, with cert-manager TLS issued by
+the shared Cloudflare `ClusterIssuer`.
 
 ## Files
 
@@ -32,8 +32,9 @@ This mirrors the sibling admin frontends already running in the cluster
 
 ## Prerequisites (one-time)
 
-1. **DNS** — a Cloudflare A record `menusadmin.apptolast.com → 138.199.157.58`
-   (DNS only, not proxied). This record already exists in the `apptolast.com` zone.
+1. **DNS** — a Cloudflare A record for `menusadmin.apptolast.com` pointing to the
+   cluster ingress (DNS only, not proxied). This record already exists in the
+   `apptolast.com` zone.
    Note: TLS issuance does **not** depend on this A record — the
    `cloudflare-clusterissuer` uses an ACME **DNS-01** challenge (a temporary `TXT`
    record), so cert-manager can obtain the certificate independently. The A record
