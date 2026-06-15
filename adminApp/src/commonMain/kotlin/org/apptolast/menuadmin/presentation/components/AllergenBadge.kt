@@ -13,11 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.AllergenType
+import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
 
@@ -27,22 +36,32 @@ fun AllergenBadge(
     isActive: Boolean,
     onClick: (() -> Unit)? = null,
     compact: Boolean = false,
+    containmentLevel: ContainmentLevel = ContainmentLevel.CONTAINS,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundColor = if (isActive) {
-        allergenType.color.copy(alpha = 0.15f)
-    } else {
-        MenuAdminTheme.colors.allergenInactiveBg
+    // "May contain" (traces) is shown as a hollow, dashed-border chip with a "(trazas)" qualifier so it
+    // is unmistakable from a definite allergen ("contains"), which stays a solid filled chip.
+    val mayContain = isActive && containmentLevel == ContainmentLevel.MAY_CONTAIN
+    val backgroundColor = when {
+        !isActive -> MenuAdminTheme.colors.allergenInactiveBg
+        mayContain -> Color.Transparent
+        else -> allergenType.color.copy(alpha = 0.15f)
     }
     val contentColor = if (isActive) allergenType.color else MenuAdminTheme.colors.allergenInactiveText
     val borderColor = if (isActive) allergenType.color else MaterialTheme.colorScheme.outlineVariant
 
-    val shape = RoundedCornerShape(if (compact) 8.dp else 12.dp)
+    val cornerRadius = if (compact) 8.dp else 12.dp
+    val shape = RoundedCornerShape(cornerRadius)
+    val borderModifier = if (mayContain) {
+        Modifier.dashedBorder(borderColor, cornerRadius)
+    } else {
+        Modifier.border(width = 1.dp, color = borderColor, shape = shape)
+    }
 
     Row(
         modifier = modifier
             .clip(shape)
-            .border(width = 1.dp, color = borderColor, shape = shape)
+            .then(borderModifier)
             .background(backgroundColor)
             .then(
                 if (onClick != null) {
@@ -64,7 +83,7 @@ fun AllergenBadge(
             color = contentColor,
         )
         Text(
-            text = allergenType.nameEs,
+            text = if (mayContain) "${allergenType.nameEs} (trazas)" else allergenType.nameEs,
             color = contentColor,
             fontSize = if (compact) 12.sp else 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -72,6 +91,22 @@ fun AllergenBadge(
         )
     }
 }
+
+/** Rounded dashed outline, used to mark "may contain" (traces) allergens. */
+private fun Modifier.dashedBorder(
+    color: Color,
+    cornerRadius: Dp,
+): Modifier =
+    drawBehind {
+        val strokeWidth = 1.dp.toPx()
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+            size = Size(size.width - strokeWidth, size.height - strokeWidth),
+            cornerRadius = CornerRadius(cornerRadius.toPx()),
+            style = Stroke(width = strokeWidth, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 5f))),
+        )
+    }
 
 @Preview
 @Composable

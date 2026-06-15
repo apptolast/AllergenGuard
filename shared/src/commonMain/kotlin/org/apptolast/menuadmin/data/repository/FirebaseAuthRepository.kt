@@ -2,6 +2,7 @@ package org.apptolast.menuadmin.data.repository
 
 import org.apptolast.menuadmin.data.remote.auth.TokenManager
 import org.apptolast.menuadmin.data.remote.firebase.FirebaseAuthService
+import org.apptolast.menuadmin.data.remote.firebase.FirebaseIdToken
 import org.apptolast.menuadmin.domain.repository.AuthRepository
 
 /**
@@ -13,6 +14,14 @@ class FirebaseAuthRepository(
     private val tokenManager: TokenManager,
 ) : AuthRepository {
     override val isLoggedIn: Boolean get() = tokenManager.isLoggedIn
+
+    // Decoded from the Firebase ID token's claims (no signature check needed for display).
+    override val currentUserEmail: String?
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "email")
+    override val currentUserId: String?
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "user_id")
+    override val isEmailVerified: Boolean
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "email_verified") == "true"
 
     override suspend fun login(
         email: String,

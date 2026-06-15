@@ -2,7 +2,6 @@ package org.apptolast.menuadmin.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -30,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,19 +85,19 @@ fun Sidebar(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Blue500)
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = "PRO",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+//            Box(
+//                modifier = Modifier
+//                    .clip(RoundedCornerShape(4.dp))
+//                    .background(Blue500)
+//                    .padding(horizontal = 6.dp, vertical = 2.dp),
+//            ) {
+//                Text(
+//                    text = "PRO",
+//                    color = Color.White,
+//                    fontSize = 10.sp,
+//                    fontWeight = FontWeight.Bold,
+//                )
+//            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -178,6 +175,7 @@ fun Sidebar(
             label = "Cerrar sesion",
             isSelected = false,
             onClick = onLogout,
+            destructive = true,
         )
     }
 }

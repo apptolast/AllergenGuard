@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.AllergenType
+import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
@@ -486,17 +488,17 @@ private fun IngredientCard(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
-    val allergens = ingredient.allergenTypes.toList()
-    // Cap the visible badges so a many-allergen ingredient can't outgrow the fixed cell height and
-    // ruin the grid alignment; the rest are summarised with a "+N" chip.
-    val maxVisible = 4
-    val visible = allergens.take(maxVisible)
-    val hidden = allergens.size - visible.size
+    // Keep the containment level per allergen so the card distinguishes "contains" from "may contain".
+    // Definite allergens (CONTAINS) are listed first. FREE_OF is not an allergen to display.
+    val allergens = ingredient.allergens
+        .filter { it.containmentLevel != ContainmentLevel.FREE_OF }
+        .mapNotNull { ia -> AllergenType.fromApiCode(ia.allergenCode)?.let { it to ia.containmentLevel } }
+        .sortedBy { it.second.ordinal }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .defaultMinSize(minHeight = 140.dp)
             .clip(shape)
             .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = shape)
             .background(MaterialTheme.colorScheme.surface)
@@ -533,36 +535,17 @@ private fun IngredientCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                visible.forEach { allergen ->
+                allergens.forEach { (allergen, level) ->
                     AllergenBadge(
                         allergenType = allergen,
                         isActive = true,
                         compact = true,
+                        containmentLevel = level,
                     )
-                }
-                if (hidden > 0) {
-                    ExtraAllergenBadge(count = hidden)
                 }
             }
         }
     }
-}
-
-@Composable
-private fun ExtraAllergenBadge(
-    count: Int,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "+$count",
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .padding(vertical = 4.dp, horizontal = 8.dp),
-    )
 }
 
 @Preview
@@ -590,7 +573,7 @@ private fun IngredientsContentPreview() {
                         brand = "Central Lechera",
                         allergens = listOf(
                             IngredientAllergen(
-                                allergenCode = "DAIRY",
+                                allergenCode = "MILK",
                                 allergenName = "Lacteos",
                             ),
                         ),
@@ -600,9 +583,17 @@ private fun IngredientsContentPreview() {
                         name = "Galletas de Canela",
                         allergens = listOf(
                             IngredientAllergen(allergenCode = "GLUTEN", allergenName = "Gluten"),
-                            IngredientAllergen(allergenCode = "SOYA", allergenName = "Soja"),
                             IngredientAllergen(allergenCode = "MILK", allergenName = "Lacteos"),
-                            IngredientAllergen(allergenCode = "SULPHITES", allergenName = "Sulfitos"),
+                            IngredientAllergen(
+                                allergenCode = "SOYA",
+                                allergenName = "Soja",
+                                containmentLevel = ContainmentLevel.MAY_CONTAIN,
+                            ),
+                            IngredientAllergen(
+                                allergenCode = "TREE_NUTS",
+                                allergenName = "Frutos Secos",
+                                containmentLevel = ContainmentLevel.MAY_CONTAIN,
+                            ),
                         ),
                     ),
                     Ingredient(id = "4", name = "Sal"),

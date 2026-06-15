@@ -68,8 +68,8 @@ fun ProfileContent(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
                     text = "Cuenta",
@@ -77,13 +77,39 @@ fun ProfileContent(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Text(
-                    text = "Sesion iniciada como administrador",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                InfoRow(label = "Correo", value = uiState.email ?: "No disponible")
+                InfoRow(label = "ID de usuario", value = uiState.userId ?: "—")
+                InfoRow(label = "Rol", value = "Administrador")
+                InfoRow(
+                    label = "Correo verificado",
+                    value = if (uiState.emailVerified) "Si" else "No",
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun InfoRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            fontSize = 15.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -92,7 +118,11 @@ fun ProfileContent(
 private fun PreviewProfileContent() {
     MenuAdminTheme {
         ProfileContent(
-            uiState = ProfileUiState(),
+            uiState = ProfileUiState(
+                email = "admin@apptolast.com",
+                userId = "kJ3mZ9x...",
+                emailVerified = true,
+            ),
         )
     }
 }

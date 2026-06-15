@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.apptolast.menuadmin.presentation.theme.Red500
 import org.apptolast.menuadmin.presentation.theme.TextSidebar
 
 @Composable
@@ -34,9 +35,14 @@ fun NavItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    destructive: Boolean = false,
 ) {
     val backgroundColor = if (isSelected) Blue500 else Color.Transparent
-    val contentColor = if (isSelected) Color.White else TextSidebar
+    val contentColor = when {
+        isSelected -> Color.White
+        destructive -> Red500
+        else -> TextSidebar
+    }
     val fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
 
     Row(
