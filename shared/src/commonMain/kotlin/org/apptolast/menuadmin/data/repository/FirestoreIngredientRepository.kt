@@ -11,6 +11,7 @@ import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -87,6 +88,8 @@ class FirestoreIngredientRepository(
             brand = fields["brand"] as? String ?: "",
             labelInfo = fields["labelInfo"] as? String ?: "",
             allergens = allergens,
+            createdAt = createTime ?: Instant.DISTANT_PAST,
+            updatedAt = updateTime ?: Instant.DISTANT_PAST,
         )
     }
 

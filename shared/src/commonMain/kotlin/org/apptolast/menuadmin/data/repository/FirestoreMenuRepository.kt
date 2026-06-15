@@ -107,6 +107,8 @@ class FirestoreMenuRepository(
             restaurantLogoUrl = fields["restaurantLogoUrl"] as? String,
             companyLogoUrl = fields["companyLogoUrl"] as? String,
             recipes = recipes,
+            createdAt = createTime,
+            updatedAt = updateTime,
         )
     }
 
