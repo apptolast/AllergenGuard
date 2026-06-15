@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apptolast-menus-admin-dev
+  labels:
+    app: menus-admin
+    environment: dev
+    app.kubernetes.io/part-of: apptolast-menus

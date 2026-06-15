@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: menus-admin
+  namespace: apptolast-menus-admin-dev
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: cloudflare-clusterissuer
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: menusadmin.apptolast.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: menus-admin
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - menusadmin.apptolast.com
+      secretName: menusadmin-tls

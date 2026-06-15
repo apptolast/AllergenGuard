@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: menus-admin-rollout
+  namespace: apptolast-menus-admin-dev
+  labels:
+    app: menus-admin
+    purpose: auto-rollout
+spec:
+  # Every 5 hours: restart the deployment so pods re-pull apptolast/menus-admin:latest
+  schedule: "0 */5 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: rollout-restart-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              imagePullPolicy: Always
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Starting rollout restart at $(date)"
+                  kubectl rollout restart deployment/menus-admin -n apptolast-menus-admin-dev
+                  echo "Rollout restart triggered successfully"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 50m
+                  memory: 64Mi
