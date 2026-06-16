@@ -1,5 +1,6 @@
 package com.apptolast.menufrontend.features.menu.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -8,7 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -48,10 +49,10 @@ fun AllergenFilterSection(
     activeFilters: Set<Allergen>,
     userAllergens: Set<Allergen>,
     expanded: Boolean,
-    onToggleAllergen: (Allergen) -> Unit,
-    onToggleExpanded: () -> Unit,
-    onRestoreFilters: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleAllergen: (Allergen) -> Unit = {},
+    onToggleExpanded: () -> Unit = {},
+    onRestoreFilters: () -> Unit = {},
 ) {
     Column(
         modifier = modifier,
@@ -62,7 +63,7 @@ fun AllergenFilterSection(
             // "restore" action appears/disappears as filters drift from the profile.
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 48.dp),
+                .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -159,9 +160,7 @@ private fun PreviewAllergenFilterSectionCollapsed() {
             activeFilters = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
             userAllergens = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
             expanded = false,
-            onToggleAllergen = {},
-            onToggleExpanded = {},
-            onRestoreFilters = {},
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
         )
     }
 }
@@ -175,9 +174,7 @@ private fun PreviewAllergenFilterSectionExpanded() {
             activeFilters = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY, Allergen.TREE_NUTS),
             userAllergens = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
             expanded = true,
-            onToggleAllergen = {},
-            onToggleExpanded = {},
-            onRestoreFilters = {},
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
         )
     }
 }

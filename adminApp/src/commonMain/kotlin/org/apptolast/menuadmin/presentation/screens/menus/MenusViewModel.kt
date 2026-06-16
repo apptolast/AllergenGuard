@@ -199,6 +199,19 @@ class MenusViewModel(
         }
     }
 
+    /** Activates this menu (publishes it) or deactivates it; activating unpublishes the others. */
+    fun onToggleMenuPublished(menu: Menu) {
+        viewModelScope.launch {
+            try {
+                menuRepository.setMenuPublished(restaurantId, menu.id, !menu.published)
+            } catch (e: Exception) {
+                _localState.value = _localState.value.copy(
+                    error = e.message ?: "Error al cambiar el menu activo",
+                )
+            }
+        }
+    }
+
     fun onRequestDeleteMenu(menu: Menu) {
         _localState.value = _localState.value.copy(menuToDelete = menu)
     }

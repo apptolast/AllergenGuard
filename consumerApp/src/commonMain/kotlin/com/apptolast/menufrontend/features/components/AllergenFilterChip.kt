@@ -2,7 +2,6 @@ package com.apptolast.menufrontend.features.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -70,7 +69,6 @@ fun AllergenFilterChip(
 private fun PreviewAllergenFilterChip() {
     AllergenGuardTheme {
         Row(
-            modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AllergenFilterChip(

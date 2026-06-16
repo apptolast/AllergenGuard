@@ -21,6 +21,13 @@ val TextTertiary = Color(0xFF94A3B8)
 val BorderLight = Color(0xFFE2E8F0)
 val BorderMedium = Color(0xFFCBD5E1)
 
+// Canvas vs surface: cards (surface) sit on a slightly different canvas (background) so they pop.
+val CanvasLight = Color(0xFFF1F5F9) // soft gray page background (light)
+val SurfaceVariantLight = Color(0xFFEDF1F6) // subtle fills/chips on white cards (light)
+val CanvasDark = Color(0xFF12121E) // deep page background (dark)
+val SurfaceDark = Color(0xFF20203A) // cards, lighter than the canvas (dark)
+val SurfaceVariantDark = Color(0xFF2C2C46) // subtle fills/chips on dark cards (dark)
+
 // Semantic - Allergen Safety
 val SafeGreen = Color(0xFF22C55E)
 val SafeGreenLight = Color(0xFFF0FDF4)

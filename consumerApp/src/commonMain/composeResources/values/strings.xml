@@ -33,6 +33,14 @@
     <string name="menu_show_less">Ver menos</string>
     <string name="menu_restore_filters">Mis alergias</string>
     <string name="menu_safe_dishes">Platos Seguros</string>
+    <string name="menu_no_menu">Este restaurante aún no tiene un menú disponible</string>
+    <string name="menu_sort">Ordenar</string>
+    <string name="menu_sort_name">Nombre</string>
+    <string name="menu_sort_price">Precio</string>
+    <string name="menu_sort_category">Categoría</string>
+    <string name="menu_category_other">Otros</string>
+    <string name="menu_favorite">Favorito</string>
+    <string name="menu_toggle_unsafe">Mostrar/ocultar platos no aptos</string>
     <string name="menu_dishes_count">%d platos</string>
     <string name="menu_contains">Contiene:</string>
 

@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -72,6 +74,7 @@ fun MenusScreen(viewModel: MenusViewModel) {
         onExportPdf = viewModel::exportPdf,
         onNewMenu = viewModel::onNewMenu,
         onEditMenu = viewModel::onEditMenu,
+        onTogglePublished = viewModel::onToggleMenuPublished,
         onRequestDeleteMenu = viewModel::onRequestDeleteMenu,
         onConfirmDeleteMenu = viewModel::onConfirmDeleteMenu,
         onDismissDeleteDialog = viewModel::onDismissDeleteDialog,
@@ -94,6 +97,7 @@ fun MenusContent(
     onExportPdf: () -> Unit,
     onNewMenu: () -> Unit,
     onEditMenu: (Menu) -> Unit,
+    onTogglePublished: (Menu) -> Unit,
     onRequestDeleteMenu: (Menu) -> Unit,
     onConfirmDeleteMenu: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
@@ -138,6 +142,7 @@ fun MenusContent(
             onSelectMenu = onSelectMenu,
             onNewMenu = onNewMenu,
             onEditMenu = onEditMenu,
+            onTogglePublished = onTogglePublished,
             onRequestDeleteMenu = onRequestDeleteMenu,
         )
     }
@@ -417,6 +422,7 @@ private fun MenuListView(
     onSelectMenu: (Menu) -> Unit,
     onNewMenu: () -> Unit,
     onEditMenu: (Menu) -> Unit,
+    onTogglePublished: (Menu) -> Unit,
     onRequestDeleteMenu: (Menu) -> Unit,
 ) {
     Column(
@@ -471,6 +477,7 @@ private fun MenuListView(
                 menu = menu,
                 onClick = { onSelectMenu(menu) },
                 onEdit = { onEditMenu(menu) },
+                onTogglePublished = { onTogglePublished(menu) },
                 onDelete = { onRequestDeleteMenu(menu) },
             )
         }
@@ -482,6 +489,7 @@ private fun MenuCard(
     menu: Menu,
     onClick: () -> Unit,
     onEdit: () -> Unit,
+    onTogglePublished: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -489,7 +497,11 @@ private fun MenuCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = RoundedCornerShape(12.dp))
+            .border(
+                width = if (menu.published) 2.dp else 1.dp,
+                color = if (menu.published) Green500 else MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(12.dp),
+            )
             .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(20.dp),
@@ -539,7 +551,33 @@ private fun MenuCard(
                     }
                 }
             }
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Active-menu toggle: only one menu per restaurant can be active (published).
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = if (menu.published) "Activo" else "Activar",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (menu.published) Green500 else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Switch(
+                        checked = menu.published,
+                        onCheckedChange = { onTogglePublished() },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Green500,
+                            // Off state: a light thumb on a subtle track so it's visible against the
+                            // dark card (surface == surfaceVariant in the dark theme).
+                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.outlineVariant,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                        ),
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
                 IconButton(onClick = onEdit) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
@@ -791,6 +829,7 @@ private fun MenusContentPreview() {
             onExportPdf = {},
             onNewMenu = {},
             onEditMenu = {},
+            onTogglePublished = {},
             onRequestDeleteMenu = {},
             onConfirmDeleteMenu = {},
             onDismissDeleteDialog = {},

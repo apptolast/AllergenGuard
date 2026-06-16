@@ -52,17 +52,16 @@ fun DishCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .then(
-                if (isSafe) {
-                    Modifier.border(1.dp, colors.safeBorder, RoundedCornerShape(12.dp))
-                } else {
-                    Modifier
-                },
+            .border(
+                width = 1.dp,
+                color = if (isSafe) colors.safeBorder else colors.onDangerContainer.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSafe) colors.safeContainer else MaterialTheme.colorScheme.surface,
+            // Dishes the user can't eat get a soft red background; safe ones stay green.
+            containerColor = if (isSafe) colors.safeContainer else colors.dangerContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
