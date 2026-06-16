@@ -27,7 +27,18 @@
     <!-- Menu -->
     <string name="menu_interactive_menu">Interactive Menu</string>
     <string name="menu_select_allergies">Select your allergies</string>
+    <string name="menu_show_more">Show more</string>
+    <string name="menu_show_less">Show less</string>
+    <string name="menu_restore_filters">My allergies</string>
     <string name="menu_safe_dishes">Safe Dishes</string>
+    <string name="menu_no_menu">This restaurant has no menu available yet</string>
+    <string name="menu_sort">Sort</string>
+    <string name="menu_sort_name">Name</string>
+    <string name="menu_sort_price">Price</string>
+    <string name="menu_sort_category">Category</string>
+    <string name="menu_category_other">Other</string>
+    <string name="menu_favorite">Favorite</string>
+    <string name="menu_toggle_unsafe">Show/hide unsafe dishes</string>
     <string name="menu_dishes_count">%d dishes</string>
     <string name="menu_contains">Contains:</string>
 
@@ -42,6 +53,9 @@
     <!-- Profile -->
     <string name="profile_my_allergies">My Allergies</string>
     <string name="profile_edit">Edit</string>
+    <string name="profile_edit_allergies_title">Edit allergies</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_no_allergies">No allergies set</string>
     <string name="profile_allergies_description">These allergies will be automatically applied when viewing any menu</string>
     <string name="profile_settings">Settings</string>
     <string name="profile_notifications">Notifications</string>

@@ -26,7 +26,19 @@ class FirestoreRestaurantRepository(
     }
 
     override suspend fun getRestaurantMenu(restaurantId: String): Result<List<Dish>> = runCatching {
-        val dishes = firestore.listDocuments("$COLLECTION/$restaurantId/recipes").map { it.toDish(restaurantId) }
+        // Only the dishes of the restaurant's active (published) menu are shown; if none is active,
+        // there is no menu available and we return an empty list.
+        val activeMenu = firestore.listDocuments("$COLLECTION/$restaurantId/menus")
+            .firstOrNull { it.fields["published"] as? Boolean == true }
+            ?: return@runCatching emptyList()
+
+        @Suppress("UNCHECKED_CAST")
+        val recipeIds = (activeMenu.fields["recipeIds"] as? List<Any?>).orEmpty()
+            .filterIsInstance<String>()
+            .toSet()
+        val dishes = firestore.listDocuments("$COLLECTION/$restaurantId/recipes")
+            .map { it.toDish(restaurantId) }
+            .filter { it.id in recipeIds }
         dishes.forEach { dishCache[it.id] = it }
         dishes
     }
@@ -37,6 +49,10 @@ class FirestoreRestaurantRepository(
 
     override suspend fun getRestaurantName(restaurantId: String): Result<String> = runCatching {
         firestore.getDocument("$COLLECTION/$restaurantId")?.fields?.get("name") as? String ?: ""
+    }
+
+    override suspend fun getRestaurantDescription(restaurantId: String): Result<String> = runCatching {
+        firestore.getDocument("$COLLECTION/$restaurantId")?.fields?.get("description") as? String ?: ""
     }
 
     private companion object {

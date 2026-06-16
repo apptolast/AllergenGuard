@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Firebase Cloud Storage security rules.
+// Mirrors the Firestore whitelist model: dish images are publicly readable (served via tokenized
+// download URLs) but only whitelisted admins may upload them. Everything else is denied by default.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isWhitelistedAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && firestore.exists(/databases/(default)/documents/whitelist/$(request.auth.token.email));
+    }
+
+    // Dish images: dish-images/{restaurantId}/{fileName}
+    match /dish-images/{restaurantId}/{fileName} {
+      allow read: if true;
+      allow write: if isWhitelistedAdmin()
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

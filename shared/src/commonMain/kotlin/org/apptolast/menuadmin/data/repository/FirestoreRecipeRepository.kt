@@ -122,6 +122,7 @@ class FirestoreRecipeRepository(
             name = fields["name"] as? String ?: "",
             description = fields["description"] as? String ?: "",
             category = fields["section"] as? String ?: "",
+            imageUrl = fields["imageUrl"] as? String,
             price = (fields["price"] as? Double) ?: (fields["price"] as? Long)?.toDouble() ?: 0.0,
             isActive = fields["active"] as? Boolean ?: true,
             ingredients = ingredients,
@@ -138,6 +139,7 @@ class FirestoreRecipeRepository(
             "name" to name,
             "description" to description,
             "section" to category,
+            "imageUrl" to imageUrl,
             "price" to (if (price > 0) price else null),
             "active" to isActive,
             "ingredients" to ingredients.map { ri ->

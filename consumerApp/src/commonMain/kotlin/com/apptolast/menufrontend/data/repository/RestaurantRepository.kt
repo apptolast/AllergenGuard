@@ -9,4 +9,5 @@ interface RestaurantRepository {
     suspend fun getRestaurantMenu(restaurantId: String): Result<List<Dish>>
     suspend fun getDishDetail(dishId: String): Result<Dish>
     suspend fun getRestaurantName(restaurantId: String): Result<String>
+    suspend fun getRestaurantDescription(restaurantId: String): Result<String>
 }

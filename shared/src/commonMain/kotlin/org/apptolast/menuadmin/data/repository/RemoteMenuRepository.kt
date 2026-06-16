@@ -143,6 +143,14 @@ class RemoteMenuRepository(
         loadedRestaurantId?.let { refreshMenus(it) }
     }
 
+    // Active-menu selection is only supported on the Firestore data path (USE_FIRESTORE). The legacy
+    // REST backend is inert in the current build, so this is a no-op here.
+    override suspend fun setMenuPublished(
+        restaurantId: String,
+        menuId: String,
+        published: Boolean,
+    ) = Unit
+
     // Sections
     suspend fun addSection(
         menuId: String,

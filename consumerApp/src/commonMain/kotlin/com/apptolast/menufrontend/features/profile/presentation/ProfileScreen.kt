@@ -18,13 +18,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,24 +35,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.apptolast.menufrontend.core.theme.AllergenActiveBg
-import com.apptolast.menufrontend.core.theme.AllergenActiveText
-import com.apptolast.menufrontend.core.theme.DangerRed
+import com.apptolast.menufrontend.appVersion
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.domain.model.Allergen
+import com.apptolast.menufrontend.domain.model.User
 import com.apptolast.menufrontend.features.components.BottomNavTab
 import com.apptolast.menufrontend.features.components.BottomNavigationBar
+import com.apptolast.menufrontend.features.components.allergenLabels
+import com.apptolast.menufrontend.features.components.icon
+import com.apptolast.menufrontend.features.profile.components.AllergenEditSheet
 import com.apptolast.menufrontend.features.profile.components.SettingsItem
 import com.apptolast.menufrontend.features.profile.data.ProfileAction
 import com.apptolast.menufrontend.features.profile.data.ProfileState
 import com.apptolast.menufrontend.resources.Res
-import com.apptolast.menufrontend.resources.allergen_dairy
-import com.apptolast.menufrontend.resources.allergen_eggs
-import com.apptolast.menufrontend.resources.allergen_fish
-import com.apptolast.menufrontend.resources.allergen_gluten
-import com.apptolast.menufrontend.resources.allergen_peanuts
-import com.apptolast.menufrontend.resources.allergen_soy
 import com.apptolast.menufrontend.resources.profile_allergies_description
 import com.apptolast.menufrontend.resources.profile_edit
 import com.apptolast.menufrontend.resources.profile_favorite_restaurants
@@ -62,6 +60,7 @@ import com.apptolast.menufrontend.resources.profile_language
 import com.apptolast.menufrontend.resources.profile_language_es
 import com.apptolast.menufrontend.resources.profile_logout
 import com.apptolast.menufrontend.resources.profile_my_allergies
+import com.apptolast.menufrontend.resources.profile_no_allergies
 import com.apptolast.menufrontend.resources.profile_notifications
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -104,15 +103,7 @@ fun ProfileScreen(
     onTabSelected: (BottomNavTab) -> Unit,
 ) {
     val user = state.user
-
-    val allergenLabels = mapOf(
-        Allergen.GLUTEN to stringResource(Res.string.allergen_gluten),
-        Allergen.FISH to stringResource(Res.string.allergen_fish),
-        Allergen.PEANUTS to stringResource(Res.string.allergen_peanuts),
-        Allergen.DAIRY to stringResource(Res.string.allergen_dairy),
-        Allergen.EGGS to stringResource(Res.string.allergen_eggs),
-        Allergen.SOY to stringResource(Res.string.allergen_soy),
-    )
+    val allergenLabels = allergenLabels()
 
     Scaffold(
         bottomBar = {
@@ -122,15 +113,15 @@ fun ProfileScreen(
             )
         },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(Modifier.height(32.dp))
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Spacer(Modifier.height(32.dp))
 
             // Avatar
             Box(
@@ -182,7 +173,7 @@ fun ProfileScreen(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                TextButton(onClick = { }) {
+                TextButton(onClick = { onAction(ProfileAction.EditAllergiesClicked) }) {
                     Text(
                         text = stringResource(Res.string.profile_edit),
                         color = MaterialTheme.colorScheme.primary,
@@ -190,23 +181,38 @@ fun ProfileScreen(
                 }
             }
 
-            // Allergen chips
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                allergenLabels.forEach { (allergen, label) ->
-                    val isSelected = user?.allergens?.contains(allergen) == true
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { onAction(ProfileAction.ToggleAllergen(allergen)) },
-                        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AllergenActiveBg,
-                            selectedLabelColor = AllergenActiveText,
-                        ),
-                    )
+            // Saved allergen chips (read-only); tap Edit to change them
+            if (state.allergens.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.profile_no_allergies),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Allergen.entries.filter { it in state.allergens }.forEach { allergen ->
+                        AssistChip(
+                            onClick = { onAction(ProfileAction.EditAllergiesClicked) },
+                            label = {
+                                Text(
+                                    text = allergenLabels[allergen] ?: allergen.name,
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = allergen.icon(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            },
+                        )
+                    }
                 }
             }
 
@@ -255,13 +261,51 @@ fun ProfileScreen(
             ) {
                 Text(
                     text = stringResource(Res.string.profile_logout),
-                    color = DangerRed,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
+            }
+
+            // App version pinned at the bottom, just above the bottom navigation bar.
+            Text(
+                text = "v${appVersion()}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+            )
         }
+    }
+
+    if (state.isEditingAllergens) {
+        AllergenEditSheet(
+            selection = state.sheetSelection,
+            allergenLabels = allergenLabels,
+            isSaving = state.isSaving,
+            onToggle = { onAction(ProfileAction.ToggleSheetAllergen(it)) },
+            onSave = { onAction(ProfileAction.SaveAllergies) },
+            onDismiss = { onAction(ProfileAction.DismissAllergenSheet) },
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewProfileScreen() {
+    AllergenGuardTheme {
+        ProfileScreen(
+            state = ProfileState(
+                user = User(id = "1", name = "Alberto Hidalgo", email = "a@a.com"),
+                allergens = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.PEANUTS, Allergen.DAIRY),
+            ),
+            onAction = {},
+            onTabSelected = {},
+        )
     }
 }

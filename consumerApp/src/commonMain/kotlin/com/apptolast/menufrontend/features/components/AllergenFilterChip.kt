@@ -1,5 +1,7 @@
-package com.apptolast.menufrontend.features.menu.components
+package com.apptolast.menufrontend.features.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -9,14 +11,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.apptolast.menufrontend.core.theme.AllergenActiveBg
-import com.apptolast.menufrontend.core.theme.AllergenActiveText
-import com.apptolast.menufrontend.core.theme.AllergenInactiveBg
-import com.apptolast.menufrontend.core.theme.AllergenInactiveText
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
+import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
-import com.apptolast.menufrontend.features.components.icon
 
+/**
+ * Toggleable allergen chip reused by the menu filter row and the profile allergy edit sheet.
+ */
 @Composable
 fun AllergenFilterChip(
     allergen: Allergen,
@@ -25,6 +28,7 @@ fun AllergenFilterChip(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.extendedColors
     FilterChip(
         selected = isSelected,
         onClick = onToggle,
@@ -44,18 +48,41 @@ fun AllergenFilterChip(
         },
         modifier = modifier,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = AllergenInactiveBg,
-            labelColor = AllergenInactiveText,
-            iconColor = AllergenInactiveText,
-            selectedContainerColor = AllergenActiveBg,
-            selectedLabelColor = AllergenActiveText,
-            selectedLeadingIconColor = AllergenActiveText,
+            containerColor = colors.chipUnselectedContainer,
+            labelColor = colors.onChipUnselected,
+            iconColor = colors.onChipUnselected,
+            selectedContainerColor = colors.dangerContainer,
+            selectedLabelColor = colors.onDangerContainer,
+            selectedLeadingIconColor = colors.onDangerContainer,
         ),
         border = FilterChipDefaults.filterChipBorder(
             borderColor = MaterialTheme.colorScheme.outlineVariant,
-            selectedBorderColor = AllergenActiveText,
+            selectedBorderColor = colors.onDangerContainer,
             enabled = true,
             selected = isSelected,
         ),
     )
+}
+
+@Preview
+@Composable
+private fun PreviewAllergenFilterChip() {
+    AllergenGuardTheme {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            AllergenFilterChip(
+                allergen = Allergen.GLUTEN,
+                label = "Gluten",
+                isSelected = true,
+                onToggle = {},
+            )
+            AllergenFilterChip(
+                allergen = Allergen.FISH,
+                label = "Pescado",
+                isSelected = false,
+                onToggle = {},
+            )
+        }
+    }
 }

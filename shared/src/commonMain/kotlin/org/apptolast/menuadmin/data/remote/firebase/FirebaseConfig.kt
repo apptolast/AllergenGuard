@@ -21,8 +21,13 @@ object FirebaseConfig {
     const val IDENTITY_TOOLKIT = "https://identitytoolkit.googleapis.com/v1"
     const val SECURE_TOKEN = "https://securetoken.googleapis.com/v1"
     const val FIRESTORE = "https://firestore.googleapis.com/v1"
+    const val STORAGE = "https://firebasestorage.googleapis.com"
 
     /** Base path for documents in the default Firestore database. */
     val firestoreDocuments: String
         get() = "$FIRESTORE/projects/$projectId/databases/(default)/documents"
+
+    /** Default Cloud Storage bucket for this Firebase project. */
+    val storageBucket: String
+        get() = "$projectId.firebasestorage.app"
 }
