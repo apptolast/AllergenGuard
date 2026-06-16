@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,9 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
@@ -63,44 +66,56 @@ fun DishCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = dish.name.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = titleColor,
-            )
+        Column {
+            dish.imageUrl?.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = dish.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                )
+            }
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = dish.name.uppercase(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor,
+                )
 
-            Text(
-                text = dish.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = secondaryColor,
-            )
+                Text(
+                    text = dish.description,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = secondaryColor,
+                )
 
-            if (dish.allergens.isNotEmpty()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.menu_contains),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = secondaryColor,
-                    )
-                    FlowRow(
+                if (dish.allergens.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        dish.allergens.forEach { allergen ->
-                            val isDangerous = allergen in userAllergens
-                            AllergenBadge(
-                                allergen = allergen,
-                                label = allergenLabels[allergen] ?: allergen.name,
-                                isDangerous = isDangerous,
-                            )
+                        Text(
+                            text = stringResource(Res.string.menu_contains),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = secondaryColor,
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            dish.allergens.forEach { allergen ->
+                                val isDangerous = allergen in userAllergens
+                                AllergenBadge(
+                                    allergen = allergen,
+                                    label = allergenLabels[allergen] ?: allergen.name,
+                                    isDangerous = isDangerous,
+                                )
+                            }
                         }
                     }
                 }
@@ -136,7 +151,7 @@ private fun AllergenBadge(
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = contentColor,
             )
         }

@@ -20,7 +20,7 @@ val presentationModule = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::IngredientsViewModel)
     viewModel { (restaurantId: String) ->
-        RecipesViewModel(get(), get(), restaurantId)
+        RecipesViewModel(get(), get(), get(), restaurantId)
     }
     viewModel { (restaurantId: String) ->
         MenusViewModel(get(), get(), restaurantId)

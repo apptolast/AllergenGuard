@@ -10,6 +10,7 @@ import org.apptolast.menuadmin.data.remote.createHttpClient
 import org.apptolast.menuadmin.data.remote.dish.DishService
 import org.apptolast.menuadmin.data.remote.firebase.FirebaseAuthService
 import org.apptolast.menuadmin.data.remote.firebase.FirebaseConfig
+import org.apptolast.menuadmin.data.remote.firebase.FirebaseStorageClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.createFirestoreHttpClient
 import org.apptolast.menuadmin.data.remote.ingredient.IngredientService
@@ -18,6 +19,7 @@ import org.apptolast.menuadmin.data.remote.menudigitalcard.MenuDigitalCardServic
 import org.apptolast.menuadmin.data.remote.recipe.RecipeService
 import org.apptolast.menuadmin.data.remote.restaurant.RestaurantService
 import org.apptolast.menuadmin.data.repository.ApiDashboardRepository
+import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.data.repository.FirebaseAuthRepository
 import org.apptolast.menuadmin.data.repository.FirestoreDashboardRepository
 import org.apptolast.menuadmin.data.repository.FirestoreIngredientRepository
@@ -73,6 +75,8 @@ val dataModule = module {
     single { FirebaseAuthService(get(named("auth"))) }
     single(named("firestore")) { createFirestoreHttpClient(get(), get(), get()) }
     single { FirestoreClient(get(named("firestore"))) }
+    single { FirebaseStorageClient(get(named("firestore"))) }
+    single { DishImageUploader(get(), get()) }
 
     // Admin registration whitelist (Firestore-backed; works in both data-layer modes).
     singleOf(::FirestoreWhitelistRepository) bind WhitelistRepository::class
