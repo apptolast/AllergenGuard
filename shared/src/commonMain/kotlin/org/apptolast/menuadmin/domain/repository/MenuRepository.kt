@@ -16,6 +16,16 @@ interface MenuRepository {
 
     suspend fun deleteMenu(id: String)
 
+    /**
+     * Sets a menu's `published` flag. When [published] is true, every other menu of the same
+     * restaurant is unpublished (only one active menu per restaurant).
+     */
+    suspend fun setMenuPublished(
+        restaurantId: String,
+        menuId: String,
+        published: Boolean,
+    )
+
     suspend fun exportMenuToJson(id: String): String
 
     suspend fun importMenuFromJson(json: String): Menu

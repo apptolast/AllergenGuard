@@ -71,6 +71,7 @@ internal fun FirestoreDocument.toDish(restaurantId: String): Dish {
         restaurantId = restaurantId,
         name = fields["name"] as? String ?: "",
         description = fields["description"] as? String ?: "",
+        category = fields["section"] as? String ?: "",
         price = (fields["price"] as? Double) ?: (fields["price"] as? Long)?.toDouble() ?: 0.0,
         imageUrl = fields["imageUrl"] as? String,
         ingredients = ingredients,

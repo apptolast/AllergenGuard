@@ -5,6 +5,7 @@ data class Dish(
     val restaurantId: String,
     val name: String,
     val description: String,
+    val category: String = "",
     val price: Double,
     val imageUrl: String? = null,
     val ingredients: List<String>,

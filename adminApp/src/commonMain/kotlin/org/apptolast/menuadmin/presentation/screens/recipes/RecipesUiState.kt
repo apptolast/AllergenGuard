@@ -16,6 +16,8 @@ data class RecipesUiState(
     val formDescription: String = "",
     val formCategory: String = "",
     val formPrice: String = "",
+    val formImageUrl: String? = null,
+    val isUploadingImage: Boolean = false,
     val formIngredients: List<RecipeIngredient> = emptyList(),
     val formIsActive: Boolean = true,
     val isSaving: Boolean = false,

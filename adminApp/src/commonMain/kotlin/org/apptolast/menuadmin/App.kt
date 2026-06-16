@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import org.apptolast.menuadmin.data.local.ThemePreferences
 import org.apptolast.menuadmin.presentation.components.AdminLayout
 import org.apptolast.menuadmin.presentation.screens.auth.AuthScreen
@@ -14,6 +17,14 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
+    // Coil singleton with a Ktor network fetcher so AsyncImage can preview dish photos from
+    // Firebase Storage URLs (uses the wasmJs ktor-client-js engine).
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .components { add(KtorNetworkFetcherFactory()) }
+            .build()
+    }
+
     val themePreferences: ThemePreferences = koinInject()
     val isDarkTheme by themePreferences.isDarkThemeFlow.collectAsState()
 

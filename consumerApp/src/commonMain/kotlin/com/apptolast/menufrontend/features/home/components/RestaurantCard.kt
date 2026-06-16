@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.apptolast.menufrontend.core.theme.WarningOrange
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
+import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Restaurant
 
 @Composable
@@ -43,7 +45,7 @@ fun RestaurantCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
     ) {
         Row(
             modifier = Modifier
@@ -95,7 +97,7 @@ fun RestaurantCard(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
                         modifier = Modifier.size(14.dp),
-                        tint = WarningOrange,
+                        tint = MaterialTheme.extendedColors.warning,
                     )
                     Text(
                         text = "${restaurant.rating}",
@@ -118,5 +120,23 @@ fun RestaurantCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewRestaurantCard() {
+    AllergenGuardTheme {
+        RestaurantCard(
+            restaurant = Restaurant(
+                id = "1",
+                name = "Hotel Valsequillo",
+                cuisineType = "Mediterránea",
+                rating = 4.6f,
+                reviewCount = 128,
+                dishCount = 50,
+            ),
+            onClick = {},
+        )
     }
 }
