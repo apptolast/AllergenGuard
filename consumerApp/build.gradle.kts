@@ -21,15 +21,6 @@ val localProperties: Properties by lazy {
     }
 }
 
-// keystore.properties (gitignored) → release signing. Absent on dev machines / CI without secrets,
-// in which case release builds run unsigned so `assembleRelease` still works without credentials.
-val keystoreProperties: Properties by lazy {
-    Properties().apply {
-        val file = rootProject.file("keystore.properties")
-        if (file.exists()) file.inputStream().use { load(it) }
-    }
-}
-
 kotlin {
     androidTarget {
         compilerOptions {
@@ -126,12 +117,12 @@ android {
     }
     signingConfigs {
         create("release") {
-            val storeFilePath = keystoreProperties.getProperty("storeFile")
+            val storeFilePath = localProperties.getProperty("storeFile")
             if (!storeFilePath.isNullOrBlank() && file(storeFilePath).exists()) {
                 storeFile = file(storeFilePath)
-                storePassword = keystoreProperties.getProperty("storePassword")
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storePassword = localProperties.getProperty("storePassword")
+                keyAlias = localProperties.getProperty("keyAlias")
+                keyPassword = localProperties.getProperty("keyPassword")
             }
         }
     }

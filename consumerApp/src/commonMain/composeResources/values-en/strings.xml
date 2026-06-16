@@ -65,6 +65,13 @@
     <string name="profile_favorite_restaurants">Favorite restaurants</string>
     <string name="profile_help">Help and support</string>
     <string name="profile_logout">Sign out</string>
+    <string name="profile_logout_confirm_title">Sign out?</string>
+    <string name="profile_logout_confirm_message">You\'ll need to sign in again to access your profile.</string>
+    <string name="profile_delete_account">Delete account</string>
+    <string name="profile_delete_confirm_title">Delete your account?</string>
+    <string name="profile_delete_confirm_message">This action is permanent. Your account and data will be deleted and cannot be recovered.</string>
+    <string name="profile_delete_confirm_button">Delete</string>
+    <string name="action_cancel">Cancel</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>

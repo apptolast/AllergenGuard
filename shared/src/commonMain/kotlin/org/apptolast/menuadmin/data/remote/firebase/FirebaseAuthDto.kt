@@ -46,6 +46,12 @@ data class FirebaseSignInResponse(
     val displayName: String = "",
 )
 
+/** Request for Identity Toolkit `accounts:delete` — permanently deletes the signed-in user. */
+@Serializable
+data class FirebaseDeleteAccountRequest(
+    val idToken: String,
+)
+
 /** Response from the Secure Token refresh endpoint (snake_case fields). */
 @Serializable
 data class FirebaseRefreshResponse(

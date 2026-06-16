@@ -14,6 +14,12 @@ data class ProfileState(
     val isSaving: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
+    /** Logout confirmation dialog visibility. */
+    val showLogoutDialog: Boolean = false,
+    /** Delete-account confirmation dialog visibility. */
+    val showDeleteDialog: Boolean = false,
+    /** Account deletion in progress (blocks the dialog buttons). */
+    val isDeleting: Boolean = false,
 )
 
 sealed interface ProfileAction {
@@ -25,5 +31,15 @@ sealed interface ProfileAction {
     data object LanguageClicked : ProfileAction
     data object FavoriteRestaurantsClicked : ProfileAction
     data object HelpClicked : ProfileAction
+
+    // Logout (reversible): tap opens a confirmation dialog, confirm signs out.
     data object LogoutClicked : ProfileAction
+    data object ConfirmLogout : ProfileAction
+
+    // Delete account (irreversible): tap opens a destructive confirmation dialog, confirm deletes.
+    data object DeleteAccountClicked : ProfileAction
+    data object ConfirmDeleteAccount : ProfileAction
+
+    /** Dismiss whichever confirmation dialog is open. */
+    data object DismissDialogs : ProfileAction
 }

@@ -38,28 +38,25 @@ jobs:
                     mkdir -p "$RUNNER_TEMP/secrets"
                     echo "${{ secrets.SIGNING_KEY_B64 }}" | base64 --decode > "$RUNNER_TEMP/secrets/release.jks"
 
-            -   name: Write keystore.properties
-                run: |
-                    cat > keystore.properties <<EOF
-                    storeFile=$RUNNER_TEMP/secrets/release.jks
-                    storePassword=${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
-                    keyAlias=${{ secrets.SIGNING_ALIAS }}
-                    keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
-                    EOF
-
             -   name: Write google-services.json
                 run: echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > consumerApp/google-services.json
 
             -   name: Write Play service account
                 run: echo '${{ secrets.SERVICE_ACCOUNT_GOOGLE_PLAY_CONSOLE_JSON }}' > "$RUNNER_TEMP/secrets/play.json"
 
-            -   name: Render local.properties
+            # consumerApp/build.gradle.kts reads release signing from local.properties (storeFile/…),
+            # so the signing keys go here alongside the Firebase BuildKonfig values.
+            -   name: Render local.properties (Firebase config + release signing)
                 run: |
                     cat > local.properties <<EOF
                     FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
                     FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
                     USE_FIRESTORE=true
                     GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+                    storeFile=$RUNNER_TEMP/secrets/release.jks
+                    storePassword=${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+                    keyAlias=${{ secrets.SIGNING_ALIAS }}
+                    keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
                     EOF
 
             -   name: Fastlane release (Play Internal, draft)

@@ -13,18 +13,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,13 +59,20 @@ import com.apptolast.menufrontend.features.profile.components.SettingsItem
 import com.apptolast.menufrontend.features.profile.data.ProfileAction
 import com.apptolast.menufrontend.features.profile.data.ProfileState
 import com.apptolast.menufrontend.resources.Res
+import com.apptolast.menufrontend.resources.action_cancel
 import com.apptolast.menufrontend.resources.profile_allergies_description
+import com.apptolast.menufrontend.resources.profile_delete_account
+import com.apptolast.menufrontend.resources.profile_delete_confirm_button
+import com.apptolast.menufrontend.resources.profile_delete_confirm_message
+import com.apptolast.menufrontend.resources.profile_delete_confirm_title
 import com.apptolast.menufrontend.resources.profile_edit
 import com.apptolast.menufrontend.resources.profile_favorite_restaurants
 import com.apptolast.menufrontend.resources.profile_help
 import com.apptolast.menufrontend.resources.profile_language
 import com.apptolast.menufrontend.resources.profile_language_es
 import com.apptolast.menufrontend.resources.profile_logout
+import com.apptolast.menufrontend.resources.profile_logout_confirm_message
+import com.apptolast.menufrontend.resources.profile_logout_confirm_title
 import com.apptolast.menufrontend.resources.profile_my_allergies
 import com.apptolast.menufrontend.resources.profile_no_allergies
 import com.apptolast.menufrontend.resources.profile_notifications
@@ -252,20 +266,41 @@ fun ProfileScreen(
                 onClick = { onAction(ProfileAction.HelpClicked) },
             )
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
 
-            // Logout
-            TextButton(
+                // Account actions. Logout is a neutral, full-width affordance; "delete account" is a
+                // low-emphasis destructive link set apart below it. Both require confirmation (dialogs
+                // further down) so neither fires on an accidental tap.
+                OutlinedButton(
                 onClick = { onAction(ProfileAction.LogoutClicked) },
-                modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(10.dp),
             ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(Res.string.profile_logout),
-                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
+
+                Spacer(Modifier.height(4.dp))
+
+                TextButton(
+                    onClick = { onAction(ProfileAction.DeleteAccountClicked) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.profile_delete_account),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
 
                 Spacer(Modifier.height(16.dp))
             }
@@ -291,6 +326,68 @@ fun ProfileScreen(
             onToggle = { onAction(ProfileAction.ToggleSheetAllergen(it)) },
             onSave = { onAction(ProfileAction.SaveAllergies) },
             onDismiss = { onAction(ProfileAction.DismissAllergenSheet) },
+        )
+    }
+
+    // Logout confirmation (reversible action → simple confirm).
+    if (state.showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { onAction(ProfileAction.DismissDialogs) },
+            title = { Text(stringResource(Res.string.profile_logout_confirm_title)) },
+            text = { Text(stringResource(Res.string.profile_logout_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = { onAction(ProfileAction.ConfirmLogout) }) {
+                    Text(stringResource(Res.string.profile_logout))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(ProfileAction.DismissDialogs) }) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
+            },
+        )
+    }
+
+    // Delete-account confirmation (irreversible → warning icon, error-colored confirm, loading state).
+    if (state.showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { if (!state.isDeleting) onAction(ProfileAction.DismissDialogs) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.WarningAmber,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            title = { Text(stringResource(Res.string.profile_delete_confirm_title)) },
+            text = { Text(stringResource(Res.string.profile_delete_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
+                    enabled = !state.isDeleting,
+                ) {
+                    if (state.isDeleting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(Res.string.profile_delete_confirm_button),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { onAction(ProfileAction.DismissDialogs) },
+                    enabled = !state.isDeleting,
+                ) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
+            },
         )
     }
 }

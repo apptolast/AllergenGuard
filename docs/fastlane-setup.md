@@ -15,7 +15,7 @@ Réplica del setup AppToLast (FamilyFilm/Municion) adaptada a la estructura de M
 
 ```
 Gemfile                                  # gem "fastlane"
-keystore.properties.example              # plantilla de firma Android (copiar a keystore.properties)
+local.properties.example                 # plantilla de config (Firebase + firma Android)
 consumerApp/fastlane/Appfile|Fastfile    # lanes Android (Play)
 consumerApp/iosApp/fastlane/
   Appfile | Matchfile | Fastfile         # lanes iOS (match + TestFlight)
@@ -25,7 +25,8 @@ consumerApp/iosApp/fastlane/
 ```
 
 Además: `consumerApp/build.gradle.kts` ahora lee `versionCode/versionName` de propiedades Gradle
-(`-PappVersionCode/-PappVersionName`) y firma release desde `keystore.properties` (si existe).
+(`-PappVersionCode/-PappVersionName`) y la firma release desde `local.properties` (claves
+`storeFile/storePassword/keyAlias/keyPassword`, si están presentes).
 
 Identificadores: **package/bundle** `com.apptolast.menufrontend` · **Apple Team** `3NXH5U7C5A` ·
 **scheme** `ConsumerApp` · **AAB** `consumerApp/build/outputs/bundle/release/consumerApp-release.aab`.
@@ -37,7 +38,7 @@ Identificadores: **package/bundle** `com.apptolast.menufrontend` · **Apple Team
 ```bash
 cd /ruta/MenuAdmin
 bundle install                                   # instala fastlane (usa el Gemfile raíz)
-cp keystore.properties.example keystore.properties
+# Asegúrate de tener local.properties con las claves (ver local.properties.example)
 cp consumerApp/iosApp/fastlane/.env.example consumerApp/iosApp/fastlane/.env
 ```
 
@@ -48,8 +49,17 @@ keytool -genkeypair -v -keystore /ruta/segura/menufrontend-release.jks \
   -alias menufrontend -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Rellena `keystore.properties` con la ruta y las contraseñas. **Añade su SHA-1/256 a Firebase**
-(ver `auth-google-apple-setup.md` §2) o Google Sign-In fallará en builds release.
+Añade las claves de firma a **`local.properties`** (las lee `consumerApp/build.gradle.kts`):
+
+```properties
+storeFile=/ruta/segura/menufrontend-release.jks
+storePassword=...
+keyAlias=menufrontend
+keyPassword=...
+```
+
+**Añade su SHA-1/256 a Firebase** (ver `auth-google-apple-setup.md` §2) o Google Sign-In fallará en
+builds release.
 
 ### 2.2 Google Play Console
 
@@ -139,6 +149,7 @@ git tag v1.0.0 && git push origin v1.0.0        # dispara los dos workflows de C
   `xcodegen generate` antes de compilar; en local hazlo tras tocar `project.yml`.
 - El `project.yml` ya compila+embebe el framework KMP vía pre-build script
   (`:consumerApp:embedAndSignAppleFrameworkForXcode`); el lane solo añade un `linkRelease…` de fail-fast.
-- `keystore.properties`, `*.jks`, `.env`, `google-services.json` y `GoogleService-Info.plist` están en
-  `.gitignore`. **No los commitees**; en CI se inyectan desde secrets.
-- `consumerApp` compila release **sin firmar** si falta `keystore.properties` (degradación elegante).
+- `local.properties`, `*.jks`, `.env`, `google-services.json` y `GoogleService-Info.plist` están en
+  `.gitignore`. **No los commitees**; en CI el workflow Android los renderiza en `local.properties`
+  desde los secrets (Firebase + firma).
+- `consumerApp` compila release **sin firmar** si `local.properties` no trae `storeFile` (degradación elegante).

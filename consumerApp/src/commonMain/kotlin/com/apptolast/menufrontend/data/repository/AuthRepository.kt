@@ -20,4 +20,7 @@ interface AuthRepository {
     suspend fun loginWithApple(): Result<User>
 
     suspend fun logout()
+
+    /** Permanently deletes the current account (Identity Toolkit) and clears the local session. */
+    suspend fun deleteAccount(): Result<Unit>
 }

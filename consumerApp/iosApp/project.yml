@@ -40,11 +40,19 @@ targets:
         SWIFT_VERSION: "5.0"
           # Sign in with Apple capability (com.apple.developer.applesignin).
         CODE_SIGN_ENTITLEMENTS: iosApp/ConsumerApp.entitlements
-        # Automatic signing with the AppToLast team (TEAM_ID lives in Config.xcconfig).
         DEVELOPMENT_TEAM: $(TEAM_ID)
-        CODE_SIGN_STYLE: Automatic
         # Link the Kotlin/Native framework produced by :consumerApp (baseName = "ConsumerApp").
         OTHER_LDFLAGS: [$(inherited), -framework, ConsumerApp]
+      configs:
+          # Debug: Xcode-managed automatic signing for quick local device runs.
+          Debug:
+              CODE_SIGN_STYLE: Automatic
+          # Release: manual signing with the match App Store certificate + provisioning profile
+          # (matches the FamilyFilm/Municion setup; required for TestFlight/App Store builds).
+          Release:
+              CODE_SIGN_STYLE: Manual
+              CODE_SIGN_IDENTITY: "Apple Distribution"
+              PROVISIONING_PROFILE_SPECIFIER: match AppStore com.apptolast.menufrontend
     preBuildScripts:
       # Builds + embeds the Compose Multiplatform framework before compiling Swift.
       # embedAndSignAppleFrameworkForXcode reads Xcode's env (CONFIGURATION, SDK_NAME,
@@ -54,3 +62,20 @@ targets:
         script: |
           cd "$SRCROOT/../.."
           ./gradlew :consumerApp:embedAndSignAppleFrameworkForXcode
+
+# Shared scheme so fastlane/gym (and CI, where xcuserdata schemes don't exist) can build & archive.
+schemes:
+    ConsumerApp:
+        build:
+            targets:
+                ConsumerApp: all
+        run:
+            config: Debug
+        test:
+            config: Debug
+        profile:
+            config: Release
+        analyze:
+            config: Debug
+        archive:
+            config: Release

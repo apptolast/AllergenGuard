@@ -71,6 +71,15 @@ class FirebaseAuthService(
         }.body()
     }
 
+    /** Permanently deletes the account that owns [idToken] (Identity Toolkit `accounts:delete`). */
+    suspend fun deleteAccount(idToken: String) {
+        client.post("${FirebaseConfig.IDENTITY_TOOLKIT}/accounts:delete") {
+            url { parameters.append("key", FirebaseConfig.apiKey) }
+            contentType(ContentType.Application.Json)
+            setBody(FirebaseDeleteAccountRequest(idToken))
+        }
+    }
+
     suspend fun refreshIdToken(refreshToken: String): FirebaseRefreshResponse =
         client.submitForm(
             url = "${FirebaseConfig.SECURE_TOKEN}/token",

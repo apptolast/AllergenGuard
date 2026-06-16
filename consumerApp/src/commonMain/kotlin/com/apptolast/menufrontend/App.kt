@@ -20,7 +20,7 @@ fun App() {
             .components { add(KtorNetworkFetcherFactory()) }
             .build()
     }
-    throw RuntimeException("Test Exception")
+
     AllergenGuardTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

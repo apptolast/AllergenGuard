@@ -83,6 +83,23 @@ class FirebaseAuthRepository(
         _currentUser.value = null
     }
 
+    override suspend fun deleteAccount(): Result<Unit> = runCatching {
+        authService.deleteAccount(freshIdToken())
+        tokenManager.clearTokens()
+        _currentUser.value = null
+    }
+
+    /** Returns a non-expired Firebase ID token, refreshing it first if needed. */
+    private suspend fun freshIdToken(): String {
+        if (tokenManager.isAccessTokenExpired()) {
+            tokenManager.refreshToken?.let { refresh ->
+                val r = authService.refreshIdToken(refresh)
+                tokenManager.saveTokens(r.idToken, r.refreshToken, r.expiresIn.toLongOrNull() ?: 3600L)
+            }
+        }
+        return tokenManager.accessToken ?: error("No hay una sesión activa.")
+    }
+
     private fun userFromToken(token: String): User? {
         val uid = FirebaseIdToken.claim(token, "user_id") ?: FirebaseIdToken.claim(token, "sub") ?: return null
         val email = FirebaseIdToken.claim(token, "email") ?: ""
