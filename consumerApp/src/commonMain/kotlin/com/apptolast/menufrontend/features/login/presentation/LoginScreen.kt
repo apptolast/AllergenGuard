@@ -1,9 +1,8 @@
 package com.apptolast.menufrontend.features.login.presentation
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -37,13 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apptolast.menufrontend.features.login.data.LoginAction
 import com.apptolast.menufrontend.features.login.data.LoginState
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.app_name
+import com.apptolast.menufrontend.resources.login_apple_button
 import com.apptolast.menufrontend.resources.login_button
 import com.apptolast.menufrontend.resources.login_divider
 import com.apptolast.menufrontend.resources.login_email_label
@@ -53,7 +51,8 @@ import com.apptolast.menufrontend.resources.login_google_button
 import com.apptolast.menufrontend.resources.login_password_label
 import com.apptolast.menufrontend.resources.login_register_link
 import com.apptolast.menufrontend.resources.login_register_prompt
-import com.apptolast.menufrontend.resources.login_subtitle
+import com.apptolast.menufrontend.resources.logo_app
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -93,27 +92,14 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(28.dp))
 
         // Logo
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(16.dp),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Shield,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
+        Image(
+            painter = painterResource(Res.drawable.logo_app),
+            contentDescription = null,
+            modifier = Modifier.size(280.dp),
+        )
 
         // Title
         Text(
@@ -121,15 +107,6 @@ fun LoginScreen(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Subtitle
-        Text(
-            text = stringResource(Res.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(Modifier.height(40.dp))
@@ -182,7 +159,6 @@ fun LoginScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .align(Alignment.End)
                 .clickable { onAction(LoginAction.ForgotPasswordClicked) },
         )
 
@@ -225,37 +201,66 @@ fun LoginScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        // Social sign-in: Google on Android, Apple on iOS. The provider that isn't available on the
+        // current platform is hidden, so the divider only shows when there is at least one button.
+        if (state.isGoogleAvailable || state.isAppleAvailable) {
+            Spacer(Modifier.height(24.dp))
 
-        // Divider
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            HorizontalDivider(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(Res.string.login_divider),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            HorizontalDivider(modifier = Modifier.weight(1f))
+            // Divider
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(Res.string.login_divider),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.height(24.dp))
         }
 
-        Spacer(Modifier.height(24.dp))
+        // Google sign in (Android)
+        if (state.isGoogleAvailable) {
+            OutlinedButton(
+                onClick = { onAction(LoginAction.GoogleSignInClicked) },
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.login_google_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
 
-        // Google sign in
-        OutlinedButton(
-            onClick = { onAction(LoginAction.GoogleSignInClicked) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.login_google_button),
-                style = MaterialTheme.typography.labelLarge,
-            )
+        // Sign in with Apple (iOS)
+        if (state.isAppleAvailable) {
+            if (state.isGoogleAvailable) Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = { onAction(LoginAction.AppleSignInClicked) },
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = MaterialTheme.colorScheme.surface,
+                ),
+            ) {
+                Text(
+                    text = stringResource(Res.string.login_apple_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
 
         Spacer(Modifier.height(32.dp))

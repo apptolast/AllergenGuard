@@ -6,6 +6,9 @@ data class LoginState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isPasswordVisible: Boolean = false,
+    // Provider availability per platform: Google on Android, Apple on iOS.
+    val isGoogleAvailable: Boolean = false,
+    val isAppleAvailable: Boolean = false,
 )
 
 sealed interface LoginAction {
@@ -14,6 +17,7 @@ sealed interface LoginAction {
     data object TogglePasswordVisibility : LoginAction
     data object LoginClicked : LoginAction
     data object GoogleSignInClicked : LoginAction
+    data object AppleSignInClicked : LoginAction
     data object RegisterClicked : LoginAction
     data object ForgotPasswordClicked : LoginAction
 }

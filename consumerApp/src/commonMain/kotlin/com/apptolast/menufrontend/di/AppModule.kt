@@ -56,6 +56,6 @@ val viewModelModule = module {
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
-        modules(firebaseModule, repositoryModule, viewModelModule)
+        modules(platformModule, firebaseModule, repositoryModule, viewModelModule)
     }
 }

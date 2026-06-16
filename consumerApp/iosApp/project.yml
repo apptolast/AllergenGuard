@@ -38,6 +38,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_VERSION: "5.0"
+          # Sign in with Apple capability (com.apple.developer.applesignin).
+        CODE_SIGN_ENTITLEMENTS: iosApp/ConsumerApp.entitlements
         # Automatic signing with the AppToLast team (TEAM_ID lives in Config.xcconfig).
         DEVELOPMENT_TEAM: $(TEAM_ID)
         CODE_SIGN_STYLE: Automatic

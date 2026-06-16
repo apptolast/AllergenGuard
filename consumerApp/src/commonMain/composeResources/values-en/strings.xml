@@ -9,6 +9,7 @@
     <string name="login_button">Sign In</string>
     <string name="login_divider">or</string>
     <string name="login_google_button">Continue with Google</string>
+    <string name="login_apple_button">Continue with Apple</string>
     <string name="login_register_prompt">Don\'t have an account?</string>
     <string name="login_register_link">Sign Up</string>
 

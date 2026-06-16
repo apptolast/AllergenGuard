@@ -11,6 +11,7 @@
     <string name="login_button">Iniciar Sesión</string>
     <string name="login_divider">o</string>
     <string name="login_google_button">Continuar con Google</string>
+    <string name="login_apple_button">Continuar con Apple</string>
     <string name="login_register_prompt">¿No tienes cuenta?</string>
     <string name="login_register_link">Regístrate</string>
 
