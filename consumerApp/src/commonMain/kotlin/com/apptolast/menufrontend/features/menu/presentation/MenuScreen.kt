@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,36 +26,28 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.apptolast.menufrontend.core.theme.SafeGreen
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
+import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
-import com.apptolast.menufrontend.features.menu.components.AllergenFilterChip
+import com.apptolast.menufrontend.domain.model.Dish
+import com.apptolast.menufrontend.features.components.allergenLabels
+import com.apptolast.menufrontend.features.menu.components.AllergenFilterSection
 import com.apptolast.menufrontend.features.menu.components.DishCard
 import com.apptolast.menufrontend.features.menu.data.MenuAction
 import com.apptolast.menufrontend.features.menu.data.MenuState
 import com.apptolast.menufrontend.resources.Res
-import com.apptolast.menufrontend.resources.allergen_celery
-import com.apptolast.menufrontend.resources.allergen_crustaceans
-import com.apptolast.menufrontend.resources.allergen_dairy
-import com.apptolast.menufrontend.resources.allergen_eggs
-import com.apptolast.menufrontend.resources.allergen_fish
-import com.apptolast.menufrontend.resources.allergen_gluten
-import com.apptolast.menufrontend.resources.allergen_lupin
-import com.apptolast.menufrontend.resources.allergen_mollusks
-import com.apptolast.menufrontend.resources.allergen_mustard
-import com.apptolast.menufrontend.resources.allergen_peanuts
-import com.apptolast.menufrontend.resources.allergen_sesame
-import com.apptolast.menufrontend.resources.allergen_soy
-import com.apptolast.menufrontend.resources.allergen_sulfites
-import com.apptolast.menufrontend.resources.allergen_tree_nuts
 import com.apptolast.menufrontend.resources.back
 import com.apptolast.menufrontend.resources.menu_interactive_menu
 import com.apptolast.menufrontend.resources.menu_safe_dishes
-import com.apptolast.menufrontend.resources.menu_select_allergies
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -94,7 +85,9 @@ fun MenuScreen(
     state: MenuState,
     onAction: (MenuAction) -> Unit,
 ) {
-    val allergenLabels = allergenLabelMap()
+    val allergenLabels = allergenLabels()
+    val colors = MaterialTheme.extendedColors
+    var filtersExpanded by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -140,32 +133,18 @@ fun MenuScreen(
                 contentPadding = PaddingValues(vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Allergen filter section
+                // Allergen filter section (collapsible)
                 item {
-                    Column(
+                    AllergenFilterSection(
+                        allergenLabels = allergenLabels,
+                        activeFilters = state.activeFilters,
+                        userAllergens = state.userAllergens,
+                        expanded = filtersExpanded,
+                        onToggleAllergen = { onAction(MenuAction.ToggleAllergenFilter(it)) },
+                        onToggleExpanded = { filtersExpanded = !filtersExpanded },
+                        onRestoreFilters = { onAction(MenuAction.RestoreUserFilters) },
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.menu_select_allergies),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(Allergen.entries.take(8)) { allergen ->
-                                AllergenFilterChip(
-                                    allergen = allergen,
-                                    label = allergenLabels[allergen] ?: allergen.name,
-                                    isSelected = allergen in state.activeFilters,
-                                    onToggle = { onAction(MenuAction.ToggleAllergenFilter(allergen)) },
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
 
                 // Safe dishes header
@@ -182,12 +161,12 @@ fun MenuScreen(
                             text = stringResource(Res.string.menu_safe_dishes),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = SafeGreen,
+                            color = colors.safe,
                         )
                         Text(
                             text = "${state.filteredDishes.size} platos",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = SafeGreen,
+                            color = colors.safe,
                         )
                     }
                 }
@@ -210,20 +189,40 @@ fun MenuScreen(
     }
 }
 
+@Preview
 @Composable
-private fun allergenLabelMap(): Map<Allergen, String> = mapOf(
-    Allergen.GLUTEN to stringResource(Res.string.allergen_gluten),
-    Allergen.FISH to stringResource(Res.string.allergen_fish),
-    Allergen.PEANUTS to stringResource(Res.string.allergen_peanuts),
-    Allergen.DAIRY to stringResource(Res.string.allergen_dairy),
-    Allergen.EGGS to stringResource(Res.string.allergen_eggs),
-    Allergen.SOY to stringResource(Res.string.allergen_soy),
-    Allergen.SULFITES to stringResource(Res.string.allergen_sulfites),
-    Allergen.MOLLUSKS to stringResource(Res.string.allergen_mollusks),
-    Allergen.CRUSTACEANS to stringResource(Res.string.allergen_crustaceans),
-    Allergen.TREE_NUTS to stringResource(Res.string.allergen_tree_nuts),
-    Allergen.CELERY to stringResource(Res.string.allergen_celery),
-    Allergen.MUSTARD to stringResource(Res.string.allergen_mustard),
-    Allergen.SESAME to stringResource(Res.string.allergen_sesame),
-    Allergen.LUPIN to stringResource(Res.string.allergen_lupin),
-)
+private fun PreviewMenuScreen() {
+    val dishes = listOf(
+        Dish(
+            id = "1",
+            restaurantId = "r1",
+            name = "Ensalada de quinoa",
+            description = "Quinoa, aguacate y vinagreta cítrica",
+            price = 9.5,
+            ingredients = listOf("Quinoa", "Aguacate"),
+            allergens = setOf(Allergen.SULFITES),
+        ),
+        Dish(
+            id = "2",
+            restaurantId = "r1",
+            name = "Pulpo a la brasa",
+            description = "Pulpo con puré de patata ahumado",
+            price = 18.0,
+            ingredients = listOf("Pulpo", "Patata"),
+            allergens = setOf(Allergen.MOLLUSKS),
+        ),
+    )
+    AllergenGuardTheme {
+        MenuScreen(
+            state = MenuState(
+                restaurantName = "Hotel Valsequillo",
+                allDishes = dishes,
+                filteredDishes = dishes,
+                activeFilters = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
+                userAllergens = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
+            ),
+            onAction = {},
+        )
+    }
+}
+

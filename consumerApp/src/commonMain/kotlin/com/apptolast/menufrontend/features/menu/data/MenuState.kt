@@ -20,6 +20,9 @@ data class MenuState(
 
 sealed interface MenuAction {
     data class ToggleAllergenFilter(val allergen: Allergen) : MenuAction
+
+    /** Re-applies the user's saved profile allergens as the active filters. */
+    data object RestoreUserFilters : MenuAction
     data class DishClicked(val dishId: String) : MenuAction
     data object NavigateBack : MenuAction
 }

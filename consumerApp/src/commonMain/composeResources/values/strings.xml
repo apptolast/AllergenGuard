@@ -29,6 +29,9 @@
     <!-- Menu -->
     <string name="menu_interactive_menu">Carta Interactiva</string>
     <string name="menu_select_allergies">Selecciona tus alergias</string>
+    <string name="menu_show_more">Ver más</string>
+    <string name="menu_show_less">Ver menos</string>
+    <string name="menu_restore_filters">Mis alergias</string>
     <string name="menu_safe_dishes">Platos Seguros</string>
     <string name="menu_dishes_count">%d platos</string>
     <string name="menu_contains">Contiene:</string>
@@ -44,6 +47,9 @@
     <!-- Profile -->
     <string name="profile_my_allergies">Mis Alergias</string>
     <string name="profile_edit">Editar</string>
+    <string name="profile_edit_allergies_title">Editar alergias</string>
+    <string name="profile_save">Guardar</string>
+    <string name="profile_no_allergies">Sin alergias configuradas</string>
     <string name="profile_allergies_description">Estas alergias se aplicarán automáticamente al ver cualquier carta</string>
     <string name="profile_settings">Ajustes</string>
     <string name="profile_notifications">Notificaciones</string>

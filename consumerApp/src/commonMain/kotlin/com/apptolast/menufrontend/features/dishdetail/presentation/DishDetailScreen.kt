@@ -38,32 +38,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.apptolast.menufrontend.core.theme.AllergenActiveBg
-import com.apptolast.menufrontend.core.theme.AllergenActiveText
-import com.apptolast.menufrontend.core.theme.DangerRedLight
-import com.apptolast.menufrontend.core.theme.SafeGreen
-import com.apptolast.menufrontend.core.theme.SafeGreenBorder
-import com.apptolast.menufrontend.core.theme.SafeGreenLight
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
+import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
+import com.apptolast.menufrontend.domain.model.Dish
+import com.apptolast.menufrontend.features.components.allergenLabels
 import com.apptolast.menufrontend.features.components.icon
 import com.apptolast.menufrontend.features.dishdetail.data.DishDetailState
 import com.apptolast.menufrontend.resources.Res
-import com.apptolast.menufrontend.resources.allergen_celery
-import com.apptolast.menufrontend.resources.allergen_crustaceans
-import com.apptolast.menufrontend.resources.allergen_dairy
-import com.apptolast.menufrontend.resources.allergen_eggs
-import com.apptolast.menufrontend.resources.allergen_fish
-import com.apptolast.menufrontend.resources.allergen_gluten
-import com.apptolast.menufrontend.resources.allergen_lupin
-import com.apptolast.menufrontend.resources.allergen_mollusks
-import com.apptolast.menufrontend.resources.allergen_mustard
-import com.apptolast.menufrontend.resources.allergen_peanuts
-import com.apptolast.menufrontend.resources.allergen_sesame
-import com.apptolast.menufrontend.resources.allergen_soy
-import com.apptolast.menufrontend.resources.allergen_sulfites
-import com.apptolast.menufrontend.resources.allergen_tree_nuts
 import com.apptolast.menufrontend.resources.back
 import com.apptolast.menufrontend.resources.dish_allergen_warning
 import com.apptolast.menufrontend.resources.dish_allergens
@@ -98,7 +83,8 @@ fun DishDetailScreen(
     state: DishDetailState,
     onNavigateBack: () -> Unit,
 ) {
-    val allergenLabels = allergenLabelMap()
+    val allergenLabels = allergenLabels()
+    val colors = MaterialTheme.extendedColors
 
     Scaffold(
         topBar = {
@@ -189,7 +175,7 @@ fun DishDetailScreen(
                     text = priceText,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = SafeGreen,
+                    color = colors.safe,
                 )
 
                 // Ingredients
@@ -248,7 +234,7 @@ fun DishDetailScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = DangerRedLight),
+                        colors = CardDefaults.cardColors(containerColor = colors.dangerContainer),
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -258,7 +244,7 @@ fun DishDetailScreen(
                             Icon(
                                 imageVector = Icons.Filled.Warning,
                                 contentDescription = null,
-                                tint = AllergenActiveText,
+                                tint = colors.onDangerContainer,
                                 modifier = Modifier.size(20.dp),
                             )
                             Text(
@@ -267,7 +253,7 @@ fun DishDetailScreen(
                                     state.dangerousAllergens.size,
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = AllergenActiveText,
+                                color = colors.onDangerContainer,
                             )
                         }
                     }
@@ -275,7 +261,7 @@ fun DishDetailScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = SafeGreenLight),
+                        colors = CardDefaults.cardColors(containerColor = colors.safeContainer),
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -284,7 +270,7 @@ fun DishDetailScreen(
                             Text(
                                 text = stringResource(Res.string.dish_safe_message),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = SafeGreen,
+                                color = colors.onSafeContainer,
                             )
                         }
                     }
@@ -302,9 +288,10 @@ private fun AllergenDetailBadge(
     label: String,
     isDangerous: Boolean,
 ) {
-    val bgColor = if (isDangerous) AllergenActiveBg else MaterialTheme.colorScheme.surfaceVariant
-    val contentColor = if (isDangerous) AllergenActiveText else MaterialTheme.colorScheme.onSurfaceVariant
-    val borderColor = if (isDangerous) AllergenActiveText else MaterialTheme.colorScheme.outlineVariant
+    val colors = MaterialTheme.extendedColors
+    val bgColor = if (isDangerous) colors.dangerContainer else MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = if (isDangerous) colors.onDangerContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val borderColor = if (isDangerous) colors.onDangerContainer else MaterialTheme.colorScheme.outlineVariant
 
     Column(
         modifier = Modifier
@@ -329,20 +316,25 @@ private fun AllergenDetailBadge(
     }
 }
 
+@Preview
 @Composable
-private fun allergenLabelMap(): Map<Allergen, String> = mapOf(
-    Allergen.GLUTEN to stringResource(Res.string.allergen_gluten),
-    Allergen.FISH to stringResource(Res.string.allergen_fish),
-    Allergen.PEANUTS to stringResource(Res.string.allergen_peanuts),
-    Allergen.DAIRY to stringResource(Res.string.allergen_dairy),
-    Allergen.EGGS to stringResource(Res.string.allergen_eggs),
-    Allergen.SOY to stringResource(Res.string.allergen_soy),
-    Allergen.SULFITES to stringResource(Res.string.allergen_sulfites),
-    Allergen.MOLLUSKS to stringResource(Res.string.allergen_mollusks),
-    Allergen.CRUSTACEANS to stringResource(Res.string.allergen_crustaceans),
-    Allergen.TREE_NUTS to stringResource(Res.string.allergen_tree_nuts),
-    Allergen.CELERY to stringResource(Res.string.allergen_celery),
-    Allergen.MUSTARD to stringResource(Res.string.allergen_mustard),
-    Allergen.SESAME to stringResource(Res.string.allergen_sesame),
-    Allergen.LUPIN to stringResource(Res.string.allergen_lupin),
-)
+private fun PreviewDishDetailScreen() {
+    AllergenGuardTheme {
+        DishDetailScreen(
+            state = DishDetailState(
+                dish = Dish(
+                    id = "1",
+                    restaurantId = "r1",
+                    name = "Lasaña boloñesa",
+                    description = "Pasta al horno con bechamel y carne",
+                    price = 12.5,
+                    ingredients = listOf("Pasta", "Carne", "Leche", "Tomate"),
+                    allergens = setOf(Allergen.GLUTEN, Allergen.DAIRY),
+                ),
+                restaurantName = "Hotel Valsequillo",
+                userAllergens = setOf(Allergen.GLUTEN),
+            ),
+            onNavigateBack = {},
+        )
+    }
+}

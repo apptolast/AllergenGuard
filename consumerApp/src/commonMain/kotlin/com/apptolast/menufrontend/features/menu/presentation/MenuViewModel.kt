@@ -80,6 +80,14 @@ class MenuViewModel(
                     )
                 }
             }
+            MenuAction.RestoreUserFilters -> {
+                _state.update {
+                    it.copy(
+                        activeFilters = it.userAllergens,
+                        filteredDishes = filterDishes(it.allDishes, it.userAllergens),
+                    )
+                }
+            }
             is MenuAction.DishClicked -> {
                 viewModelScope.launch {
                     _effect.emit(MenuEffect.NavigateToDishDetail(action.dishId))

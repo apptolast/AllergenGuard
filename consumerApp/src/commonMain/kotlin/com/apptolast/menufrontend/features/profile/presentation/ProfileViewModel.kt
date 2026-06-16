@@ -36,11 +36,26 @@ class ProfileViewModel(
                 _state.update { it.copy(user = user) }
             }
         }
+        loadAllergens()
+    }
+
+    /** Hydrates the saved allergen selection from Firestore so the chips reflect what was stored. */
+    private fun loadAllergens() {
+        viewModelScope.launch {
+            userRepository.getUserAllergens()
+                .onSuccess { allergens -> _state.update { it.copy(allergens = allergens) } }
+        }
     }
 
     fun onAction(action: ProfileAction) {
         when (action) {
-            is ProfileAction.ToggleAllergen -> toggleAllergen(action)
+            ProfileAction.EditAllergiesClicked ->
+                _state.update { it.copy(isEditingAllergens = true, sheetSelection = it.allergens) }
+
+            is ProfileAction.ToggleSheetAllergen -> toggleSheetAllergen(action)
+            ProfileAction.SaveAllergies -> saveAllergens()
+            ProfileAction.DismissAllergenSheet ->
+                _state.update { it.copy(isEditingAllergens = false) }
             ProfileAction.LogoutClicked -> logout()
             ProfileAction.NotificationsClicked -> { /* TODO */ }
             ProfileAction.LanguageClicked -> { /* TODO */ }
@@ -49,16 +64,30 @@ class ProfileViewModel(
         }
     }
 
-    private fun toggleAllergen(action: ProfileAction.ToggleAllergen) {
-        val user = _state.value.user ?: return
-        val updated = if (action.allergen in user.allergens) {
-            user.allergens - action.allergen
-        } else {
-            user.allergens + action.allergen
+    private fun toggleSheetAllergen(action: ProfileAction.ToggleSheetAllergen) {
+        _state.update {
+            val updated = if (action.allergen in it.sheetSelection) {
+                it.sheetSelection - action.allergen
+            } else {
+                it.sheetSelection + action.allergen
+            }
+            it.copy(sheetSelection = updated)
         }
-        _state.update { it.copy(user = user.copy(allergens = updated)) }
+    }
+
+    private fun saveAllergens() {
+        val selection = _state.value.sheetSelection
+        _state.update { it.copy(isSaving = true) }
         viewModelScope.launch {
-            userRepository.updateUserAllergens(updated)
+            userRepository.updateUserAllergens(selection)
+                .onSuccess {
+                    _state.update {
+                        it.copy(allergens = selection, isEditingAllergens = false, isSaving = false)
+                    }
+                }
+                .onFailure { e ->
+                    _state.update { it.copy(isSaving = false, error = e.message) }
+                }
         }
     }
 
