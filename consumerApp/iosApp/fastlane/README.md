@@ -61,9 +61,7 @@ CI-only: read the Git tag, increment build number, build, upload to TestFlight.
 [bundle exec] fastlane ios screenshots
 ```
 
-Generate localized App Store screenshots on the simulator. The app's ScreenshotMode skips login and serves demo data;
-the UI test launches per screen and shoots. Devices/languages live in the Snapfile. Upload afterwards with
-upload_store_assets.
+Generate localized App Store screenshots on the simulator. The app's ScreenshotMode skips login and serves demo data; the UI test launches per screen and shoots. Devices/languages live in the Snapfile. Upload afterwards with upload_store_assets.
 
 ### ios upload_store_assets
 

@@ -182,6 +182,9 @@ platform :ios do
       skip_binary_upload: true,
       skip_metadata: false,
       skip_screenshots: skip_screenshots,
+      # Replace the App Store screenshots instead of appending — without this, every re-run adds the
+      # set again and they pile up (10 = two runs of 5).
+      overwrite_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
       precheck_include_in_app_purchases: false,
