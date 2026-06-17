@@ -1,0 +1,74 @@
+name: Deploy Android (Play Internal)
+
+# Tag-driven: push a v* tag (or run manually) to build a signed AAB and upload it to Play Internal
+# testing as a DRAFT (manual publish in Play Console).
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: "Tag to release (e.g. v1.2.3)"
+                required: true
+
+concurrency:
+    group: deploy-android-${{ github.ref_name }}
+    cancel-in-progress: false
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        environment: release
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   uses: actions/setup-java@v4
+                with:
+                    distribution: temurin
+                    java-version: "17"
+
+            -   uses: ruby/setup-ruby@v1
+                with:
+                    ruby-version: "3.3"
+                    bundler-cache: true
+
+            -   name: Decode release keystore
+                run: |
+                    mkdir -p "$RUNNER_TEMP/secrets"
+                    echo "${{ secrets.SIGNING_KEY_B64 }}" | base64 --decode > "$RUNNER_TEMP/secrets/release.jks"
+
+            -   name: Write google-services.json
+                run: echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > consumerApp/google-services.json
+
+            -   name: Write Play service account
+                run: echo '${{ secrets.SERVICE_ACCOUNT_GOOGLE_PLAY_CONSOLE_JSON }}' > "$RUNNER_TEMP/secrets/play.json"
+
+            # consumerApp/build.gradle.kts reads release signing from local.properties (storeFile/…),
+            # so the signing keys go here alongside the Firebase BuildKonfig values.
+            -   name: Render local.properties (Firebase config + release signing)
+                run: |
+                    cat > local.properties <<EOF
+                    FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+                    FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+                    USE_FIRESTORE=true
+                    GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+                    storeFile=$RUNNER_TEMP/secrets/release.jks
+                    storePassword=${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+                    keyAlias=${{ secrets.SIGNING_ALIAS }}
+                    keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}
+                    EOF
+
+            -   name: Fastlane release (Play Internal, draft)
+                working-directory: consumerApp
+                env:
+                    RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+                    SUPPLY_JSON_KEY: ${{ runner.temp }}/secrets/play.json
+                run: bundle exec fastlane android release_from_tag
+
+            -   uses: actions/upload-artifact@v4
+                with:
+                    name: consumerApp-release-aab
+                    path: consumerApp/build/outputs/bundle/release/consumerApp-release.aab
+                    if-no-files-found: warn
+                    retention-days: 30

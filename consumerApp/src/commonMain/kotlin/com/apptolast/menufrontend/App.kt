@@ -20,6 +20,7 @@ fun App() {
             .components { add(KtorNetworkFetcherFactory()) }
             .build()
     }
+
     AllergenGuardTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

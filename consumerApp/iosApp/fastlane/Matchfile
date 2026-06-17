@@ -1,0 +1,20 @@
+# Matchfile — encrypted distribution of iOS signing artifacts for MenuAdmin (consumerApp).
+# `match` stores the App Store distribution certificate + provisioning profile in a private Git
+# repo, encrypted with MATCH_PASSWORD, and syncs them across machines + CI.
+#
+# Reuses the shared apptolast/ios-certificates repo: the distribution certificate already lives
+# there (reused across AppToLast apps), so bootstrap only creates a new App Store provisioning
+# profile for com.apptolast.menufrontend.
+#
+# Bootstrap once (from consumerApp/iosApp): bundle exec fastlane ios bootstrap_match
+# CI lanes call match(readonly: true) so they never create new certificates.
+
+git_url(ENV["MATCH_GIT_URL"]) unless ENV["MATCH_GIT_URL"].to_s.empty?
+
+storage_mode("git")
+
+app_identifier(["com.apptolast.menufrontend"])
+
+team_id(ENV["FASTLANE_TEAM_ID"]) unless ENV["FASTLANE_TEAM_ID"].to_s.empty?
+
+type("appstore")

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">AllergenGuard</string>
+    <string name="app_name" translatable="false">Allergen Guard</string>
 
     <!-- Login -->
     <string name="login_subtitle">Tu guía de alérgenos</string>
@@ -11,6 +11,7 @@
     <string name="login_button">Iniciar Sesión</string>
     <string name="login_divider">o</string>
     <string name="login_google_button">Continuar con Google</string>
+    <string name="login_apple_button">Continuar con Apple</string>
     <string name="login_register_prompt">¿No tienes cuenta?</string>
     <string name="login_register_link">Regístrate</string>
 
@@ -66,6 +67,13 @@
     <string name="profile_favorite_restaurants">Restaurantes favoritos</string>
     <string name="profile_help">Ayuda y soporte</string>
     <string name="profile_logout">Cerrar sesión</string>
+    <string name="profile_logout_confirm_title">¿Cerrar sesión?</string>
+    <string name="profile_logout_confirm_message">Tendrás que volver a iniciar sesión para acceder a tu perfil.</string>
+    <string name="profile_delete_account">Eliminar cuenta</string>
+    <string name="profile_delete_confirm_title">¿Eliminar tu cuenta?</string>
+    <string name="profile_delete_confirm_message">Esta acción es permanente. Se eliminarán tu cuenta y tus datos, y no podrás recuperarlos.</string>
+    <string name="profile_delete_confirm_button">Eliminar</string>
+    <string name="action_cancel">Cancelar</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>

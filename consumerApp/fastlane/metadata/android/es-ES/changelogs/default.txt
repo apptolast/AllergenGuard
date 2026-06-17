@@ -1,0 +1,1 @@
+Primera versión de Allergen Guard. Configura tu perfil de alérgenos, explora restaurantes y consulta la carta de cada uno filtrada según tus alergias.

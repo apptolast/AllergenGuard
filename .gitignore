@@ -29,9 +29,11 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+keystore.properties
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+GoogleService-Info.plist
 
 # Android Profiling
 *.hprof
@@ -575,6 +577,14 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Generated store screenshots (regenerate with `fastlane ios screenshots`); store text metadata IS tracked.
+consumerApp/iosApp/fastlane/screenshots/
+consumerApp/fastlane/metadata/android/*/images/
+
+# Transient fastlane run reports under the mobile modules (regenerated on every run).
+consumerApp/**/fastlane/report.xml
+consumerApp/**/fastlane/Preview.html
 
 # Code Injection
 # After new code Injection tools there's a generated folder /iOSInjectionProject
