@@ -28,6 +28,8 @@ KMP_MODULE   = ":consumerApp"                          # produces ConsumerApp.fr
 RELEASE_CONFIG = "Release"
 APPSTORE_PROFILE_NAME = "match AppStore #{BUNDLE_ID}"
 APPSTORE_SIGNING_XCARGS = "PROVISIONING_PROFILE_SPECIFIER='#{APPSTORE_PROFILE_NAME}'"
+METADATA_PATH = File.join(IOS_APP_DIR, "fastlane/metadata")
+SCREENSHOTS_PATH = File.join(IOS_APP_DIR, "fastlane/screenshots")
 
 def parse_tag(tag)
   match = tag.to_s.match(/\Av(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)\z/)
@@ -151,6 +153,41 @@ platform :ios do
       skip_submission: true,
     )
     UI.success "Uploaded v#{vname} (build #{next_build}) to TestFlight."
+  end
+
+  desc "Generate localized App Store screenshots on the simulator. The app's ScreenshotMode skips login and serves demo data; the UI test launches per screen and shoots. Devices/languages live in the Snapfile. Upload afterwards with upload_store_assets."
+  lane :screenshots do
+    # Fail fast on Kotlin errors before xcodebuild; the UI test builds the simulator framework (Debug).
+    gradle(
+      task: "#{KMP_MODULE}:linkDebugFrameworkIosSimulatorArm64",
+      project_dir: ROOT_DIR,
+      flags: "--no-configuration-cache",
+    )
+    capture_screenshots
+    UI.success "Screenshots generated at #{SCREENSHOTS_PATH}"
+  end
+
+  desc "Upload App Store metadata + any generated screenshots (no binary, no review submission)."
+  lane :upload_store_assets do
+    api_key = app_store_connect_api_key_token
+    screenshot_files = Dir.glob(File.join(SCREENSHOTS_PATH, "**", "*.{png,jpg,jpeg}"), File::FNM_CASEFOLD)
+    skip_screenshots = screenshot_files.empty?
+    UI.important "No screenshots under #{SCREENSHOTS_PATH}; uploading metadata only." if skip_screenshots
+
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      metadata_path: METADATA_PATH,
+      screenshots_path: SCREENSHOTS_PATH,
+      skip_binary_upload: true,
+      skip_metadata: false,
+      skip_screenshots: skip_screenshots,
+      submit_for_review: false,
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      force: true,
+    )
+    UI.success "Uploaded App Store metadata#{skip_screenshots ? "" : " + screenshots"}."
   end
 
   error do |lane, exception|

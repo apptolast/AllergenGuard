@@ -63,6 +63,25 @@ targets:
           cd "$SRCROOT/../.."
           ./gradlew :consumerApp:embedAndSignAppleFrameworkForXcode
 
+    # UI test bundle used only by fastlane snapshot to capture App Store screenshots (simulator, Debug).
+  ConsumerAppUITests:
+      type: bundle.ui-testing
+      platform: iOS
+      sources:
+          -   path: ConsumerAppUITests
+      dependencies:
+          -   target: ConsumerApp
+      settings:
+          base:
+              DEVELOPMENT_TEAM: $(TEAM_ID)
+              # The project xcconfig forces PRODUCT_NAME=MenuFrontend on EVERY target. Override it here so
+              # this test bundle's Swift module is uniquely named — otherwise it emits its own
+              # MenuFrontend.swiftmodule and collides with the app's ("Multiple commands produce …swiftmodule").
+              PRODUCT_NAME: ConsumerAppUITests
+              PRODUCT_BUNDLE_IDENTIFIER: com.apptolast.menufrontend.uitests
+              CODE_SIGN_STYLE: Automatic
+              GENERATE_INFOPLIST_FILE: YES
+
 # Shared scheme so fastlane/gym (and CI, where xcuserdata schemes don't exist) can build & archive.
 schemes:
     ConsumerApp:
@@ -73,6 +92,8 @@ schemes:
             config: Debug
         test:
             config: Debug
+            targets:
+                - ConsumerAppUITests
         profile:
             config: Release
         analyze:

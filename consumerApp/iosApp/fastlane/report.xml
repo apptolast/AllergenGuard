@@ -3,27 +3,17 @@
     <testsuite name="fastlane.lanes">
 
 
-        <testcase name="0: default_platform" classname="fastlane.lanes" time="0.000604">
+        <testcase name="0: default_platform" classname="fastlane.lanes" time="0.000619">
 
         </testcase>
 
 
-        <testcase name="1: :consumerApp:linkReleaseFrameworkIosArm64" classname="fastlane.lanes" time="346.927562">
+        <testcase name="1: :consumerApp:linkDebugFrameworkIosSimulatorArm64" classname="fastlane.lanes" time="28.54527">
 
         </testcase>
 
 
-        <testcase name="2: app_store_connect_api_key" classname="fastlane.lanes" time="1.485476">
-
-        </testcase>
-
-
-        <testcase name="3: match" classname="fastlane.lanes" time="1.755405">
-
-        </testcase>
-
-
-        <testcase name="4: build_app" classname="fastlane.lanes" time="140.431289">
+        <testcase name="2: capture_screenshots" classname="fastlane.lanes" time="161.976941">
 
         </testcase>
 

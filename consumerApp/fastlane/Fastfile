@@ -18,10 +18,13 @@
 
 default_platform(:android)
 
-APP_DIR      = File.expand_path("..", __dir__)        # …/MenuAdmin/consumerApp
-ROOT_DIR     = File.expand_path("../..", __dir__)     # …/MenuAdmin (where gradlew lives)
-BUILD_GRADLE = File.join(APP_DIR, "build.gradle.kts")
-AAB_PATH     = File.join(APP_DIR, "build/outputs/bundle/release/consumerApp-release.aab")
+APP_DIR        = File.expand_path("..", __dir__)        # …/MenuAdmin/consumerApp
+ROOT_DIR       = File.expand_path("../..", __dir__)     # …/MenuAdmin (where gradlew lives)
+BUILD_GRADLE   = File.join(APP_DIR, "build.gradle.kts")
+AAB_PATH       = File.join(APP_DIR, "build/outputs/bundle/release/consumerApp-release.aab")
+METADATA_PATH  = File.join(APP_DIR, "fastlane/metadata/android")           # Play listing text/images
+IOS_SHOTS_DIR  = File.join(APP_DIR, "iosApp/fastlane/screenshots")         # reused for Play phone shots
+STORE_LOCALE   = "es-ES"
 
 # Play enforces globally-unique versionCodes across tracks, so we take the max of all of them.
 PLAY_TRACKS = %w[production beta alpha internal].freeze
@@ -133,6 +136,37 @@ platform :android do
       skip_upload_changelogs: true,
     )
     UI.success "Uploaded v#{vname} (versionCode #{vcode}) to Internal testing as DRAFT."
+  end
+
+  desc "Upload Play Store listing text + phone screenshots (reused from the iOS snapshot run). No AAB; requires the app's first manual upload to exist. Run `ios screenshots` first."
+  lane :upload_store_assets do
+    require "fileutils"
+
+    # Reuse the iOS-generated screenshots as Play phone screenshots.
+    src = File.join(IOS_SHOTS_DIR, STORE_LOCALE)
+    dest = File.join(METADATA_PATH, STORE_LOCALE, "images", "phoneScreenshots")
+    shots = Dir.glob(File.join(src, "*.{png,jpg,jpeg}"), File::FNM_CASEFOLD).sort
+    if shots.empty?
+      UI.important "No iOS screenshots at #{src}; uploading listing text only. Run `cd ../iosApp && bundle exec fastlane ios screenshots` first."
+    else
+      FileUtils.mkdir_p(dest)
+      Dir.glob(File.join(dest, "*")).each { |f| FileUtils.rm_f(f) }
+      shots.each_with_index { |png, i| FileUtils.cp(png, File.join(dest, format("%02d.png", i + 1))) }
+      UI.message "Copied #{shots.length} screenshots to #{dest}"
+    end
+
+    upload_to_play_store(
+      track: "internal",
+      metadata_path: METADATA_PATH,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: shots.empty?,
+      # Changelogs are tied to a release (AAB); they upload with release_from_tag, not here.
+      skip_upload_changelogs: true,
+    )
+    UI.success "Uploaded Play Store listing#{shots.empty? ? " (text only)" : " + screenshots"}."
   end
 
   error do |lane, exception|

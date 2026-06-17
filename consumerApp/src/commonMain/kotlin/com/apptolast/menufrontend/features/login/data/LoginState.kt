@@ -1,8 +1,8 @@
 package com.apptolast.menufrontend.features.login.data
 
 data class LoginState(
-    val email: String = "a@a.com",
-    val password: String = "abcd1234",
+    val email: String = "",
+    val password: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
     val isPasswordVisible: Boolean = false,

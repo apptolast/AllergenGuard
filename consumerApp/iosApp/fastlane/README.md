@@ -55,6 +55,24 @@ Build & upload to TestFlight. Pass version_name:'X.Y.Z' to set the marketing ver
 
 CI-only: read the Git tag, increment build number, build, upload to TestFlight.
 
+### ios screenshots
+
+```sh
+[bundle exec] fastlane ios screenshots
+```
+
+Generate localized App Store screenshots on the simulator. The app's ScreenshotMode skips login and serves demo data;
+the UI test launches per screen and shoots. Devices/languages live in the Snapfile. Upload afterwards with
+upload_store_assets.
+
+### ios upload_store_assets
+
+```sh
+[bundle exec] fastlane ios upload_store_assets
+```
+
+Upload App Store metadata + any generated screenshots (no binary, no review submission).
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
