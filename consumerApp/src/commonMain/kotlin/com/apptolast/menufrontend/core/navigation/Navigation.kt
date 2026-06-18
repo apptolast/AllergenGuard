@@ -63,7 +63,6 @@ fun Navigation() {
                 },
                 onNavigateToFavorites = { navigateToTab(FavoritesRoute) },
                 onNavigateToProfile = { navigateToTab(ProfileRoute) },
-                onNavigateToScanner = { navController.navigate(ScannerRoute) },
             )
         }
 

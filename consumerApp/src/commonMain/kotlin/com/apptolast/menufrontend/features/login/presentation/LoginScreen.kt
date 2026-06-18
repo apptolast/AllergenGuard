@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +42,7 @@ import com.apptolast.menufrontend.features.login.data.LoginAction
 import com.apptolast.menufrontend.features.login.data.LoginState
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.app_name
+import com.apptolast.menufrontend.resources.ic_google
 import com.apptolast.menufrontend.resources.login_apple_button
 import com.apptolast.menufrontend.resources.login_button
 import com.apptolast.menufrontend.resources.login_divider
@@ -234,6 +236,12 @@ fun LoginScreen(
                     .height(50.dp),
                 shape = RoundedCornerShape(10.dp),
             ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_google),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(Res.string.login_google_button),
                     style = MaterialTheme.typography.labelLarge,

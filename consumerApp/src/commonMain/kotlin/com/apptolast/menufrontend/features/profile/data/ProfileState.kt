@@ -27,10 +27,6 @@ sealed interface ProfileAction {
     data class ToggleSheetAllergen(val allergen: Allergen) : ProfileAction
     data object SaveAllergies : ProfileAction
     data object DismissAllergenSheet : ProfileAction
-    data object NotificationsClicked : ProfileAction
-    data object LanguageClicked : ProfileAction
-    data object FavoriteRestaurantsClicked : ProfileAction
-    data object HelpClicked : ProfileAction
 
     // Logout (reversible): tap opens a confirmation dialog, confirm signs out.
     data object LogoutClicked : ProfileAction
