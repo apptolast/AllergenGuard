@@ -62,10 +62,6 @@ class ProfileViewModel(
             ProfileAction.ConfirmDeleteAccount -> deleteAccount()
             ProfileAction.DismissDialogs ->
                 _state.update { it.copy(showLogoutDialog = false, showDeleteDialog = false) }
-            ProfileAction.NotificationsClicked -> { /* TODO */ }
-            ProfileAction.LanguageClicked -> { /* TODO */ }
-            ProfileAction.FavoriteRestaurantsClicked -> { /* TODO */ }
-            ProfileAction.HelpClicked -> { /* TODO */ }
         }
     }
 

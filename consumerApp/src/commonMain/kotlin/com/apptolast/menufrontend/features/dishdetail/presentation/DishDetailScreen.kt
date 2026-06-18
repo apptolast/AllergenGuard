@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,6 +56,7 @@ import com.apptolast.menufrontend.resources.back
 import com.apptolast.menufrontend.resources.dish_allergen_warning
 import com.apptolast.menufrontend.resources.dish_allergens
 import com.apptolast.menufrontend.resources.dish_detail_title
+import com.apptolast.menufrontend.resources.dish_disclaimer
 import com.apptolast.menufrontend.resources.dish_ingredients
 import com.apptolast.menufrontend.resources.dish_safe_message
 import org.jetbrains.compose.resources.stringResource
@@ -304,6 +306,16 @@ fun DishDetailScreen(
                         }
                     }
                 }
+
+                // Always-visible, low-emphasis reminder that the allergen data comes from the
+                // restaurant and should be confirmed before ordering.
+                Text(
+                    text = stringResource(Res.string.dish_disclaimer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
 
                 Spacer(Modifier.height(16.dp))
             }

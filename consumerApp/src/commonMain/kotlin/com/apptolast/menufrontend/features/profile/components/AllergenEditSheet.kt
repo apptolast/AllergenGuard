@@ -2,8 +2,7 @@ package com.apptolast.menufrontend.features.profile.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,12 +19,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.domain.model.Allergen
-import com.apptolast.menufrontend.features.components.AllergenFilterChip
 import com.apptolast.menufrontend.resources.Res
+import com.apptolast.menufrontend.resources.profile_allergies_sheet_disclaimer
 import com.apptolast.menufrontend.resources.profile_edit_allergies_title
 import com.apptolast.menufrontend.resources.profile_save
 import org.jetbrains.compose.resources.stringResource
@@ -59,7 +59,6 @@ fun AllergenEditSheet(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AllergenEditSheetContent(
     selection: Set<Allergen>,
@@ -83,36 +82,59 @@ private fun AllergenEditSheetContent(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        FlowRow(
+        // 3-column grid of equal-width cells. The last (short) row is padded with weighted
+        // spacers so the columns stay aligned.
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Allergen.entries.forEach { allergen ->
-                AllergenFilterChip(
-                    allergen = allergen,
-                    label = allergenLabels[allergen] ?: allergen.name,
-                    isSelected = allergen in selection,
-                    onToggle = { onToggle(allergen) },
-                )
+            Allergen.entries.chunked(3).forEach { rowAllergens ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    rowAllergens.forEach { allergen ->
+                        AllergenGridItem(
+                            allergen = allergen,
+                            label = allergenLabels[allergen] ?: allergen.name,
+                            isSelected = allergen in selection,
+                            onToggle = { onToggle(allergen) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    repeat(3 - rowAllergens.size) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.profile_allergies_sheet_disclaimer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
 
         Button(
             onClick = onSave,
             enabled = !isSaving,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
         ) {
             if (isSaving) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(22.dp),
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
             } else {
-                Text(stringResource(Res.string.profile_save))
+                Text(
+                    text = stringResource(Res.string.profile_save),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
         }
     }

@@ -108,4 +108,18 @@
     <string name="retry">Reintentar</string>
     <string name="back">Volver</string>
     <string name="currency_format">%s €</string>
+
+    <!-- Disclaimers -->
+    <string name="dish_disclaimer">La información de alérgenos la facilita el restaurante.\nConfírmala con el personal antes de pedir.</string>
+    <string name="profile_allergies_sheet_disclaimer">Esta información es orientativa.\nConfirma siempre con el restaurante antes de pedir.</string>
+    <string name="profile_allergen_disclaimer">Aviso sobre alérgenos</string>
+    <string name="disclaimer_full_title">Aviso sobre la información de alérgenos</string>
+    <string name="disclaimer_full_body">Allergen Guard muestra la información de alérgenos que cada restaurante publica sobre sus platos. Esta información puede contener errores, estar incompleta o no estar actualizada.\n\nLa app es una ayuda orientativa y no sustituye la confirmación directa con el restaurante. Antes de pedir, especialmente en caso de alergias graves, confirma siempre con el personal que el plato es seguro para ti.\n\nAllergen Guard y AppToLast no se responsabilizan de la exactitud de la información facilitada por los restaurantes ni de las decisiones tomadas a partir de ella.</string>
+    <string name="disclaimer_understood">Entendido</string>
+
+    <!-- Share -->
+    <string name="profile_share_app">Compartir app</string>
+    <string name="menu_share">Compartir restaurante</string>
+    <string name="share_app_message">Descubre Allergen Guard, la app para comer fuera sin tus alérgenos: %1$s</string>
+    <string name="share_restaurant_message">Mira la carta de %1$s en Allergen Guard, filtrada según tus alergias: %2$s</string>
 </resources>
