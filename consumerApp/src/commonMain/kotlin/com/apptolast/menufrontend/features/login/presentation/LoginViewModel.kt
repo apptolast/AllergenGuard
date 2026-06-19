@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 
 sealed interface LoginEffect {
     data object NavigateToHome : LoginEffect
-    data object NavigateToRegister : LoginEffect
 }
 
 class LoginViewModel(
@@ -37,13 +36,16 @@ class LoginViewModel(
 
     fun onAction(action: LoginAction) {
         when (action) {
+            is LoginAction.NameChanged -> _state.update { it.copy(name = action.name, error = null) }
             is LoginAction.EmailChanged -> _state.update { it.copy(email = action.email, error = null) }
             is LoginAction.PasswordChanged -> _state.update { it.copy(password = action.password, error = null) }
             LoginAction.TogglePasswordVisibility -> _state.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
             LoginAction.LoginClicked -> login()
+            LoginAction.RegisterClicked -> register()
+            LoginAction.ToggleAuthMode ->
+                _state.update { it.copy(isRegisterMode = !it.isRegisterMode, error = null) }
             LoginAction.GoogleSignInClicked -> socialLogin { authRepository.loginWithGoogle() }
             LoginAction.AppleSignInClicked -> socialLogin { authRepository.loginWithApple() }
-            LoginAction.RegisterClicked -> viewModelScope.launch { _effect.emit(LoginEffect.NavigateToRegister) }
             LoginAction.ForgotPasswordClicked -> { /* TODO */ }
         }
     }
@@ -52,6 +54,17 @@ class LoginViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             authRepository.login(_state.value.email, _state.value.password)
+                .onSuccess { _effect.emit(LoginEffect.NavigateToHome) }
+                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun register() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            val current = _state.value
+            authRepository.register(current.email, current.password, current.name.trim())
                 .onSuccess { _effect.emit(LoginEffect.NavigateToHome) }
                 .onFailure { e -> _state.update { it.copy(error = e.message) } }
             _state.update { it.copy(isLoading = false) }

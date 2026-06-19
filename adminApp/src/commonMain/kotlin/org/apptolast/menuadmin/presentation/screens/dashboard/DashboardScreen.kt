@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.DashboardStats
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.StatCard
 import org.apptolast.menuadmin.presentation.screens.dashboard.components.AllergenFrequencyChart
 import org.apptolast.menuadmin.presentation.screens.dashboard.components.RecentActivityList
@@ -167,14 +168,8 @@ fun DashboardContent(
             }
         }
 
-        // Error display
-        uiState.error?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
     }
 }
 

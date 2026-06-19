@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "51493B4BE436771DAA393D50"
-               BuildableName = "MenuFrontend.app"
+               BuildableName = "Allergen Guard.app"
                BlueprintName = "ConsumerApp"
                ReferencedContainer = "container:ConsumerApp.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "51493B4BE436771DAA393D50"
-            BuildableName = "MenuFrontend.app"
+            BuildableName = "Allergen Guard.app"
             BlueprintName = "ConsumerApp"
             ReferencedContainer = "container:ConsumerApp.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "51493B4BE436771DAA393D50"
-            BuildableName = "MenuFrontend.app"
+            BuildableName = "Allergen Guard.app"
             BlueprintName = "ConsumerApp"
             ReferencedContainer = "container:ConsumerApp.xcodeproj">
          </BuildableReference>
@@ -81,7 +81,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "51493B4BE436771DAA393D50"
-            BuildableName = "MenuFrontend.app"
+            BuildableName = "Allergen Guard.app"
             BlueprintName = "ConsumerApp"
             ReferencedContainer = "container:ConsumerApp.xcodeproj">
          </BuildableReference>

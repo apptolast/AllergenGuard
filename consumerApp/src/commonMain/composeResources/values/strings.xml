@@ -14,6 +14,10 @@
     <string name="login_apple_button">Continuar con Apple</string>
     <string name="login_register_prompt">¿No tienes cuenta?</string>
     <string name="login_register_link">Regístrate</string>
+    <string name="login_name_label">Nombre</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="login_have_account_prompt">¿Ya tienes cuenta?</string>
+    <string name="login_signin_link">Inicia sesión</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_explore">Explorar</string>

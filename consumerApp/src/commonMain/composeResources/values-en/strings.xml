@@ -12,6 +12,10 @@
     <string name="login_apple_button">Continue with Apple</string>
     <string name="login_register_prompt">Don't have an account?</string>
     <string name="login_register_link">Sign Up</string>
+    <string name="login_name_label">Name</string>
+    <string name="register_button">Create account</string>
+    <string name="login_have_account_prompt">Already have an account?</string>
+    <string name="login_signin_link">Sign in</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_explore">Explore</string>

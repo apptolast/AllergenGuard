@@ -19,6 +19,8 @@ data class MenusUiState(
     val formDescription: String = "",
     val formRestaurantLogoUrl: String = "",
     val formCompanyLogoUrl: String = "",
+    val isUploadingRestaurantLogo: Boolean = false,
+    val isUploadingCompanyLogo: Boolean = false,
     val formSelectedRecipeIds: Set<String> = emptySet(),
     val availableRecipes: List<Recipe> = emptyList(),
     val isSaving: Boolean = false,
