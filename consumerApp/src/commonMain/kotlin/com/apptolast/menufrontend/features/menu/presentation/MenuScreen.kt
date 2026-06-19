@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.apptolast.menufrontend.core.share.APP_SHARE_URL
+import com.apptolast.menufrontend.core.share.rememberShareLauncher
 import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
@@ -67,10 +70,12 @@ import com.apptolast.menufrontend.resources.menu_favorite
 import com.apptolast.menufrontend.resources.menu_interactive_menu
 import com.apptolast.menufrontend.resources.menu_no_menu
 import com.apptolast.menufrontend.resources.menu_safe_dishes
+import com.apptolast.menufrontend.resources.menu_share
 import com.apptolast.menufrontend.resources.menu_sort_category
 import com.apptolast.menufrontend.resources.menu_sort_name
 import com.apptolast.menufrontend.resources.menu_sort_price
 import com.apptolast.menufrontend.resources.menu_toggle_unsafe
+import com.apptolast.menufrontend.resources.share_restaurant_message
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -82,6 +87,12 @@ fun MenuScreenRoot(
     viewModel: MenuViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val share = rememberShareLauncher()
+    val shareMessage = stringResource(
+        Res.string.share_restaurant_message,
+        state.restaurantName,
+        APP_SHARE_URL,
+    )
 
     LaunchedEffect(restaurantId) {
         viewModel.loadMenu(restaurantId)
@@ -99,6 +110,7 @@ fun MenuScreenRoot(
     MenuScreen(
         state = state,
         onAction = viewModel::onAction,
+        onShare = { share(shareMessage) },
     )
 }
 
@@ -107,6 +119,7 @@ fun MenuScreenRoot(
 fun MenuScreen(
     state: MenuState,
     onAction: (MenuAction) -> Unit,
+    onShare: () -> Unit,
 ) {
     val allergenLabels = allergenLabels()
     var filtersExpanded by rememberSaveable { mutableStateOf(false) }
@@ -141,6 +154,13 @@ fun MenuScreen(
                     }
                 },
                 actions = {
+                    // Share this restaurant (opens the native share sheet).
+                    IconButton(onClick = onShare) {
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            contentDescription = stringResource(Res.string.menu_share),
+                        )
+                    }
                     // Show/hide dishes the user can't eat (eye toggle, like a password field).
                     IconButton(onClick = { onAction(MenuAction.ToggleShowUnsafe) }) {
                         Icon(
@@ -380,6 +400,7 @@ private fun PreviewMenuScreen() {
                 userAllergens = setOf(Allergen.GLUTEN, Allergen.FISH, Allergen.SOY),
             ),
             onAction = {},
+            onShare = {},
         )
     }
 }

@@ -2,6 +2,7 @@ package org.apptolast.menuadmin.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,11 +38,13 @@ fun StatCard(
     iconTint: Color,
     changeText: String? = null,
     changeColor: Color = Green500,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surface)
             .padding(20.dp),

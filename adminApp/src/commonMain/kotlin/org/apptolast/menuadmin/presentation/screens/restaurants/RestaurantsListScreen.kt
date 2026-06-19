@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.Restaurant
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
@@ -124,10 +125,8 @@ fun RestaurantsListContent(
             }
         }
 
-        // Error message
-        uiState.error?.let { error ->
-            Text(text = error, color = Red500, fontSize = 13.sp)
-        }
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
 
         // Success message
         uiState.successMessage?.let { msg ->

@@ -11,13 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,7 +36,6 @@ import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.app_name
 import com.apptolast.menufrontend.resources.home_nearby_title
 import com.apptolast.menufrontend.resources.home_see_all
-import com.apptolast.menufrontend.resources.scanner_title
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -49,7 +44,6 @@ fun HomeScreenRoot(
     onRestaurantClick: (String) -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToScanner: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -72,7 +66,6 @@ fun HomeScreenRoot(
                 BottomNavTab.PROFILE -> onNavigateToProfile()
             }
         },
-        onScanClick = onNavigateToScanner,
     )
 }
 
@@ -82,7 +75,6 @@ fun HomeScreen(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
     onTabSelected: (BottomNavTab) -> Unit,
-    onScanClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -99,18 +91,6 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onScanClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.QrCodeScanner,
-                    contentDescription = stringResource(Res.string.scanner_title),
-                )
-            }
         },
         bottomBar = {
             BottomNavigationBar(

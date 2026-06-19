@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -66,9 +67,7 @@ fun SettingsContent(
             )
         }
 
-        uiState.error?.let { error ->
-            Text(text = error, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
-        }
+        ErrorSnackbarEffect(uiState.error)
         uiState.successMessage?.let { msg ->
             Text(text = msg, color = MenuAdminTheme.colors.success, fontSize = 13.sp)
         }

@@ -1,0 +1,7 @@
+# Appfile — Android identifiers for the MenuAdmin consumerApp (KMP mobile module).
+
+package_name("com.apptolast.menufrontend")
+
+# Path to the Play Console service account JSON key. Set locally in consumerApp/fastlane/.env
+# (gitignored) or via the SUPPLY_JSON_KEY env var in CI.
+json_key_file(ENV["SUPPLY_JSON_KEY"]) if ENV["SUPPLY_JSON_KEY"]

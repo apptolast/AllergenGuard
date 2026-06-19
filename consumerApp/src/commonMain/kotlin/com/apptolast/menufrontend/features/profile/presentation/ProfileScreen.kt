@@ -1,5 +1,6 @@
 package com.apptolast.menufrontend.features.profile.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,24 +14,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,28 +50,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apptolast.menufrontend.appVersion
+import com.apptolast.menufrontend.core.share.APP_SHARE_URL
+import com.apptolast.menufrontend.core.share.rememberShareLauncher
 import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.domain.model.Allergen
 import com.apptolast.menufrontend.domain.model.User
+import com.apptolast.menufrontend.features.components.AllergenFilterChip
 import com.apptolast.menufrontend.features.components.BottomNavTab
 import com.apptolast.menufrontend.features.components.BottomNavigationBar
 import com.apptolast.menufrontend.features.components.allergenLabels
-import com.apptolast.menufrontend.features.components.icon
 import com.apptolast.menufrontend.features.profile.components.AllergenEditSheet
+import com.apptolast.menufrontend.features.profile.components.DisclaimerSheet
 import com.apptolast.menufrontend.features.profile.components.SettingsItem
 import com.apptolast.menufrontend.features.profile.data.ProfileAction
 import com.apptolast.menufrontend.features.profile.data.ProfileState
 import com.apptolast.menufrontend.resources.Res
+import com.apptolast.menufrontend.resources.action_cancel
+import com.apptolast.menufrontend.resources.profile_allergen_disclaimer
 import com.apptolast.menufrontend.resources.profile_allergies_description
+import com.apptolast.menufrontend.resources.profile_delete_account
+import com.apptolast.menufrontend.resources.profile_delete_confirm_button
+import com.apptolast.menufrontend.resources.profile_delete_confirm_message
+import com.apptolast.menufrontend.resources.profile_delete_confirm_title
 import com.apptolast.menufrontend.resources.profile_edit
-import com.apptolast.menufrontend.resources.profile_favorite_restaurants
-import com.apptolast.menufrontend.resources.profile_help
-import com.apptolast.menufrontend.resources.profile_language
-import com.apptolast.menufrontend.resources.profile_language_es
 import com.apptolast.menufrontend.resources.profile_logout
+import com.apptolast.menufrontend.resources.profile_logout_confirm_message
+import com.apptolast.menufrontend.resources.profile_logout_confirm_title
 import com.apptolast.menufrontend.resources.profile_my_allergies
 import com.apptolast.menufrontend.resources.profile_no_allergies
-import com.apptolast.menufrontend.resources.profile_notifications
+import com.apptolast.menufrontend.resources.profile_share_app
+import com.apptolast.menufrontend.resources.share_app_message
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -104,6 +122,9 @@ fun ProfileScreen(
 ) {
     val user = state.user
     val allergenLabels = allergenLabels()
+    val share = rememberShareLauncher()
+    val shareMessage = stringResource(Res.string.share_app_message, APP_SHARE_URL)
+    var showDisclaimer by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -192,25 +213,15 @@ fun ProfileScreen(
             } else {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Allergen.entries.filter { it in state.allergens }.forEach { allergen ->
-                        AssistChip(
-                            onClick = { onAction(ProfileAction.EditAllergiesClicked) },
-                            label = {
-                                Text(
-                                    text = allergenLabels[allergen] ?: allergen.name,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = allergen.icon(),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            },
+                        AllergenFilterChip(
+                            allergen = allergen,
+                            label = allergenLabels[allergen] ?: allergen.name,
+                            isSelected = false,
+                            onToggle = { onAction(ProfileAction.EditAllergiesClicked) },
                         )
                     }
                 }
@@ -231,41 +242,68 @@ fun ProfileScreen(
 
             // Settings
             SettingsItem(
-                icon = Icons.Filled.Notifications,
-                label = stringResource(Res.string.profile_notifications),
-                onClick = { onAction(ProfileAction.NotificationsClicked) },
+                icon = Icons.Filled.Share,
+                label = stringResource(Res.string.profile_share_app),
+                onClick = { share(shareMessage) },
             )
             SettingsItem(
-                icon = Icons.Filled.Language,
-                label = stringResource(Res.string.profile_language),
-                value = stringResource(Res.string.profile_language_es),
-                onClick = { onAction(ProfileAction.LanguageClicked) },
-            )
-            SettingsItem(
-                icon = Icons.Filled.FavoriteBorder,
-                label = stringResource(Res.string.profile_favorite_restaurants),
-                onClick = { onAction(ProfileAction.FavoriteRestaurantsClicked) },
-            )
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.HelpOutline,
-                label = stringResource(Res.string.profile_help),
-                onClick = { onAction(ProfileAction.HelpClicked) },
+                icon = Icons.Outlined.Info,
+                label = stringResource(Res.string.profile_allergen_disclaimer),
+                onClick = { showDisclaimer = true },
             )
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
 
-            // Logout
-            TextButton(
-                onClick = { onAction(ProfileAction.LogoutClicked) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = stringResource(Res.string.profile_logout),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+                // Account actions. Sign out is the neutral, primary affordance (white surface so it
+                // stands out from the gray canvas); "delete account" is an outlined danger button set
+                // apart below it. Both require confirmation (dialogs further down) so neither fires on
+                // an accidental tap.
+                OutlinedButton(
+                    onClick = { onAction(ProfileAction.LogoutClicked) },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(Res.string.profile_logout),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = { onAction(ProfileAction.DeleteAccountClicked) },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(Res.string.profile_delete_account),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
 
                 Spacer(Modifier.height(16.dp))
             }
@@ -291,6 +329,72 @@ fun ProfileScreen(
             onToggle = { onAction(ProfileAction.ToggleSheetAllergen(it)) },
             onSave = { onAction(ProfileAction.SaveAllergies) },
             onDismiss = { onAction(ProfileAction.DismissAllergenSheet) },
+        )
+    }
+
+    if (showDisclaimer) {
+        DisclaimerSheet(onDismiss = { showDisclaimer = false })
+    }
+
+    // Logout confirmation (reversible action → simple confirm).
+    if (state.showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { onAction(ProfileAction.DismissDialogs) },
+            title = { Text(stringResource(Res.string.profile_logout_confirm_title)) },
+            text = { Text(stringResource(Res.string.profile_logout_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = { onAction(ProfileAction.ConfirmLogout) }) {
+                    Text(stringResource(Res.string.profile_logout))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(ProfileAction.DismissDialogs) }) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
+            },
+        )
+    }
+
+    // Delete-account confirmation (irreversible → warning icon, error-colored confirm, loading state).
+    if (state.showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { if (!state.isDeleting) onAction(ProfileAction.DismissDialogs) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.WarningAmber,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            title = { Text(stringResource(Res.string.profile_delete_confirm_title)) },
+            text = { Text(stringResource(Res.string.profile_delete_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onAction(ProfileAction.ConfirmDeleteAccount) },
+                    enabled = !state.isDeleting,
+                ) {
+                    if (state.isDeleting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(Res.string.profile_delete_confirm_button),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { onAction(ProfileAction.DismissDialogs) },
+                    enabled = !state.isDeleting,
+                ) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
+            },
         )
     }
 }

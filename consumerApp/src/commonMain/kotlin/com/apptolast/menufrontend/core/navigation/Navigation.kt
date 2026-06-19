@@ -5,6 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.apptolast.menufrontend.core.screenshot.ScreenshotMode
+import com.apptolast.menufrontend.data.demo.ScreenshotDemoData
 import com.apptolast.menufrontend.features.dishdetail.presentation.DishDetailScreenRoot
 import com.apptolast.menufrontend.features.favorites.presentation.FavoritesScreenRoot
 import com.apptolast.menufrontend.features.home.presentation.HomeScreenRoot
@@ -25,9 +27,23 @@ fun Navigation() {
         }
     }
 
+    // Normally the app starts at Login; in ScreenshotMode it jumps straight to the requested screen
+    // (fed by the fake demo repositories) so fastlane can capture authenticated screens unattended.
+    val startDestination: Destination = if (ScreenshotMode.enabled) {
+        when (ScreenshotMode.startScreen) {
+            "home" -> HomeRoute
+            "menu" -> MenuRoute(ScreenshotDemoData.RESTAURANT_ID)
+            "dish" -> DishDetailRoute(ScreenshotDemoData.DISH_ID, ScreenshotDemoData.RESTAURANT_ID)
+            "profile" -> ProfileRoute
+            else -> LoginRoute
+        }
+    } else {
+        LoginRoute
+    }
+
     NavHost(
         navController = navController,
-        startDestination = LoginRoute,
+        startDestination = startDestination,
     ) {
         composable<LoginRoute> {
             LoginScreenRoot(
@@ -36,7 +52,6 @@ fun Navigation() {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { /* TODO */ },
             )
         }
 
@@ -47,7 +62,6 @@ fun Navigation() {
                 },
                 onNavigateToFavorites = { navigateToTab(FavoritesRoute) },
                 onNavigateToProfile = { navigateToTab(ProfileRoute) },
-                onNavigateToScanner = { navController.navigate(ScannerRoute) },
             )
         }
 

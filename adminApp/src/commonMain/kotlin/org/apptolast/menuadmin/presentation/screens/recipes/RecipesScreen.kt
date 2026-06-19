@@ -63,6 +63,7 @@ import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.AllergenSummaryCard
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.SearchBar
 import org.apptolast.menuadmin.presentation.screens.recipes.components.RecipeCard
 import org.apptolast.menuadmin.presentation.theme.Blue500
@@ -287,14 +288,8 @@ fun RecipesContent(
             }
         }
 
-        // Error display
-        uiState.error?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
     }
 }
 

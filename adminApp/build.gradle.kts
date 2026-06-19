@@ -13,7 +13,7 @@ plugins {
 }
 
 // Single source of truth for the admin platform version (exposed to code via BuildKonfig.APP_VERSION).
-version = "1.2.0"
+version = "1.3.0"
 
 kotlin {
     compilerOptions {

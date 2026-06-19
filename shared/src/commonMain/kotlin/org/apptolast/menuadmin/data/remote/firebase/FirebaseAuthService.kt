@@ -38,6 +38,48 @@ class FirebaseAuthService(
             setBody(FirebaseSignInRequest(email = email, password = password, returnSecureToken = true))
         }.body()
 
+    /**
+     * Exchanges a federated provider id token for a Firebase session.
+     *
+     * @param providerId `"google.com"` or `"apple.com"`.
+     * @param idToken the OIDC id token obtained natively (Google ID token / Apple identity token).
+     * @param rawNonce the *raw* (un-hashed) nonce used by Sign in with Apple. The Apple request was
+     *   signed with `sha256(rawNonce)`; Identity Toolkit re-hashes this value and compares it with
+     *   the token's `nonce` claim. Pass `null` for Google (no nonce).
+     */
+    suspend fun signInWithIdp(
+        providerId: String,
+        idToken: String,
+        rawNonce: String? = null,
+    ): FirebaseSignInResponse {
+        val postBody = buildString {
+            append("id_token=").append(idToken)
+            append("&providerId=").append(providerId)
+            if (!rawNonce.isNullOrBlank()) append("&nonce=").append(rawNonce)
+        }
+        return client.post("${FirebaseConfig.IDENTITY_TOOLKIT}/accounts:signInWithIdp") {
+            url { parameters.append("key", FirebaseConfig.apiKey) }
+            contentType(ContentType.Application.Json)
+            setBody(
+                FirebaseSignInWithIdpRequest(
+                    postBody = postBody,
+                    requestUri = "http://localhost",
+                    returnSecureToken = true,
+                    returnIdpCredential = true,
+                ),
+            )
+        }.body()
+    }
+
+    /** Permanently deletes the account that owns [idToken] (Identity Toolkit `accounts:delete`). */
+    suspend fun deleteAccount(idToken: String) {
+        client.post("${FirebaseConfig.IDENTITY_TOOLKIT}/accounts:delete") {
+            url { parameters.append("key", FirebaseConfig.apiKey) }
+            contentType(ContentType.Application.Json)
+            setBody(FirebaseDeleteAccountRequest(idToken))
+        }
+    }
+
     suspend fun refreshIdToken(refreshToken: String): FirebaseRefreshResponse =
         client.submitForm(
             url = "${FirebaseConfig.SECURE_TOKEN}/token",
