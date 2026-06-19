@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material3.Button
@@ -37,6 +39,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,16 +47,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Dish
 import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.presentation.components.ConfirmDialog
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.screens.menus.components.AllergenMatrixTable
 import org.apptolast.menuadmin.presentation.screens.menus.components.AllergenTableLegend
 import org.apptolast.menuadmin.presentation.screens.menus.components.CategoryFilterRow
@@ -80,8 +86,10 @@ fun MenusScreen(viewModel: MenusViewModel) {
         onDismissDeleteDialog = viewModel::onDismissDeleteDialog,
         onFormNameChange = viewModel::onFormNameChange,
         onFormDescriptionChange = viewModel::onFormDescriptionChange,
-        onFormRestaurantLogoUrlChange = viewModel::onFormRestaurantLogoUrlChange,
-        onFormCompanyLogoUrlChange = viewModel::onFormCompanyLogoUrlChange,
+        onPickRestaurantLogo = viewModel::onPickRestaurantLogo,
+        onRemoveRestaurantLogo = viewModel::onRemoveRestaurantLogo,
+        onPickCompanyLogo = viewModel::onPickCompanyLogo,
+        onRemoveCompanyLogo = viewModel::onRemoveCompanyLogo,
         onToggleRecipeSelection = viewModel::onToggleRecipeSelection,
         onDismissForm = viewModel::onDismissForm,
         onSaveMenu = viewModel::onSaveMenu,
@@ -103,8 +111,10 @@ fun MenusContent(
     onDismissDeleteDialog: () -> Unit,
     onFormNameChange: (String) -> Unit,
     onFormDescriptionChange: (String) -> Unit,
-    onFormRestaurantLogoUrlChange: (String) -> Unit,
-    onFormCompanyLogoUrlChange: (String) -> Unit,
+    onPickRestaurantLogo: () -> Unit,
+    onRemoveRestaurantLogo: () -> Unit,
+    onPickCompanyLogo: () -> Unit,
+    onRemoveCompanyLogo: () -> Unit,
     onToggleRecipeSelection: (String) -> Unit,
     onDismissForm: () -> Unit,
     onSaveMenu: () -> Unit,
@@ -120,8 +130,10 @@ fun MenusContent(
             uiState = uiState,
             onFormNameChange = onFormNameChange,
             onFormDescriptionChange = onFormDescriptionChange,
-            onFormRestaurantLogoUrlChange = onFormRestaurantLogoUrlChange,
-            onFormCompanyLogoUrlChange = onFormCompanyLogoUrlChange,
+            onPickRestaurantLogo = onPickRestaurantLogo,
+            onRemoveRestaurantLogo = onRemoveRestaurantLogo,
+            onPickCompanyLogo = onPickCompanyLogo,
+            onRemoveCompanyLogo = onRemoveCompanyLogo,
             onToggleRecipeSelection = onToggleRecipeSelection,
             onDismiss = onDismissForm,
             onSave = onSaveMenu,
@@ -159,14 +171,8 @@ fun MenusContent(
         )
     }
 
-    // Error display
-    uiState.error?.let { error ->
-        Text(
-            text = error,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    // Errors surface through the app-wide snackbar instead of inline red text.
+    ErrorSnackbarEffect(uiState.error)
 }
 
 @Composable
@@ -174,8 +180,10 @@ private fun MenuEditorForm(
     uiState: MenusUiState,
     onFormNameChange: (String) -> Unit,
     onFormDescriptionChange: (String) -> Unit,
-    onFormRestaurantLogoUrlChange: (String) -> Unit,
-    onFormCompanyLogoUrlChange: (String) -> Unit,
+    onPickRestaurantLogo: () -> Unit,
+    onRemoveRestaurantLogo: () -> Unit,
+    onPickCompanyLogo: () -> Unit,
+    onRemoveCompanyLogo: () -> Unit,
     onToggleRecipeSelection: (String) -> Unit,
     onDismiss: () -> Unit,
     onSave: () -> Unit,
@@ -264,32 +272,23 @@ private fun MenuEditorForm(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Top,
             ) {
-                OutlinedTextField(
-                    value = uiState.formRestaurantLogoUrl,
-                    onValueChange = onFormRestaurantLogoUrlChange,
-                    label = { Text("Logo del Restaurante (URL)") },
-                    placeholder = { Text("https://...") },
-                    singleLine = true,
+                LogoUploadField(
+                    label = "Logo del Restaurante",
+                    imageUrl = uiState.formRestaurantLogoUrl,
+                    isUploading = uiState.isUploadingRestaurantLogo,
+                    onPick = onPickRestaurantLogo,
+                    onRemove = onRemoveRestaurantLogo,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Blue500,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
                 )
-                OutlinedTextField(
-                    value = uiState.formCompanyLogoUrl,
-                    onValueChange = onFormCompanyLogoUrlChange,
-                    label = { Text("Logo de la Empresa (URL)") },
-                    placeholder = { Text("https://...") },
-                    singleLine = true,
+                LogoUploadField(
+                    label = "Logo de la Empresa",
+                    imageUrl = uiState.formCompanyLogoUrl,
+                    isUploading = uiState.isUploadingCompanyLogo,
+                    onPick = onPickCompanyLogo,
+                    onRemove = onRemoveCompanyLogo,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Blue500,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
                 )
             }
 
@@ -363,6 +362,107 @@ private fun MenuEditorForm(
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Logo picker: uploads an image from disk to Firebase Storage (same bucket as dish photos, so the
+ * resulting URL is CORS-safe for embedding in the exported PDF) and shows a small live preview.
+ */
+@Composable
+private fun LogoUploadField(
+    label: String,
+    imageUrl: String,
+    isUploading: Boolean,
+    onPick: () -> Unit,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(96.dp)
+                .clip(RoundedCornerShape(8.dp))
+                // White so transparent / dark logos stay visible (same as how they sit in the PDF).
+                .background(Color.White)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                isUploading -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text(
+                            text = "Subiendo...",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                imageUrl.isNotBlank() -> {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = "Vista previa de $label",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                    )
+                }
+
+                else -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Image,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(28.dp),
+                        )
+                        Text(
+                            text = "Sin logo",
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                        )
+                    }
+                }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = onPick,
+                enabled = !isUploading,
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Image,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(if (imageUrl.isNotBlank()) "Cambiar logo" else "Subir logo")
+            }
+            if (imageUrl.isNotBlank() && !isUploading) {
+                TextButton(onClick = onRemove) {
+                    Text("Quitar", color = Red500)
+                }
             }
         }
     }
@@ -835,8 +935,10 @@ private fun MenusContentPreview() {
             onDismissDeleteDialog = {},
             onFormNameChange = {},
             onFormDescriptionChange = {},
-            onFormRestaurantLogoUrlChange = {},
-            onFormCompanyLogoUrlChange = {},
+            onPickRestaurantLogo = {},
+            onRemoveRestaurantLogo = {},
+            onPickCompanyLogo = {},
+            onRemoveCompanyLogo = {},
             onToggleRecipeSelection = {},
             onDismissForm = {},
             onSaveMenu = {},

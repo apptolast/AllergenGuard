@@ -50,10 +50,14 @@ import com.apptolast.menufrontend.resources.login_email_label
 import com.apptolast.menufrontend.resources.login_email_placeholder
 import com.apptolast.menufrontend.resources.login_forgot_password
 import com.apptolast.menufrontend.resources.login_google_button
+import com.apptolast.menufrontend.resources.login_have_account_prompt
+import com.apptolast.menufrontend.resources.login_name_label
 import com.apptolast.menufrontend.resources.login_password_label
 import com.apptolast.menufrontend.resources.login_register_link
 import com.apptolast.menufrontend.resources.login_register_prompt
+import com.apptolast.menufrontend.resources.login_signin_link
 import com.apptolast.menufrontend.resources.logo_app
+import com.apptolast.menufrontend.resources.register_button
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -61,7 +65,6 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LoginScreenRoot(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,7 +73,6 @@ fun LoginScreenRoot(
         viewModel.effect.collect { effect ->
             when (effect) {
                 LoginEffect.NavigateToHome -> onLoginSuccess()
-                LoginEffect.NavigateToRegister -> onNavigateToRegister()
             }
         }
     }
@@ -113,6 +115,19 @@ fun LoginScreen(
 
         Spacer(Modifier.height(40.dp))
 
+        // Name field (sign-up only)
+        if (state.isRegisterMode) {
+            OutlinedTextField(
+                value = state.name,
+                onValueChange = { onAction(LoginAction.NameChanged(it)) },
+                label = { Text(stringResource(Res.string.login_name_label)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+
         // Email field
         OutlinedTextField(
             value = state.email,
@@ -153,16 +168,17 @@ fun LoginScreen(
             shape = RoundedCornerShape(10.dp),
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        // Forgot password
-        Text(
-            text = stringResource(Res.string.login_forgot_password),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .clickable { onAction(LoginAction.ForgotPasswordClicked) },
-        )
+        // Forgot password (login only)
+        if (!state.isRegisterMode) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.login_forgot_password),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clickable { onAction(LoginAction.ForgotPasswordClicked) },
+            )
+        }
 
         Spacer(Modifier.height(24.dp))
 
@@ -177,10 +193,17 @@ fun LoginScreen(
             Spacer(Modifier.height(8.dp))
         }
 
-        // Login button
+        // Primary button: logs in, or creates the account in sign-up mode.
         Button(
-            onClick = { onAction(LoginAction.LoginClicked) },
-            enabled = !state.isLoading && state.email.isNotBlank() && state.password.isNotBlank(),
+            onClick = {
+                onAction(
+                    if (state.isRegisterMode) LoginAction.RegisterClicked else LoginAction.LoginClicked,
+                )
+            },
+            enabled = !state.isLoading &&
+                state.email.isNotBlank() &&
+                state.password.isNotBlank() &&
+                (!state.isRegisterMode || state.name.isNotBlank()),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -196,7 +219,9 @@ fun LoginScreen(
                 )
             } else {
                 Text(
-                    text = stringResource(Res.string.login_button),
+                    text = stringResource(
+                        if (state.isRegisterMode) Res.string.register_button else Res.string.login_button,
+                    ),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -273,22 +298,34 @@ fun LoginScreen(
 
         Spacer(Modifier.height(32.dp))
 
-        // Register link
+        // Toggle between login and sign-up.
         Row(
             horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = stringResource(Res.string.login_register_prompt) + " ",
+                text = stringResource(
+                    if (state.isRegisterMode) {
+                        Res.string.login_have_account_prompt
+                    } else {
+                        Res.string.login_register_prompt
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = stringResource(Res.string.login_register_link),
+                text = stringResource(
+                    if (state.isRegisterMode) Res.string.login_signin_link else Res.string.login_register_link,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onAction(LoginAction.RegisterClicked) },
+                // clickable before padding → the 8dp padding is part of the tap target.
+                modifier = Modifier
+                    .clickable { onAction(LoginAction.ToggleAuthMode) }
+                    .padding(8.dp),
             )
         }
 

@@ -49,9 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
-import org.apptolast.menuadmin.presentation.theme.Red500
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -222,16 +222,8 @@ fun AuthContent(
                 )
             }
 
-            // Error message
-            uiState.error?.let { error ->
-                Text(
-                    text = error,
-                    color = Red500,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            // Errors surface through the app-wide snackbar instead of inline red text.
+            ErrorSnackbarEffect(uiState.error)
 
             // Submit button
             Button(

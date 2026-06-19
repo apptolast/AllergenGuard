@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green100
 import org.apptolast.menuadmin.presentation.theme.Green500
@@ -241,14 +242,8 @@ fun CartaDigitalContent(
             }
         }
 
-        // Error display
-        uiState.error?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
     }
 }
 

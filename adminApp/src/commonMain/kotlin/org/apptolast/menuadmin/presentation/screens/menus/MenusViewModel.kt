@@ -9,16 +9,25 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.repository.DishImageUploader
+import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.MenuRecipeSummary
+import org.apptolast.menuadmin.domain.platform.AllergenMenuPdf
+import org.apptolast.menuadmin.domain.platform.AllergenPdfRow
+import org.apptolast.menuadmin.domain.platform.MenuPdfExporter
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class MenusViewModel(
     private val menuRepository: MenuRepository,
     private val recipeRepository: RecipeRepository,
+    private val restaurantRepository: RestaurantRepository,
+    private val menuPdfExporter: MenuPdfExporter,
+    private val imageUploader: DishImageUploader,
     private val restaurantId: String,
 ) : ViewModel() {
     private val _localState = MutableStateFlow(MenusUiState())
@@ -97,6 +106,8 @@ class MenusViewModel(
             formDescription = "",
             formRestaurantLogoUrl = "",
             formCompanyLogoUrl = "",
+            isUploadingRestaurantLogo = false,
+            isUploadingCompanyLogo = false,
             formSelectedRecipeIds = emptySet(),
         )
     }
@@ -110,6 +121,8 @@ class MenusViewModel(
             formDescription = menu.description,
             formRestaurantLogoUrl = menu.restaurantLogoUrl ?: "",
             formCompanyLogoUrl = menu.companyLogoUrl ?: "",
+            isUploadingRestaurantLogo = false,
+            isUploadingCompanyLogo = false,
             formSelectedRecipeIds = menu.recipes.map { it.id }.toSet(),
         )
     }
@@ -122,12 +135,50 @@ class MenusViewModel(
         _localState.value = _localState.value.copy(formDescription = desc)
     }
 
-    fun onFormRestaurantLogoUrlChange(url: String) {
-        _localState.value = _localState.value.copy(formRestaurantLogoUrl = url)
+    /** Picks + compresses a logo and uploads it to Firebase Storage; the resulting URL is CORS-safe
+     * (same bucket as dish photos), so it can be embedded in the exported PDF. */
+    fun onPickRestaurantLogo() {
+        viewModelScope.launch {
+            _localState.value = _localState.value.copy(isUploadingRestaurantLogo = true, error = null)
+            try {
+                val url = imageUploader.pickCompressAndUpload(restaurantId)
+                _localState.value = _localState.value.copy(
+                    isUploadingRestaurantLogo = false,
+                    formRestaurantLogoUrl = url ?: _localState.value.formRestaurantLogoUrl,
+                )
+            } catch (e: Exception) {
+                _localState.value = _localState.value.copy(
+                    isUploadingRestaurantLogo = false,
+                    error = e.message ?: "Error al subir el logo",
+                )
+            }
+        }
     }
 
-    fun onFormCompanyLogoUrlChange(url: String) {
-        _localState.value = _localState.value.copy(formCompanyLogoUrl = url)
+    fun onRemoveRestaurantLogo() {
+        _localState.value = _localState.value.copy(formRestaurantLogoUrl = "")
+    }
+
+    fun onPickCompanyLogo() {
+        viewModelScope.launch {
+            _localState.value = _localState.value.copy(isUploadingCompanyLogo = true, error = null)
+            try {
+                val url = imageUploader.pickCompressAndUpload(restaurantId)
+                _localState.value = _localState.value.copy(
+                    isUploadingCompanyLogo = false,
+                    formCompanyLogoUrl = url ?: _localState.value.formCompanyLogoUrl,
+                )
+            } catch (e: Exception) {
+                _localState.value = _localState.value.copy(
+                    isUploadingCompanyLogo = false,
+                    error = e.message ?: "Error al subir el logo",
+                )
+            }
+        }
+    }
+
+    fun onRemoveCompanyLogo() {
+        _localState.value = _localState.value.copy(formCompanyLogoUrl = "")
     }
 
     fun onToggleRecipeSelection(recipeId: String) {
@@ -145,6 +196,8 @@ class MenusViewModel(
             formDescription = "",
             formRestaurantLogoUrl = "",
             formCompanyLogoUrl = "",
+            isUploadingRestaurantLogo = false,
+            isUploadingCompanyLogo = false,
             formSelectedRecipeIds = emptySet(),
         )
     }
@@ -251,15 +304,80 @@ class MenusViewModel(
         }
     }
 
+    /**
+     * Builds the allergen-menu PDF for the selected menu (every recipe it contains, alphabetically,
+     * ignoring the on-screen category filter) and hands it to the platform exporter, which downloads
+     * it. The restaurant name for the header is fetched lazily; logos come from the menu itself.
+     */
     fun exportPdf() {
         viewModelScope.launch {
             try {
-                // PDF export would be handled by platform-specific code
+                val state = uiState.value
+                val menu = state.selectedMenu ?: return@launch
+                val recipes = state.menuRecipes.sortedBy { it.name.lowercase() }
+                if (recipes.isEmpty()) {
+                    _localState.value = _localState.value.copy(
+                        error = "El menu no tiene recetas para exportar",
+                    )
+                    return@launch
+                }
+
+                val allergens = AllergenType.entries
+                val columns = allergens.map { ALLERGEN_PDF_LABELS[it] ?: it.nameEs.uppercase() }
+                val rows = recipes.map { recipe ->
+                    AllergenPdfRow(
+                        name = recipe.name,
+                        ingredients = recipe.ingredients
+                            .mapNotNull { it.ingredientName.ifBlank { null } }
+                            .joinToString(", "),
+                        present = allergens.map { it in recipe.computedAllergens },
+                    )
+                }
+
+                val restaurantName = runCatching { restaurantRepository.getRestaurantById(restaurantId)?.name }
+                    .getOrNull()
+                    .orEmpty()
+                val fileLabel = restaurantName.ifBlank { "restaurante" }
+
+                menuPdfExporter.exportAllergenMenu(
+                    AllergenMenuPdf(
+                        restaurantName = restaurantName,
+                        menuName = menu.name,
+                        restaurantLogoUrl = menu.restaurantLogoUrl,
+                        companyLogoUrl = menu.companyLogoUrl,
+                        regulationText = "Conforme al Reglamento (UE) Nº 1169/2011",
+                        notaText = "Esta información ha sido elaborada en base a las fichas técnicas y " +
+                            "listado de ingredientes facilitados por nuestros proveedores o clientes.",
+                        fileName = "Menu de Alergenos - $fileLabel.pdf",
+                        columns = columns,
+                        rows = rows,
+                    ),
+                )
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     error = e.message ?: "Error al exportar PDF",
                 )
             }
         }
+    }
+
+    private companion object {
+        /** Allergen column headers for the PDF, matching the legal Spanish naming on the reference doc. */
+        val ALLERGEN_PDF_LABELS = mapOf(
+            AllergenType.GLUTEN to "GLUTEN",
+            AllergenType.CRUSTACEANS to "CRUSTÁCEOS",
+            AllergenType.EGGS to "HUEVOS",
+            AllergenType.FISH to "PESCADO",
+            AllergenType.PEANUTS to "CACAHUETES",
+            AllergenType.SOY to "SOJA",
+            AllergenType.DAIRY to "LÁCTEOS",
+            AllergenType.TREE_NUTS to "F. CÁSCARA",
+            AllergenType.CELERY to "APIO",
+            AllergenType.MUSTARD to "MOSTAZA",
+            AllergenType.SESAME to "SÉSAMO",
+            AllergenType.SULFITES to "SULFITOS",
+            AllergenType.LUPINS to "ALTRAMUCES",
+            AllergenType.MOLLUSKS to "MOLUSCOS",
+        )
     }
 }

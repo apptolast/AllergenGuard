@@ -52,7 +52,6 @@ fun Navigation() {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { /* TODO */ },
             )
         }
 

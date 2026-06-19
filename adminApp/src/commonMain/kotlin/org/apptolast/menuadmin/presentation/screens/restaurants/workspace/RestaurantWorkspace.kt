@@ -126,6 +126,8 @@ fun RestaurantWorkspace(
                         onAddressChange = detailViewModel::onAddressChange,
                         onPhoneChange = detailViewModel::onPhoneChange,
                         onDismissMessage = detailViewModel::dismissMessage,
+                        onOpenRecipes = { selectedTab = WorkspaceTab.RECIPES.ordinal },
+                        onOpenMenus = { selectedTab = WorkspaceTab.MENUS.ordinal },
                     )
                 }
 
