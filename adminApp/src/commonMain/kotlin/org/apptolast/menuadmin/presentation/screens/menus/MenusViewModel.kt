@@ -13,6 +13,9 @@ import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.MenuRecipeSummary
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.apptolast.menuadmin.platform.buildAllergenPdfPayload
+import org.apptolast.menuadmin.platform.encodeAllergenPdfPayload
+import org.apptolast.menuadmin.platform.launchAllergenPdf
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -241,7 +244,10 @@ class MenusViewModel(
     fun exportPdf() {
         viewModelScope.launch {
             try {
-                // PDF export would be handled by platform-specific code
+                val state = uiState.value
+                val menu = state.selectedMenu ?: return@launch
+                val payload = buildAllergenPdfPayload(menu, state.menuRecipes)
+                launchAllergenPdf(encodeAllergenPdfPayload(payload))
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     error = e.message ?: "Error al exportar PDF",
