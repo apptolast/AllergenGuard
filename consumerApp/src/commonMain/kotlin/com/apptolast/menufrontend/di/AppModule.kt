@@ -1,5 +1,9 @@
 package com.apptolast.menufrontend.di
 
+import com.apptolast.menufrontend.core.screenshot.ScreenshotMode
+import com.apptolast.menufrontend.data.demo.FakeAuthRepository
+import com.apptolast.menufrontend.data.demo.FakeRestaurantRepository
+import com.apptolast.menufrontend.data.demo.FakeUserRepository
 import com.apptolast.menufrontend.data.firebase.FirebaseAuthRepository
 import com.apptolast.menufrontend.data.firebase.FirestoreRestaurantRepository
 import com.apptolast.menufrontend.data.firebase.FirestoreUserRepository
@@ -43,6 +47,13 @@ val repositoryModule = module {
     singleOf(::FirestoreUserRepository) bind UserRepository::class
 }
 
+// Repositories used only in ScreenshotMode (App Store screenshots): in-memory demo data, no network.
+val screenshotRepositoryModule = module {
+    single<AuthRepository> { FakeAuthRepository() }
+    single<RestaurantRepository> { FakeRestaurantRepository() }
+    single<UserRepository> { FakeUserRepository() }
+}
+
 val viewModelModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::HomeViewModel)
@@ -56,6 +67,8 @@ val viewModelModule = module {
 fun initKoin(config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
-        modules(firebaseModule, repositoryModule, viewModelModule)
+        // In ScreenshotMode the fake repositories replace the Firestore ones; everything else is identical.
+        val repositories = if (ScreenshotMode.enabled) screenshotRepositoryModule else repositoryModule
+        modules(platformModule, firebaseModule, repositories, viewModelModule)
     }
 }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
@@ -17,6 +18,7 @@ import org.apptolast.menuadmin.domain.repository.RecipeRepository
 class RecipesViewModel(
     private val recipeRepository: RecipeRepository,
     private val ingredientRepository: IngredientRepository,
+    private val imageUploader: DishImageUploader,
     private val restaurantId: String,
 ) : ViewModel() {
     private val _formState = MutableStateFlow(RecipesUiState())
@@ -72,6 +74,8 @@ class RecipesViewModel(
             formDescription = "",
             formCategory = "",
             formPrice = "",
+            formImageUrl = null,
+            isUploadingImage = false,
             formIngredients = emptyList(),
             formIsActive = true,
         )
@@ -87,6 +91,8 @@ class RecipesViewModel(
                 formDescription = fullRecipe.description,
                 formCategory = fullRecipe.category,
                 formPrice = if (fullRecipe.price > 0) fullRecipe.price.toString() else "",
+                formImageUrl = fullRecipe.imageUrl,
+                isUploadingImage = false,
                 formIngredients = fullRecipe.ingredients,
                 formIsActive = fullRecipe.isActive,
             )
@@ -102,9 +108,33 @@ class RecipesViewModel(
             formDescription = "",
             formCategory = "",
             formPrice = "",
+            formImageUrl = null,
+            isUploadingImage = false,
             formIngredients = emptyList(),
             formIsActive = true,
         )
+    }
+
+    fun onPickImage() {
+        viewModelScope.launch {
+            _formState.value = _formState.value.copy(isUploadingImage = true, error = null)
+            try {
+                val url = imageUploader.pickCompressAndUpload(restaurantId)
+                _formState.value = _formState.value.copy(
+                    isUploadingImage = false,
+                    formImageUrl = url ?: _formState.value.formImageUrl,
+                )
+            } catch (e: Exception) {
+                _formState.value = _formState.value.copy(
+                    isUploadingImage = false,
+                    error = e.message ?: "Error al subir la imagen",
+                )
+            }
+        }
+    }
+
+    fun onRemoveImage() {
+        _formState.value = _formState.value.copy(formImageUrl = null)
     }
 
     fun onFormPriceChange(value: String) {
@@ -153,6 +183,7 @@ class RecipesViewModel(
                             name = state.formName,
                             description = state.formDescription,
                             category = state.formCategory,
+                            imageUrl = state.formImageUrl,
                             price = parsedPrice,
                             ingredients = state.formIngredients,
                             isActive = state.formIsActive,
@@ -165,6 +196,7 @@ class RecipesViewModel(
                             name = state.formName,
                             description = state.formDescription,
                             category = state.formCategory,
+                            imageUrl = state.formImageUrl,
                             price = parsedPrice,
                             ingredients = state.formIngredients,
                             isActive = state.formIsActive,

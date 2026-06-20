@@ -2,10 +2,10 @@ package com.apptolast.menufrontend.core.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 
 private val LightColorScheme = lightColorScheme(
     primary = Blue500,
@@ -14,11 +14,11 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = TextPrimary,
     secondary = TextSecondary,
     onSecondary = White,
-    background = White,
+    background = CanvasLight,
     onBackground = TextPrimary,
     surface = White,
     onSurface = TextPrimary,
-    surfaceVariant = Gray50,
+    surfaceVariant = SurfaceVariantLight,
     onSurfaceVariant = TextSecondary,
     outline = BorderMedium,
     outlineVariant = BorderLight,
@@ -33,11 +33,11 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = White,
     primaryContainer = Blue600,
     onPrimaryContainer = White,
-    background = TextPrimary,
+    background = CanvasDark,
     onBackground = White,
-    surface = TextPrimary,
+    surface = SurfaceDark,
     onSurface = White,
-    surfaceVariant = TextPrimary,
+    surfaceVariant = SurfaceVariantDark,
     onSurfaceVariant = TextTertiary,
     outline = BorderMedium,
     outlineVariant = BorderLight,
@@ -53,10 +53,13 @@ fun AllergenGuardTheme(
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = DmSansTypography(),
-        content = content,
-    )
+    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = DmSansTypography(),
+            content = content,
+        )
+    }
 }

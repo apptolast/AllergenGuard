@@ -33,18 +33,29 @@ class MenuViewModel(
     private val _effect = MutableSharedFlow<MenuEffect>()
     val effect: SharedFlow<MenuEffect> = _effect.asSharedFlow()
 
+    private var restaurantId: String? = null
+
     fun loadMenu(restaurantId: String) {
+        this.restaurantId = restaurantId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Load restaurant name
+            // Load restaurant name + description (shown in the top bar)
             restaurantRepository.getRestaurantName(restaurantId)
                 .onSuccess { name -> _state.update { it.copy(restaurantName = name) } }
+            restaurantRepository.getRestaurantDescription(restaurantId)
+                .onSuccess { desc -> _state.update { it.copy(restaurantDescription = desc) } }
 
             // Load user allergens
             userRepository.getUserAllergens()
                 .onSuccess { allergens ->
                     _state.update { it.copy(userAllergens = allergens, activeFilters = allergens) }
+                }
+
+            // Is this restaurant a favorite?
+            userRepository.getFavoriteRestaurants()
+                .onSuccess { favorites ->
+                    _state.update { it.copy(isFavorite = favorites.any { r -> r.id == restaurantId }) }
                 }
 
             // Load menu
@@ -53,7 +64,7 @@ class MenuViewModel(
                     _state.update {
                         it.copy(
                             allDishes = dishes,
-                            filteredDishes = filterDishes(dishes, it.activeFilters),
+                            filteredDishes = displayedDishes(dishes, it.activeFilters, it.showUnsafe),
                             isLoading = false,
                         )
                     }
@@ -76,10 +87,30 @@ class MenuViewModel(
                 _state.update {
                     it.copy(
                         activeFilters = updated,
-                        filteredDishes = filterDishes(it.allDishes, updated),
+                        filteredDishes = displayedDishes(it.allDishes, updated, it.showUnsafe),
                     )
                 }
             }
+            MenuAction.RestoreUserFilters -> {
+                _state.update {
+                    it.copy(
+                        activeFilters = it.userAllergens,
+                        filteredDishes = displayedDishes(it.allDishes, it.userAllergens, it.showUnsafe),
+                    )
+                }
+            }
+
+            is MenuAction.SetSortMode -> _state.update { it.copy(sortMode = action.mode) }
+            MenuAction.ToggleSortDirection -> _state.update { it.copy(sortAscending = !it.sortAscending) }
+            MenuAction.ToggleShowUnsafe -> _state.update {
+                val show = !it.showUnsafe
+                it.copy(
+                    showUnsafe = show,
+                    filteredDishes = displayedDishes(it.allDishes, it.activeFilters, show),
+                )
+            }
+
+            MenuAction.ToggleFavorite -> toggleFavorite()
             is MenuAction.DishClicked -> {
                 viewModelScope.launch {
                     _effect.emit(MenuEffect.NavigateToDishDetail(action.dishId))
@@ -95,6 +126,24 @@ class MenuViewModel(
         if (filters.isEmpty()) return dishes
         return dishes.filter { dish ->
             dish.allergens.none { it in filters }
+        }
+    }
+
+    /** Dishes to display: all of them when [showUnsafe], otherwise only the ones safe for the filters. */
+    private fun displayedDishes(
+        dishes: List<Dish>,
+        filters: Set<Allergen>,
+        showUnsafe: Boolean,
+    ): List<Dish> = if (showUnsafe) dishes else filterDishes(dishes, filters)
+
+    private fun toggleFavorite() {
+        val rid = restaurantId ?: return
+        val newValue = !_state.value.isFavorite
+        _state.update { it.copy(isFavorite = newValue) } // optimistic
+        viewModelScope.launch {
+            userRepository.toggleFavorite(rid).onFailure {
+                _state.update { it.copy(isFavorite = !newValue) } // revert
+            }
         }
     }
 }

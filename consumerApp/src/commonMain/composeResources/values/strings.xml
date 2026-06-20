@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">AllergenGuard</string>
+    <string name="app_name" translatable="false">Allergen Guard</string>
 
     <!-- Login -->
     <string name="login_subtitle">Tu guía de alérgenos</string>
@@ -11,8 +11,13 @@
     <string name="login_button">Iniciar Sesión</string>
     <string name="login_divider">o</string>
     <string name="login_google_button">Continuar con Google</string>
+    <string name="login_apple_button">Continuar con Apple</string>
     <string name="login_register_prompt">¿No tienes cuenta?</string>
     <string name="login_register_link">Regístrate</string>
+    <string name="login_name_label">Nombre</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="login_have_account_prompt">¿Ya tienes cuenta?</string>
+    <string name="login_signin_link">Inicia sesión</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_explore">Explorar</string>
@@ -29,7 +34,18 @@
     <!-- Menu -->
     <string name="menu_interactive_menu">Carta Interactiva</string>
     <string name="menu_select_allergies">Selecciona tus alergias</string>
+    <string name="menu_show_more">Ver más</string>
+    <string name="menu_show_less">Ver menos</string>
+    <string name="menu_restore_filters">Mis alergias</string>
     <string name="menu_safe_dishes">Platos Seguros</string>
+    <string name="menu_no_menu">Este restaurante aún no tiene un menú disponible</string>
+    <string name="menu_sort">Ordenar</string>
+    <string name="menu_sort_name">Nombre</string>
+    <string name="menu_sort_price">Precio</string>
+    <string name="menu_sort_category">Categoría</string>
+    <string name="menu_category_other">Otros</string>
+    <string name="menu_favorite">Favorito</string>
+    <string name="menu_toggle_unsafe">Mostrar/ocultar platos no aptos</string>
     <string name="menu_dishes_count">%d platos</string>
     <string name="menu_contains">Contiene:</string>
 
@@ -44,6 +60,9 @@
     <!-- Profile -->
     <string name="profile_my_allergies">Mis Alergias</string>
     <string name="profile_edit">Editar</string>
+    <string name="profile_edit_allergies_title">Editar alergias</string>
+    <string name="profile_save">Guardar</string>
+    <string name="profile_no_allergies">Sin alergias configuradas</string>
     <string name="profile_allergies_description">Estas alergias se aplicarán automáticamente al ver cualquier carta</string>
     <string name="profile_settings">Ajustes</string>
     <string name="profile_notifications">Notificaciones</string>
@@ -52,6 +71,13 @@
     <string name="profile_favorite_restaurants">Restaurantes favoritos</string>
     <string name="profile_help">Ayuda y soporte</string>
     <string name="profile_logout">Cerrar sesión</string>
+    <string name="profile_logout_confirm_title">¿Cerrar sesión?</string>
+    <string name="profile_logout_confirm_message">Tendrás que volver a iniciar sesión para acceder a tu perfil.</string>
+    <string name="profile_delete_account">Eliminar cuenta</string>
+    <string name="profile_delete_confirm_title">¿Eliminar tu cuenta?</string>
+    <string name="profile_delete_confirm_message">Esta acción es permanente. Se eliminarán tu cuenta y tus datos, y no podrás recuperarlos.</string>
+    <string name="profile_delete_confirm_button">Eliminar</string>
+    <string name="action_cancel">Cancelar</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>
@@ -86,4 +112,18 @@
     <string name="retry">Reintentar</string>
     <string name="back">Volver</string>
     <string name="currency_format">%s €</string>
+
+    <!-- Disclaimers -->
+    <string name="dish_disclaimer">La información de alérgenos la facilita el restaurante.\nConfírmala con el personal antes de pedir.</string>
+    <string name="profile_allergies_sheet_disclaimer">Esta información es orientativa.\nConfirma siempre con el restaurante antes de pedir.</string>
+    <string name="profile_allergen_disclaimer">Aviso sobre alérgenos</string>
+    <string name="disclaimer_full_title">Aviso sobre la información de alérgenos</string>
+    <string name="disclaimer_full_body">Allergen Guard muestra la información de alérgenos que cada restaurante publica sobre sus platos. Esta información puede contener errores, estar incompleta o no estar actualizada.\n\nLa app es una ayuda orientativa y no sustituye la confirmación directa con el restaurante. Antes de pedir, especialmente en caso de alergias graves, confirma siempre con el personal que el plato es seguro para ti.\n\nAllergen Guard y AppToLast no se responsabilizan de la exactitud de la información facilitada por los restaurantes ni de las decisiones tomadas a partir de ella.</string>
+    <string name="disclaimer_understood">Entendido</string>
+
+    <!-- Share -->
+    <string name="profile_share_app">Compartir app</string>
+    <string name="menu_share">Compartir restaurante</string>
+    <string name="share_app_message">Descubre Allergen Guard, la app para comer fuera sin tus alérgenos: %1$s</string>
+    <string name="share_restaurant_message">Mira la carta de %1$s en Allergen Guard, filtrada según tus alergias: %2$s</string>
 </resources>

@@ -10,6 +10,7 @@ data class Recipe(
     val name: String = "",
     val description: String = "",
     val category: String = "",
+    val imageUrl: String? = null,
     val price: Double = 0.0,
     val isActive: Boolean = true,
     val ingredients: List<RecipeIngredient> = emptyList(),

@@ -83,6 +83,30 @@ class FirestoreMenuRepository(
         refresh(restaurantId)
     }
 
+    override suspend fun setMenuPublished(
+        restaurantId: String,
+        menuId: String,
+        published: Boolean,
+    ) {
+        if (loadedRestaurantId != restaurantId) runCatching { refresh(restaurantId) }
+        firestore.patchDocument(
+            "${path(restaurantId)}/$menuId",
+            mapOf("published" to published),
+            updateMask = listOf("published"),
+        )
+        // Only one active menu per restaurant: unpublish the others when activating this one.
+        if (published) {
+            _menus.value.filter { it.id != menuId && it.published }.forEach { other ->
+                firestore.patchDocument(
+                    "${path(restaurantId)}/${other.id}",
+                    mapOf("published" to false),
+                    updateMask = listOf("published"),
+                )
+            }
+        }
+        refresh(restaurantId)
+    }
+
     override suspend fun exportMenuToJson(id: String): String {
         val menu = getMenuById(id) ?: throw NoSuchElementException("Menu $id not found")
         return json.encodeToString(Menu.serializer(), menu)
@@ -107,6 +131,8 @@ class FirestoreMenuRepository(
             restaurantLogoUrl = fields["restaurantLogoUrl"] as? String,
             companyLogoUrl = fields["companyLogoUrl"] as? String,
             recipes = recipes,
+            createdAt = createTime,
+            updatedAt = updateTime,
         )
     }
 

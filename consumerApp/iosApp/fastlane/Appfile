@@ -1,0 +1,13 @@
+# Appfile — iOS identifiers for the MenuAdmin consumerApp (KMP mobile module).
+# Per-developer credentials load from consumerApp/iosApp/fastlane/.env (gitignored); in CI the
+# workflow exports them as job-level env vars from GitHub Actions Secrets.
+
+# Bundle identifier — must match Config.xcconfig (PRODUCT_BUNDLE_IDENTIFIER) and App Store Connect.
+app_identifier("com.apptolast.menufrontend")
+
+apple_id(ENV["APPLE_ID"]) unless ENV["APPLE_ID"].to_s.empty?
+
+#   • developer.apple.com -> Membership -> Team ID       -> FASTLANE_TEAM_ID
+#   • App Store Connect -> Users and Access -> Team ID   -> FASTLANE_ITC_TEAM_ID
+team_id(ENV["FASTLANE_TEAM_ID"]) unless ENV["FASTLANE_TEAM_ID"].to_s.empty?
+itc_team_id(ENV["FASTLANE_ITC_TEAM_ID"]) unless ENV["FASTLANE_ITC_TEAM_ID"].to_s.empty?

@@ -1,0 +1,175 @@
+# Fastfile — Android lanes for MenuAdmin (KMP :consumerApp module).
+#
+# Tag-driven release model (mirrors the AppToLast FamilyFilm/Municion setup):
+#   • versionName comes from the Git tag (`v1.2.3` -> `1.2.3`).
+#   • versionCode is `max(existing on all Play tracks) + 1`, queried from Play at runtime — no
+#     state stored in the repo.
+#   • Both are injected into Gradle as `-PappVersionCode=N -PappVersionName=X`, so
+#     consumerApp/build.gradle.kts is never modified by CI.
+#   • Signing reads root keystore.properties (restored from secrets in CI).
+#
+# Lanes (run from `consumerApp/`):
+#   cd consumerApp
+#   bundle exec fastlane android version           # show the local default version
+#   bundle exec fastlane android validate_play     # sanity-check Play credentials
+#   bundle exec fastlane android build             # build a signed AAB locally
+#   bundle exec fastlane android internal          # build + upload to Internal testing as DRAFT
+#   bundle exec fastlane android release_from_tag  # CI-only: tag -> Internal testing as DRAFT
+
+default_platform(:android)
+
+APP_DIR        = File.expand_path("..", __dir__)        # …/MenuAdmin/consumerApp
+ROOT_DIR       = File.expand_path("../..", __dir__)     # …/MenuAdmin (where gradlew lives)
+BUILD_GRADLE   = File.join(APP_DIR, "build.gradle.kts")
+AAB_PATH       = File.join(APP_DIR, "build/outputs/bundle/release/consumerApp-release.aab")
+METADATA_PATH  = File.join(APP_DIR, "fastlane/metadata/android")           # Play listing text/images
+IOS_SHOTS_DIR  = File.join(APP_DIR, "iosApp/fastlane/screenshots")         # reused for Play phone shots
+STORE_LOCALE   = "es-ES"
+
+# Play enforces globally-unique versionCodes across tracks, so we take the max of all of them.
+PLAY_TRACKS = %w[production beta alpha internal].freeze
+
+def default_version_name
+  text = File.read(BUILD_GRADLE)
+  match = text.match(/versionName\s*=.*\?:\s*"([^"]+)"/) || text.match(/versionName\s*=\s*"([^"]+)"/)
+  UI.user_error!("versionName default not found in #{BUILD_GRADLE}") unless match
+  match[1]
+end
+
+def default_version_code
+  text = File.read(BUILD_GRADLE)
+  match = text.match(/versionCode\s*=.*\?:\s*(\d+)/) || text.match(/versionCode\s*=\s*(\d+)/)
+  UI.user_error!("versionCode default not found in #{BUILD_GRADLE}") unless match
+  match[1].to_i
+end
+
+# Next versionCode = highest code seen on any track + 1 (stateless from the repo's perspective).
+def next_version_code_from_play
+  codes = PLAY_TRACKS.flat_map do |track|
+    google_play_track_version_codes(track: track)
+  rescue StandardError => e
+    UI.message "Track '#{track}' returned no codes (#{e.class}); treating as empty."
+    []
+  end
+  (codes.max || 0) + 1
+end
+
+# Extracts the semver from a `v*` Git tag: "v1.2.3" -> "1.2.3".
+def parse_tag(tag)
+  match = tag.to_s.match(/\Av(\d+\.\d+\.\d+(?:[-+][\w.\-]+)?)\z/)
+  UI.user_error!("Tag '#{tag}' is not in form `vMAJOR.MINOR.PATCH[-suffix]`") unless match
+  match[1]
+end
+
+platform :android do
+
+  desc "Print the versionName/versionCode currently declared in build.gradle.kts"
+  lane :version do
+    UI.message "default versionName = #{default_version_name}"
+    UI.message "default versionCode = #{default_version_code}"
+  end
+
+  desc "Sanity-check Play credentials by listing existing versionCodes on each track"
+  lane :validate_play do
+    PLAY_TRACKS.each do |track|
+      codes = google_play_track_version_codes(track: track) rescue []
+      UI.message "Play '#{track}' versionCodes: #{codes.inspect}"
+    end
+  end
+
+  desc "Build a signed release AAB. Pass version_code:N version_name:X to override defaults."
+  lane :build do |options|
+    vcode = options[:version_code] || default_version_code
+    vname = options[:version_name] || default_version_name
+
+    gradle(task: ":consumerApp:clean", project_dir: ROOT_DIR)
+    gradle(
+      task: ":consumerApp:bundleRelease",
+      project_dir: ROOT_DIR,
+      properties: {
+        "appVersionCode" => vcode,
+        "appVersionName" => vname,
+      },
+      flags: "--no-configuration-cache",
+    )
+    UI.success "Built versionCode #{vcode}, versionName #{vname} -> #{AAB_PATH}"
+  end
+
+  desc "Build & upload to Internal testing as DRAFT (manual local run)."
+  lane :internal do |options|
+    vcode = next_version_code_from_play
+    vname = options[:version_name] || "#{default_version_name}-internal-#{vcode}"
+
+    build(version_code: vcode, version_name: vname)
+
+    upload_to_play_store(
+      track: "internal",
+      aab: AAB_PATH,
+      release_status: "draft",
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+    UI.success "Uploaded versionCode #{vcode} to Internal testing as DRAFT."
+  end
+
+  desc "CI-only: read the Git tag (GITHUB_REF_NAME), compute versionCode, build, upload as DRAFT."
+  lane :release_from_tag do
+    tag = ENV["RELEASE_TAG"] || ENV["GITHUB_REF_NAME"]
+    UI.user_error!("RELEASE_TAG/GITHUB_REF_NAME not set — run this from a tag-triggered job") if tag.to_s.empty?
+
+    vname = parse_tag(tag)
+    vcode = next_version_code_from_play
+
+    build(version_code: vcode, version_name: vname)
+
+    upload_to_play_store(
+      track: "internal",
+      aab: AAB_PATH,
+      release_status: "draft",
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+    UI.success "Uploaded v#{vname} (versionCode #{vcode}) to Internal testing as DRAFT."
+  end
+
+  desc "Upload Play Store listing text + phone screenshots (reused from the iOS snapshot run). No AAB; requires the app's first manual upload to exist. Run `ios screenshots` first."
+  lane :upload_store_assets do
+    require "fileutils"
+
+    # Reuse the iOS-generated screenshots as Play phone screenshots.
+    src = File.join(IOS_SHOTS_DIR, STORE_LOCALE)
+    dest = File.join(METADATA_PATH, STORE_LOCALE, "images", "phoneScreenshots")
+    shots = Dir.glob(File.join(src, "*.{png,jpg,jpeg}"), File::FNM_CASEFOLD).sort
+    if shots.empty?
+      UI.important "No iOS screenshots at #{src}; uploading listing text only. Run `cd ../iosApp && bundle exec fastlane ios screenshots` first."
+    else
+      FileUtils.mkdir_p(dest)
+      Dir.glob(File.join(dest, "*")).each { |f| FileUtils.rm_f(f) }
+      shots.each_with_index { |png, i| FileUtils.cp(png, File.join(dest, format("%02d.png", i + 1))) }
+      UI.message "Copied #{shots.length} screenshots to #{dest}"
+    end
+
+    upload_to_play_store(
+      track: "internal",
+      metadata_path: METADATA_PATH,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: shots.empty?,
+      # Changelogs are tied to a release (AAB); they upload with release_from_tag, not here.
+      skip_upload_changelogs: true,
+    )
+    UI.success "Uploaded Play Store listing#{shots.empty? ? " (text only)" : " + screenshots"}."
+  end
+
+  error do |lane, exception|
+    UI.error "Lane `#{lane}` failed: #{exception.message}"
+  end
+end

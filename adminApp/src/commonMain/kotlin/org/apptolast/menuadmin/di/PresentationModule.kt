@@ -1,5 +1,6 @@
 package org.apptolast.menuadmin.di
 
+import org.apptolast.menuadmin.presentation.components.SnackbarController
 import org.apptolast.menuadmin.presentation.screens.auth.AuthViewModel
 import org.apptolast.menuadmin.presentation.screens.backup.BackupViewModel
 import org.apptolast.menuadmin.presentation.screens.cartadigital.CartaDigitalViewModel
@@ -16,14 +17,15 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val presentationModule = module {
+    single { SnackbarController() }
     viewModelOf(::AuthViewModel)
     viewModelOf(::DashboardViewModel)
     viewModelOf(::IngredientsViewModel)
     viewModel { (restaurantId: String) ->
-        RecipesViewModel(get(), get(), restaurantId)
+        RecipesViewModel(get(), get(), get(), restaurantId)
     }
     viewModel { (restaurantId: String) ->
-        MenusViewModel(get(), get(), restaurantId)
+        MenusViewModel(get(), get(), get(), get(), get(), restaurantId)
     }
     viewModel { (restaurantId: String) ->
         CartaDigitalViewModel(get(), get(), restaurantId)

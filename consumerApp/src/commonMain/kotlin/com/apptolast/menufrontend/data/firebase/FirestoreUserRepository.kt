@@ -32,7 +32,6 @@ class FirestoreUserRepository(
         val uid = uid() ?: throw IllegalStateException("Not logged in")
         val profile = mapOf("codes" to allergens.map { it.toApiCode() }, "notes" to "")
         firestore.patchDocument("users/$uid", mapOf("allergenProfile" to profile), updateMask = listOf("allergenProfile"))
-        Unit
     }
 
     override suspend fun getFavoriteRestaurants(): Result<List<Restaurant>> = runCatching {
@@ -48,6 +47,5 @@ class FirestoreUserRepository(
         val favorites = (doc?.fields?.get("favorites") as? List<Any?>).orEmpty().filterIsInstance<String>().toMutableSet()
         if (!favorites.add(restaurantId)) favorites.remove(restaurantId)
         firestore.patchDocument("users/$uid", mapOf("favorites" to favorites.toList()), updateMask = listOf("favorites"))
-        Unit
     }
 }

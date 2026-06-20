@@ -43,12 +43,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.apptolast.menuadmin.domain.model.Restaurant
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.StatCard
 import org.apptolast.menuadmin.presentation.theme.Amber500
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
-import org.apptolast.menuadmin.presentation.theme.Red500
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -62,6 +62,8 @@ fun RestaurantOverviewContent(
     onAddressChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onDismissMessage: () -> Unit,
+    onOpenRecipes: () -> Unit = {},
+    onOpenMenus: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val restaurant = uiState.restaurant
@@ -87,10 +89,10 @@ fun RestaurantOverviewContent(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
+
         // Messages
-        uiState.error?.let { error ->
-            Text(text = error, color = Red500, fontSize = 13.sp)
-        }
         uiState.successMessage?.let { msg ->
             Text(text = msg, color = MenuAdminTheme.colors.success, fontSize = 13.sp)
         }
@@ -106,6 +108,7 @@ fun RestaurantOverviewContent(
                 value = uiState.recipesCount.toString(),
                 icon = Icons.Outlined.Fastfood,
                 iconTint = Green500,
+                onClick = onOpenRecipes,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
@@ -113,6 +116,7 @@ fun RestaurantOverviewContent(
                 value = uiState.menusCount.toString(),
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
                 iconTint = Amber500,
+                onClick = onOpenMenus,
                 modifier = Modifier.weight(1f),
             )
             StatCard(

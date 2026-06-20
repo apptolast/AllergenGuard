@@ -93,7 +93,7 @@ fun AllergenBadge(
 }
 
 /** Rounded dashed outline, used to mark "may contain" (traces) allergens. */
-private fun Modifier.dashedBorder(
+internal fun Modifier.dashedBorder(
     color: Color,
     cornerRadius: Dp,
 ): Modifier =

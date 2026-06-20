@@ -9,8 +9,13 @@
     <string name="login_button">Sign In</string>
     <string name="login_divider">or</string>
     <string name="login_google_button">Continue with Google</string>
-    <string name="login_register_prompt">Don\'t have an account?</string>
+    <string name="login_apple_button">Continue with Apple</string>
+    <string name="login_register_prompt">Don't have an account?</string>
     <string name="login_register_link">Sign Up</string>
+    <string name="login_name_label">Name</string>
+    <string name="register_button">Create account</string>
+    <string name="login_have_account_prompt">Already have an account?</string>
+    <string name="login_signin_link">Sign in</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_explore">Explore</string>
@@ -27,7 +32,18 @@
     <!-- Menu -->
     <string name="menu_interactive_menu">Interactive Menu</string>
     <string name="menu_select_allergies">Select your allergies</string>
+    <string name="menu_show_more">Show more</string>
+    <string name="menu_show_less">Show less</string>
+    <string name="menu_restore_filters">My allergies</string>
     <string name="menu_safe_dishes">Safe Dishes</string>
+    <string name="menu_no_menu">This restaurant has no menu available yet</string>
+    <string name="menu_sort">Sort</string>
+    <string name="menu_sort_name">Name</string>
+    <string name="menu_sort_price">Price</string>
+    <string name="menu_sort_category">Category</string>
+    <string name="menu_category_other">Other</string>
+    <string name="menu_favorite">Favorite</string>
+    <string name="menu_toggle_unsafe">Show/hide unsafe dishes</string>
     <string name="menu_dishes_count">%d dishes</string>
     <string name="menu_contains">Contains:</string>
 
@@ -42,6 +58,9 @@
     <!-- Profile -->
     <string name="profile_my_allergies">My Allergies</string>
     <string name="profile_edit">Edit</string>
+    <string name="profile_edit_allergies_title">Edit allergies</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_no_allergies">No allergies set</string>
     <string name="profile_allergies_description">These allergies will be automatically applied when viewing any menu</string>
     <string name="profile_settings">Settings</string>
     <string name="profile_notifications">Notifications</string>
@@ -50,6 +69,13 @@
     <string name="profile_favorite_restaurants">Favorite restaurants</string>
     <string name="profile_help">Help and support</string>
     <string name="profile_logout">Sign out</string>
+    <string name="profile_logout_confirm_title">Sign out?</string>
+    <string name="profile_logout_confirm_message">You'll need to sign in again to access your profile.</string>
+    <string name="profile_delete_account">Delete account</string>
+    <string name="profile_delete_confirm_title">Delete your account?</string>
+    <string name="profile_delete_confirm_message">This action is permanent. Your account and data will be deleted and cannot be recovered.</string>
+    <string name="profile_delete_confirm_button">Delete</string>
+    <string name="action_cancel">Cancel</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>
@@ -69,7 +95,7 @@
 
     <!-- Scanner -->
     <string name="scanner_title">Scan QR</string>
-    <string name="scanner_hint">Point at the restaurant\'s QR code to see their menu</string>
+    <string name="scanner_hint">Point at the restaurant's QR code to see their menu</string>
     <string name="scanner_invalid_qr">Invalid QR code. Try again.</string>
     <string name="scanner_retry">Retry</string>
     <string name="scanner_demo_button">Demo: Scan restaurant</string>
@@ -84,4 +110,18 @@
     <string name="retry">Retry</string>
     <string name="back">Back</string>
     <string name="currency_format">€%s</string>
+
+    <!-- Disclaimers -->
+    <string name="dish_disclaimer">Allergen information is provided by the restaurant.\nConfirm it with the staff before ordering.</string>
+    <string name="profile_allergies_sheet_disclaimer">This information is a guide only.\nAlways confirm with the restaurant before ordering.</string>
+    <string name="profile_allergen_disclaimer">About allergens</string>
+    <string name="disclaimer_full_title">About allergen information</string>
+    <string name="disclaimer_full_body">Allergen Guard shows the allergen information each restaurant publishes about its dishes. This information may contain errors, be incomplete or be out of date.\n\nThe app is a guide and does not replace confirming directly with the restaurant. Before ordering, especially in case of severe allergies, always confirm with the staff that the dish is safe for you.\n\nAllergen Guard and AppToLast are not responsible for the accuracy of the information provided by restaurants or for decisions made based on it.</string>
+    <string name="disclaimer_understood">Got it</string>
+
+    <!-- Share -->
+    <string name="profile_share_app">Share app</string>
+    <string name="menu_share">Share restaurant</string>
+    <string name="share_app_message">Discover Allergen Guard, the app for eating out without your allergens: %1$s</string>
+    <string name="share_restaurant_message">Check out %1$s's menu on Allergen Guard, filtered by your allergies: %2$s</string>
 </resources>

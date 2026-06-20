@@ -1,0 +1,25 @@
+# local.properties.example
+#
+# Copy to local.properties (gitignored) and fill in. Feeds BuildKonfig (:shared) + BuildConfig
+# (:consumerApp) at build time, plus Android release signing. In CI these are rendered from secrets.
+
+# Android SDK location (Android Studio sets this automatically).
+sdk.dir=/Users/you/Library/Android/sdk
+
+# --- Firebase REST config (BuildKonfig in :shared) ---
+# api_key.current_key from google-services.json (embedded in the app, not a CI-only secret).
+FIREBASE_API_KEY=AIza...
+FIREBASE_PROJECT_ID=menusmati
+# Feature flag: true = Firebase/Firestore REST data layer, false = legacy VPS backend.
+USE_FIRESTORE=true
+
+# --- Google Sign-In (Android) ---
+# Web OAuth client (client_type 3) from google-services.json; used as Credential Manager serverClientId.
+GOOGLE_WEB_CLIENT_ID=151008360567-63uvts5qa5i41mhlb999uf8h7ab57tna.apps.googleusercontent.com
+
+# --- Android release signing (read by consumerApp/build.gradle.kts) ---
+# Leave these blank/absent to build release UNSIGNED (assembleRelease still works without secrets).
+storeFile=/absolute/path/to/menufrontend-release.jks
+storePassword=...
+keyAlias=menufrontend
+keyPassword=...

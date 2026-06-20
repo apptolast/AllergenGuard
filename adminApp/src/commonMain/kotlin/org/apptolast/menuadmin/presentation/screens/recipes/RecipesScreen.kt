@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +39,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,15 +51,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import org.apptolast.menuadmin.domain.model.AllergenType
+import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.AllergenSummaryCard
+import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.SearchBar
 import org.apptolast.menuadmin.presentation.screens.recipes.components.RecipeCard
 import org.apptolast.menuadmin.presentation.theme.Blue500
@@ -76,6 +83,8 @@ fun RecipesScreen(viewModel: RecipesViewModel) {
         onFormDescriptionChange = viewModel::onFormDescriptionChange,
         onFormCategoryChange = viewModel::onFormCategoryChange,
         onFormPriceChange = viewModel::onFormPriceChange,
+        onPickImage = viewModel::onPickImage,
+        onRemoveImage = viewModel::onRemoveImage,
         onAddIngredientToForm = viewModel::onAddIngredientToForm,
         onRemoveIngredientFromForm = viewModel::onRemoveIngredientFromForm,
         onSaveRecipe = viewModel::onSaveRecipe,
@@ -95,6 +104,8 @@ fun RecipesContent(
     onFormDescriptionChange: (String) -> Unit,
     onFormCategoryChange: (String) -> Unit,
     onFormPriceChange: (String) -> Unit,
+    onPickImage: () -> Unit,
+    onRemoveImage: () -> Unit,
     onAddIngredientToForm: (RecipeIngredient) -> Unit,
     onRemoveIngredientFromForm: (String) -> Unit,
     onSaveRecipe: () -> Unit,
@@ -230,6 +241,8 @@ fun RecipesContent(
                 onFormDescriptionChange = onFormDescriptionChange,
                 onFormCategoryChange = onFormCategoryChange,
                 onFormPriceChange = onFormPriceChange,
+                onPickImage = onPickImage,
+                onRemoveImage = onRemoveImage,
                 onAddIngredientToForm = onAddIngredientToForm,
                 onRemoveIngredientFromForm = onRemoveIngredientFromForm,
             )
@@ -275,13 +288,101 @@ fun RecipesContent(
             }
         }
 
-        // Error display
-        uiState.error?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-            )
+        // Errors surface through the app-wide snackbar instead of inline red text.
+        ErrorSnackbarEffect(uiState.error)
+    }
+}
+
+@Composable
+private fun DishImagePanel(
+    imageUrl: String?,
+    isUploading: Boolean,
+    onPickImage: () -> Unit,
+    onRemoveImage: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "Imagen del Plato",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        // Preview area
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                isUploading -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        Text(
+                            text = "Comprimiendo y subiendo...",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                imageUrl != null -> {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = "Imagen del plato",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                    )
+                }
+
+                else -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Image,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(40.dp),
+                        )
+                        Text(
+                            text = "Sin imagen",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+
+        // Actions
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = onPickImage,
+                enabled = !isUploading,
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Image,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(if (imageUrl != null) "Cambiar imagen" else "Subir imagen")
+            }
+            if (imageUrl != null && !isUploading) {
+                TextButton(onClick = onRemoveImage) {
+                    Text("Quitar", color = Red500)
+                }
+            }
         }
     }
 }
@@ -294,6 +395,8 @@ private fun RecipeEditorForm(
     onFormDescriptionChange: (String) -> Unit,
     onFormCategoryChange: (String) -> Unit,
     onFormPriceChange: (String) -> Unit,
+    onPickImage: () -> Unit,
+    onRemoveImage: () -> Unit,
     onAddIngredientToForm: (RecipeIngredient) -> Unit,
     onRemoveIngredientFromForm: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -301,13 +404,24 @@ private fun RecipeEditorForm(
     var ingredientSearchQuery by remember { mutableStateOf("") }
     var categoryFieldFocused by remember { mutableStateOf(false) }
 
-    // Compute aggregate allergens from form ingredients
-    val aggregateAllergens = remember(uiState.formIngredients, uiState.allIngredients) {
-        val ingredientMap = uiState.allIngredients.associateBy { it.id }
-        uiState.formIngredients.flatMap { ri ->
-            ingredientMap[ri.ingredientId]?.allergenTypes.orEmpty()
-        }.toSet()
-    }
+    // Aggregate allergens from form ingredients, keeping the strongest containment level per allergen
+    // (CONTAINS beats MAY_CONTAIN; FREE_OF ignored) so the summary can mark traces distinctly.
+    val aggregateAllergens: Map<AllergenType, ContainmentLevel> =
+        remember(uiState.formIngredients, uiState.allIngredients) {
+            val ingredientMap = uiState.allIngredients.associateBy { it.id }
+            val strongest = mutableMapOf<AllergenType, ContainmentLevel>()
+            uiState.formIngredients.forEach { ri ->
+                ingredientMap[ri.ingredientId]?.allergens.orEmpty().forEach { ia ->
+                    if (ia.containmentLevel == ContainmentLevel.FREE_OF) return@forEach
+                    val type = AllergenType.fromApiCode(ia.allergenCode) ?: return@forEach
+                    val current = strongest[type]
+                    if (current == null || ia.containmentLevel.ordinal < current.ordinal) {
+                        strongest[type] = ia.containmentLevel
+                    }
+                }
+            }
+            strongest
+        }
 
     Column(
         modifier = modifier
@@ -340,13 +454,14 @@ private fun RecipeEditorForm(
                     ),
                 )
 
-                // Description
+                // Description (customer-facing; shown in the mobile app dish detail)
                 OutlinedTextField(
                     value = uiState.formDescription,
                     onValueChange = onFormDescriptionChange,
-                    label = { Text("Identificador Interno (Opcional)") },
-                    placeholder = { Text("Ej. Cliente: Hotel Palace") },
-                    singleLine = true,
+                    label = { Text("Descripcion") },
+                    placeholder = { Text("Ej. Crujientes croquetas caseras de jamon iberico") },
+                    minLines = 2,
+                    maxLines = 4,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -517,7 +632,8 @@ private fun RecipeEditorForm(
                             val ingredientAllergens =
                                 uiState.allIngredients
                                     .find { it.id == ri.ingredientId }
-                                    ?.allergenTypes.orEmpty()
+                                    ?.allergens.orEmpty()
+                                    .filter { it.containmentLevel != ContainmentLevel.FREE_OF }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -538,11 +654,15 @@ private fun RecipeEditorForm(
                                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                                             verticalArrangement = Arrangement.spacedBy(6.dp),
                                         ) {
-                                            ingredientAllergens.forEach { allergen ->
-                                                AllergenBadge(
-                                                    allergenType = allergen,
-                                                    isActive = true,
-                                                )
+                                            ingredientAllergens.forEach { ia ->
+                                                val type = AllergenType.fromApiCode(ia.allergenCode)
+                                                if (type != null) {
+                                                    AllergenBadge(
+                                                        allergenType = type,
+                                                        isActive = true,
+                                                        containmentLevel = ia.containmentLevel,
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -581,13 +701,20 @@ private fun RecipeEditorForm(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     AllergenType.entries.forEach { allergen ->
-                        val isPresent = allergen in aggregateAllergens
                         AllergenSummaryCard(
                             allergenType = allergen,
-                            isPresent = isPresent,
+                            containmentLevel = aggregateAllergens[allergen],
                         )
                     }
                 }
+
+                // Dish image: preview + management (compressed client-side, stored in Firebase Storage)
+                DishImagePanel(
+                    imageUrl = uiState.formImageUrl,
+                    isUploading = uiState.isUploadingImage,
+                    onPickImage = onPickImage,
+                    onRemoveImage = onRemoveImage,
+                )
             }
         }
     }
@@ -621,6 +748,8 @@ private fun RecipesContentPreview() {
             onFormDescriptionChange = {},
             onFormCategoryChange = {},
             onFormPriceChange = {},
+            onPickImage = {},
+            onRemoveImage = {},
             onAddIngredientToForm = {},
             onRemoveIngredientFromForm = {},
             onSaveRecipe = {},

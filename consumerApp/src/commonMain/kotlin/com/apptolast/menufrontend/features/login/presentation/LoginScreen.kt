@@ -1,9 +1,8 @@
 package com.apptolast.menufrontend.features.login.presentation
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -37,30 +36,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apptolast.menufrontend.features.login.data.LoginAction
 import com.apptolast.menufrontend.features.login.data.LoginState
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.app_name
+import com.apptolast.menufrontend.resources.ic_google
+import com.apptolast.menufrontend.resources.login_apple_button
 import com.apptolast.menufrontend.resources.login_button
 import com.apptolast.menufrontend.resources.login_divider
 import com.apptolast.menufrontend.resources.login_email_label
 import com.apptolast.menufrontend.resources.login_email_placeholder
 import com.apptolast.menufrontend.resources.login_forgot_password
 import com.apptolast.menufrontend.resources.login_google_button
+import com.apptolast.menufrontend.resources.login_have_account_prompt
+import com.apptolast.menufrontend.resources.login_name_label
 import com.apptolast.menufrontend.resources.login_password_label
 import com.apptolast.menufrontend.resources.login_register_link
 import com.apptolast.menufrontend.resources.login_register_prompt
-import com.apptolast.menufrontend.resources.login_subtitle
+import com.apptolast.menufrontend.resources.login_signin_link
+import com.apptolast.menufrontend.resources.logo_app
+import com.apptolast.menufrontend.resources.register_button
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreenRoot(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -69,7 +73,6 @@ fun LoginScreenRoot(
         viewModel.effect.collect { effect ->
             when (effect) {
                 LoginEffect.NavigateToHome -> onLoginSuccess()
-                LoginEffect.NavigateToRegister -> onNavigateToRegister()
             }
         }
     }
@@ -93,27 +96,14 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(28.dp))
 
         // Logo
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(16.dp),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Shield,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
+        Image(
+            painter = painterResource(Res.drawable.logo_app),
+            contentDescription = null,
+            modifier = Modifier.size(280.dp),
+        )
 
         // Title
         Text(
@@ -123,16 +113,20 @@ fun LoginScreen(
             color = MaterialTheme.colorScheme.onBackground,
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        // Subtitle
-        Text(
-            text = stringResource(Res.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
         Spacer(Modifier.height(40.dp))
+
+        // Name field (sign-up only)
+        if (state.isRegisterMode) {
+            OutlinedTextField(
+                value = state.name,
+                onValueChange = { onAction(LoginAction.NameChanged(it)) },
+                label = { Text(stringResource(Res.string.login_name_label)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+            )
+            Spacer(Modifier.height(16.dp))
+        }
 
         // Email field
         OutlinedTextField(
@@ -174,17 +168,17 @@ fun LoginScreen(
             shape = RoundedCornerShape(10.dp),
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        // Forgot password
-        Text(
-            text = stringResource(Res.string.login_forgot_password),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .align(Alignment.End)
-                .clickable { onAction(LoginAction.ForgotPasswordClicked) },
-        )
+        // Forgot password (login only)
+        if (!state.isRegisterMode) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.login_forgot_password),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clickable { onAction(LoginAction.ForgotPasswordClicked) },
+            )
+        }
 
         Spacer(Modifier.height(24.dp))
 
@@ -199,10 +193,17 @@ fun LoginScreen(
             Spacer(Modifier.height(8.dp))
         }
 
-        // Login button
+        // Primary button: logs in, or creates the account in sign-up mode.
         Button(
-            onClick = { onAction(LoginAction.LoginClicked) },
-            enabled = !state.isLoading && state.email.isNotBlank() && state.password.isNotBlank(),
+            onClick = {
+                onAction(
+                    if (state.isRegisterMode) LoginAction.RegisterClicked else LoginAction.LoginClicked,
+                )
+            },
+            enabled = !state.isLoading &&
+                state.email.isNotBlank() &&
+                state.password.isNotBlank() &&
+                (!state.isRegisterMode || state.name.isNotBlank()),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -218,64 +219,113 @@ fun LoginScreen(
                 )
             } else {
                 Text(
-                    text = stringResource(Res.string.login_button),
+                    text = stringResource(
+                        if (state.isRegisterMode) Res.string.register_button else Res.string.login_button,
+                    ),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        // Social sign-in: Google on Android, Apple on iOS. The provider that isn't available on the
+        // current platform is hidden, so the divider only shows when there is at least one button.
+        if (state.isGoogleAvailable || state.isAppleAvailable) {
+            Spacer(Modifier.height(24.dp))
 
-        // Divider
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            HorizontalDivider(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(Res.string.login_divider),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            HorizontalDivider(modifier = Modifier.weight(1f))
+            // Divider
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(Res.string.login_divider),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.height(24.dp))
         }
 
-        Spacer(Modifier.height(24.dp))
+        // Google sign in (Android)
+        if (state.isGoogleAvailable) {
+            OutlinedButton(
+                onClick = { onAction(LoginAction.GoogleSignInClicked) },
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_google),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = stringResource(Res.string.login_google_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
 
-        // Google sign in
-        OutlinedButton(
-            onClick = { onAction(LoginAction.GoogleSignInClicked) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(10.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.login_google_button),
-                style = MaterialTheme.typography.labelLarge,
-            )
+        // Sign in with Apple (iOS)
+        if (state.isAppleAvailable) {
+            if (state.isGoogleAvailable) Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = { onAction(LoginAction.AppleSignInClicked) },
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = MaterialTheme.colorScheme.surface,
+                ),
+            ) {
+                Text(
+                    text = stringResource(Res.string.login_apple_button),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
 
         Spacer(Modifier.height(32.dp))
 
-        // Register link
+        // Toggle between login and sign-up.
         Row(
             horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = stringResource(Res.string.login_register_prompt) + " ",
+                text = stringResource(
+                    if (state.isRegisterMode) {
+                        Res.string.login_have_account_prompt
+                    } else {
+                        Res.string.login_register_prompt
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = stringResource(Res.string.login_register_link),
+                text = stringResource(
+                    if (state.isRegisterMode) Res.string.login_signin_link else Res.string.login_register_link,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onAction(LoginAction.RegisterClicked) },
+                // clickable before padding → the 8dp padding is part of the tap target.
+                modifier = Modifier
+                    .clickable { onAction(LoginAction.ToggleAuthMode) }
+                    .padding(8.dp),
             )
         }
 

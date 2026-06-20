@@ -19,6 +19,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.time.Instant
 
 class FirestoreException(
     val statusCode: Int,
@@ -28,6 +29,10 @@ class FirestoreException(
 data class FirestoreDocument(
     val id: String,
     val fields: Map<String, Any?>,
+    // Server-managed timestamps returned by Firestore REST (RFC-3339). Used as the source of truth
+    // for "created/updated" since the app does not store its own timestamp fields.
+    val createTime: Instant? = null,
+    val updateTime: Instant? = null,
 )
 
 /**
@@ -94,6 +99,15 @@ class FirestoreClient(
     private fun parseDoc(obj: JsonObject): FirestoreDocument {
         val name = obj["name"]?.jsonPrimitive?.content ?: ""
         val fields = obj["fields"]?.jsonObject ?: JsonObject(emptyMap())
-        return FirestoreDocument(id = name.substringAfterLast('/'), fields = FirestoreCodec.decodeFields(fields))
+        return FirestoreDocument(
+            id = name.substringAfterLast('/'),
+            fields = FirestoreCodec.decodeFields(fields),
+            createTime = obj["createTime"]?.jsonPrimitive?.contentOrNull?.let {
+                runCatching { Instant.parse(it) }.getOrNull()
+            },
+            updateTime = obj["updateTime"]?.jsonPrimitive?.contentOrNull?.let {
+                runCatching { Instant.parse(it) }.getOrNull()
+            },
+        )
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,12 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.apptolast.menufrontend.core.theme.AllergenActiveBg
-import com.apptolast.menufrontend.core.theme.AllergenActiveText
-import com.apptolast.menufrontend.core.theme.SafeGreenBorder
-import com.apptolast.menufrontend.core.theme.SafeGreenLight
+import coil3.compose.AsyncImage
+import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
+import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
 import com.apptolast.menufrontend.domain.model.Dish
 import com.apptolast.menufrontend.features.components.icon
@@ -41,63 +43,78 @@ fun DishCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.extendedColors
     val isSafe = dish.allergens.none { it in userAllergens }
+    val titleColor = if (isSafe) colors.onSafeContainer else MaterialTheme.colorScheme.onSurface
+    val secondaryColor =
+        if (isSafe) colors.onSafeContainer.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .then(
-                if (isSafe) {
-                    Modifier.border(1.dp, SafeGreenBorder, RoundedCornerShape(12.dp))
-                } else {
-                    Modifier
-                },
+            .border(
+                width = 1.dp,
+                color = if (isSafe) colors.safeBorder else colors.onDangerContainer.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(12.dp),
             )
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSafe) SafeGreenLight else MaterialTheme.colorScheme.surface,
+            // Dishes the user can't eat get a soft red background; safe ones stay green.
+            containerColor = if (isSafe) colors.safeContainer else colors.dangerContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = dish.name.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+        Column {
+            dish.imageUrl?.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = dish.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                )
+            }
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = dish.name.uppercase(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor,
+                )
 
-            Text(
-                text = dish.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+                Text(
+                    text = dish.description,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = secondaryColor,
+                )
 
-            if (dish.allergens.isNotEmpty()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.menu_contains),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    FlowRow(
+                if (dish.allergens.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        dish.allergens.forEach { allergen ->
-                            val isDangerous = allergen in userAllergens
-                            AllergenBadge(
-                                allergen = allergen,
-                                label = allergenLabels[allergen] ?: allergen.name,
-                                isDangerous = isDangerous,
-                            )
+                        Text(
+                            text = stringResource(Res.string.menu_contains),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = secondaryColor,
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            dish.allergens.forEach { allergen ->
+                                val isDangerous = allergen in userAllergens
+                                AllergenBadge(
+                                    allergen = allergen,
+                                    label = allergenLabels[allergen] ?: allergen.name,
+                                    isDangerous = isDangerous,
+                                )
+                            }
                         }
                     }
                 }
@@ -112,11 +129,13 @@ private fun AllergenBadge(
     label: String,
     isDangerous: Boolean,
 ) {
+    val colors = MaterialTheme.extendedColors
+    val containerColor = if (isDangerous) colors.dangerContainer else MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = if (isDangerous) colors.onDangerContainer else MaterialTheme.colorScheme.onSurfaceVariant
+
     Card(
         shape = RoundedCornerShape(6.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isDangerous) AllergenActiveBg else MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -127,12 +146,53 @@ private fun AllergenBadge(
                 imageVector = allergen.icon(),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp),
-                tint = if (isDangerous) AllergenActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = contentColor,
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isDangerous) AllergenActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelMedium,
+                color = contentColor,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewDishCard() {
+    val labels = Allergen.entries.associateWith { it.name }
+    AllergenGuardTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            DishCard(
+                dish = Dish(
+                    id = "1",
+                    restaurantId = "r1",
+                    name = "Ensalada de quinoa",
+                    description = "Quinoa, aguacate y vinagreta cítrica",
+                    price = 9.5,
+                    ingredients = listOf("Quinoa", "Aguacate"),
+                    allergens = setOf(Allergen.SULFITES),
+                ),
+                userAllergens = setOf(Allergen.GLUTEN, Allergen.DAIRY),
+                allergenLabels = labels,
+                onClick = {},
+            )
+            DishCard(
+                dish = Dish(
+                    id = "2",
+                    restaurantId = "r1",
+                    name = "Lasaña boloñesa",
+                    description = "Pasta al horno con bechamel",
+                    price = 12.0,
+                    ingredients = listOf("Pasta", "Carne", "Leche"),
+                    allergens = setOf(Allergen.GLUTEN, Allergen.DAIRY),
+                ),
+                userAllergens = setOf(Allergen.GLUTEN, Allergen.DAIRY),
+                allergenLabels = labels,
+                onClick = {},
             )
         }
     }

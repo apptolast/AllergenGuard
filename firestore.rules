@@ -1,44 +1,55 @@
 rules_version = '2';
 
-// Modelo: alérgenos + ingredientes GLOBALES (catálogo de empresa); restaurantes con
-// subcolecciones recipes/menus/reviews; users privados. Auth con custom claims (role, accountId).
+// Modelo: alérgenos + ingredientes GLOBALES (catálogo de empresa); restaurantes con subcolecciones
+// recipes/menus/reviews; users privados. La ESCRITURA de admin se autoriza por WHITELIST de correos
+// (colección `whitelist`, gestionada solo desde la consola/Admin SDK), no por self-registration.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function isSignedIn() { return request.auth != null; }
-    function isAdmin() { return isSignedIn() && request.auth.token.role == 'ADMIN'; }
-    function accountOf(rid) {
-      return get(/databases/$(database)/documents/restaurants/$(rid)).data.accountId;
+
+    // Admin autorizado = sesión iniciada cuyo email está en la whitelist.
+    function isWhitelisted() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && exists(/databases/$(database)/documents/whitelist/$(request.auth.token.email));
     }
 
-    // Catálogo legal de alérgenos (14 fijos): lectura pública; escritura solo admin.
+    // Whitelist de registro de admins. Lectura GET por email exacto (el formulario de registro puede
+    // comprobar un correo concreto, pero NO listar todos → no expone la lista). Escritura solo desde
+    // la consola de Firebase / Admin SDK (nunca desde el cliente).
+    match /whitelist/{email} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
+    // Catálogo legal de alérgenos (14 fijos): lectura pública; escritura solo admin whitelisted.
     match /allergens/{code} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isWhitelisted();
     }
 
-    // Catálogo global de ingredientes (empresa): lectura pública; escritura solo admin.
+    // Catálogo global de ingredientes (empresa): lectura pública; escritura solo admin whitelisted.
     match /ingredients/{ingredientId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isWhitelisted();
     }
 
     // Restaurantes + subárbol.
     match /restaurants/{restaurantId} {
       allow read: if true;
-      allow create: if isAdmin() && request.auth.token.accountId == request.resource.data.accountId;
-      allow update, delete: if isAdmin() && request.auth.token.accountId == resource.data.accountId;
+      allow write: if isWhitelisted();
 
-      // Recetas (= platos del cliente): lectura pública; escritura admin del account dueño.
+      // Recetas (= platos del cliente): lectura pública; escritura admin whitelisted.
       match /recipes/{recipeId} {
         allow read: if true;
-        allow write: if isAdmin() && request.auth.token.accountId == accountOf(restaurantId);
+        allow write: if isWhitelisted();
       }
 
-      // Menús: lectura pública; escritura admin del account dueño.
+      // Menús: lectura pública; escritura admin whitelisted.
       match /menus/{menuId} {
         allow read: if true;
-        allow write: if isAdmin() && request.auth.token.accountId == accountOf(restaurantId);
+        allow write: if isWhitelisted();
       }
 
       // Reseñas (post-MVP): lectura pública; escribe/edita el consumidor dueño.

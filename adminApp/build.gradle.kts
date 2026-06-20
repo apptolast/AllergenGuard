@@ -1,3 +1,4 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 // Admin app: WEB ONLY (wasmJs/js). Android & iOS targets live in :shared and will be consumed by
@@ -7,8 +8,12 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.buildkonfig)
     alias(libs.plugins.ktlint)
 }
+
+// Single source of truth for the admin platform version (exposed to code via BuildKonfig.APP_VERSION).
+version = "1.3.0"
 
 kotlin {
     compilerOptions {
@@ -56,6 +61,8 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -73,5 +80,12 @@ ktlint {
     // Gradle Project (keeps the configuration cache happy).
     filter {
         exclude { entry -> entry.file.path.contains("/generated/") }
+    }
+}
+
+buildkonfig {
+    packageName = "org.apptolast.menuadmin.config"
+    defaultConfigs {
+        buildConfigField(STRING, "APP_VERSION", project.version.toString())
     }
 }

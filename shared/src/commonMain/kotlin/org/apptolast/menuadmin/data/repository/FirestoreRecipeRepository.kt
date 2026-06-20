@@ -13,6 +13,7 @@ import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -121,12 +122,15 @@ class FirestoreRecipeRepository(
             name = fields["name"] as? String ?: "",
             description = fields["description"] as? String ?: "",
             category = fields["section"] as? String ?: "",
+            imageUrl = fields["imageUrl"] as? String,
             price = (fields["price"] as? Double) ?: (fields["price"] as? Long)?.toDouble() ?: 0.0,
             isActive = fields["active"] as? Boolean ?: true,
             ingredients = ingredients,
             computedAllergens = allergens,
             ingredientCount = ingredients.size,
             allergenCount = allergens.size,
+            createdAt = createTime ?: Instant.DISTANT_PAST,
+            updatedAt = updateTime ?: Instant.DISTANT_PAST,
         )
     }
 
@@ -135,6 +139,7 @@ class FirestoreRecipeRepository(
             "name" to name,
             "description" to description,
             "section" to category,
+            "imageUrl" to imageUrl,
             "price" to (if (price > 0) price else null),
             "active" to isActive,
             "ingredients" to ingredients.map { ri ->

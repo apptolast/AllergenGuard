@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 // Consumer app (ex apptolast/Menus-Front): MOBILE (Android + iOS). Reuses :shared (data + domain).
 plugins {
@@ -10,6 +11,14 @@ plugins {
     // Firebase Analytics + Crashlytics on Android (auto-initialised from google-services.json).
     alias(libs.plugins.googleServices)
     alias(libs.plugins.firebaseCrashlytics)
+}
+
+// local.properties → GOOGLE_WEB_CLIENT_ID for Google Sign-In (web OAuth client, client_type 3).
+val localProperties: Properties by lazy {
+    Properties().apply {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
 }
 
 kotlin {
@@ -38,6 +47,10 @@ kotlin {
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
+            // Google Sign-In via Credential Manager.
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.services.auth)
+            implementation(libs.googleid)
         }
         commonMain.dependencies {
             implementation(projects.shared)
@@ -82,12 +95,36 @@ android {
     namespace = "com.apptolast.menufrontend"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.apptolast.menufrontend"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // Tag-driven release: fastlane injects -PappVersionCode / -PappVersionName; defaults for dev.
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 2
+        versionName = (project.findProperty("appVersionName") as String?) ?: "0.1.1"
+
+        // Web OAuth client id (client_type 3) used as Credential Manager serverClientId. Empty when
+        // not set → AndroidSocialAuthClient reports Google unavailable and hides the button.
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", "")}\"",
+        )
+    }
+    signingConfigs {
+        create("release") {
+            val storeFilePath = localProperties.getProperty("storeFile")
+            if (!storeFilePath.isNullOrBlank() && file(storeFilePath).exists()) {
+                storeFile = file(storeFilePath)
+                storePassword = localProperties.getProperty("storePassword")
+                keyAlias = localProperties.getProperty("keyAlias")
+                keyPassword = localProperties.getProperty("keyPassword")
+            }
+        }
     }
     packaging {
         resources {
@@ -97,6 +134,10 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            // Only sign when a keystore is configured; otherwise leave the build unsigned.
+            if (signingConfigs.getByName("release").storeFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {

@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.apptolast.menuadmin.domain.repository.AuthRepository
+import org.apptolast.menuadmin.domain.repository.WhitelistRepository
 
 class AuthViewModel(
     private val authRepository: AuthRepository,
+    private val whitelistRepository: WhitelistRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState(isAuthenticated = authRepository.isLoggedIn))
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -40,7 +42,7 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                authRepository.login(state.email.trim(), state.password)
+                authRepository.login(state.email.trim().lowercase(), state.password)
                 _uiState.update { it.copy(isLoading = false, isAuthenticated = true) }
             } catch (e: Exception) {
                 _uiState.update {
@@ -63,11 +65,24 @@ class AuthViewModel(
             _uiState.update { it.copy(error = "La contraseña debe tener al menos 8 caracteres") }
             return
         }
+        val email = state.email.trim().lowercase()
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
+                // Whitelist gate: only emails pre-authorised by an admin can register. This is a UX
+                // gate; the actual enforcement lives in the Firestore security rules.
+                if (!whitelistRepository.isWhitelisted(email)) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Este correo no está autorizado para registrarse. " +
+                                "Contacta con el administrador para que te dé de alta.",
+                        )
+                    }
+                    return@launch
+                }
                 authRepository.registerAdmin(
-                    state.email.trim(),
+                    email,
                     state.password,
                     state.name.trim().ifEmpty { null },
                 )

@@ -1,13 +1,13 @@
 package org.apptolast.menuadmin.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,18 +18,19 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.logo_android
+import org.apptolast.menuadmin.AppInfo
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
 import org.apptolast.menuadmin.navigation.IngredientsRoute
@@ -44,10 +48,10 @@ import org.apptolast.menuadmin.navigation.ProfileRoute
 import org.apptolast.menuadmin.navigation.RestaurantDetailRoute
 import org.apptolast.menuadmin.navigation.RestaurantsRoute
 import org.apptolast.menuadmin.navigation.SettingsRoute
-import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.SidebarDark
 import org.apptolast.menuadmin.presentation.theme.SidebarDarkSurface
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun Sidebar(
@@ -68,22 +72,24 @@ fun Sidebar(
             .verticalScroll(rememberScrollState()),
     ) {
         // Logo area
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        Box(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentAlignment = Alignment.CenterStart,
             modifier = Modifier.padding(horizontal = 12.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.Restaurant,
-                contentDescription = "AllergenGuard",
-                tint = Blue500,
-                modifier = Modifier.size(28.dp),
+                painter = painterResource(Res.drawable.logo_android),
+                contentDescription = "Allergen Guard",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(160.dp).offset(x = (-40).dp),
             )
             Text(
-                text = "AllergenGuard",
+                text = "Allergen\nGuard",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.offset(x = (90).dp)
             )
 //            Box(
 //                modifier = Modifier
@@ -165,6 +171,16 @@ fun Sidebar(
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = "Versión ${AppInfo.VERSION}",
+            color = MenuAdminTheme.colors.textMuted,
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+        )
 
         HorizontalDivider(color = SidebarDarkSurface)
 
