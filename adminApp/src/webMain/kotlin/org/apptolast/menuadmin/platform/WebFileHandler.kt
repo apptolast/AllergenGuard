@@ -24,17 +24,14 @@ class WebFileHandler : FileHandler {
                     reader.onload = {
                         val result = reader.result?.toString()
                         cont.resume(result)
-                        Unit
                     }
                     reader.onerror = {
                         cont.resume(null)
-                        Unit
                     }
                     reader.readAsText(file)
                 } else {
                     cont.resume(null)
                 }
-                Unit
             }
 
             input.click()

@@ -102,7 +102,7 @@ private fun AllergenCard(
             textAlign = TextAlign.Center,
             maxLines = 1,
         )
-        if (isActive && containmentLevel != null) {
+        if (containmentLevel != null) {
             Text(
                 text = containmentLevel.labelEs,
                 color = accentColor,

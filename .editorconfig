@@ -17,6 +17,10 @@ ktlint_standard_filename = disabled
 ktlint_standard_multiline-expression-wrapping = disabled
 ktlint_standard_function-expression-body = disabled
 ktlint_standard_chain-method-continuation = disabled
+# The codebase exposes MutableStateFlow backing fields as `_state` with a public
+# `uiState` (a different name), which this rule does not allow. Matches the
+# established MVVM pattern used across every ViewModel.
+ktlint_standard_backing-property-naming = disabled
 
 [*.xml]
 indent_size = 4
