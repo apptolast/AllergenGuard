@@ -18,7 +18,9 @@ import org.apptolast.menuadmin.domain.platform.AllergenPdfRow
 import org.apptolast.menuadmin.domain.platform.MenuPdfExporter
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
-import org.apptolast.menuadmin.domain.repository.RestaurantRepository
+import org.apptolast.menuadmin.platform.buildAllergenPdfPayload
+import org.apptolast.menuadmin.platform.encodeAllergenPdfPayload
+import org.apptolast.menuadmin.platform.launchAllergenPdf
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -314,45 +316,8 @@ class MenusViewModel(
             try {
                 val state = uiState.value
                 val menu = state.selectedMenu ?: return@launch
-                val recipes = state.menuRecipes.sortedBy { it.name.lowercase() }
-                if (recipes.isEmpty()) {
-                    _localState.value = _localState.value.copy(
-                        error = "El menu no tiene recetas para exportar",
-                    )
-                    return@launch
-                }
-
-                val allergens = AllergenType.entries
-                val columns = allergens.map { ALLERGEN_PDF_LABELS[it] ?: it.nameEs.uppercase() }
-                val rows = recipes.map { recipe ->
-                    AllergenPdfRow(
-                        name = recipe.name,
-                        ingredients = recipe.ingredients
-                            .mapNotNull { it.ingredientName.ifBlank { null } }
-                            .joinToString(", "),
-                        present = allergens.map { it in recipe.computedAllergens },
-                    )
-                }
-
-                val restaurantName = runCatching { restaurantRepository.getRestaurantById(restaurantId)?.name }
-                    .getOrNull()
-                    .orEmpty()
-                val fileLabel = restaurantName.ifBlank { "restaurante" }
-
-                menuPdfExporter.exportAllergenMenu(
-                    AllergenMenuPdf(
-                        restaurantName = restaurantName,
-                        menuName = menu.name,
-                        restaurantLogoUrl = menu.restaurantLogoUrl,
-                        companyLogoUrl = menu.companyLogoUrl,
-                        regulationText = "Conforme al Reglamento (UE) Nº 1169/2011",
-                        notaText = "Esta información ha sido elaborada en base a las fichas técnicas y " +
-                            "listado de ingredientes facilitados por nuestros proveedores o clientes.",
-                        fileName = "Menu de Alergenos - $fileLabel.pdf",
-                        columns = columns,
-                        rows = rows,
-                    ),
-                )
+                val payload = buildAllergenPdfPayload(menu, state.menuRecipes)
+                launchAllergenPdf(encodeAllergenPdfPayload(payload))
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     error = e.message ?: "Error al exportar PDF",
