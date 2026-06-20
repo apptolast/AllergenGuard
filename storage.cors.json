@@ -1,0 +1,12 @@
+[
+  {
+    "origin": [
+      "https://menusadmin.apptolast.com",
+      "http://localhost:8080",
+      "http://localhost:8081"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]
