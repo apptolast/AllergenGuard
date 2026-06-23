@@ -17,10 +17,12 @@ interface MembershipRepository {
     /**
      * Creates `memberships/{uid}` from an invitation on first login and returns the resolved session.
      * Security rules validate the written account/role/restaurantIds equal the invitation, so the client
-     * cannot self-promote.
+     * cannot self-promote. [email] is stored so the platform panel can list users by email (the rules
+     * require it to match the verified token email).
      */
     suspend fun materializeMembership(
         uid: String,
+        email: String,
         invitation: AccountInvitation,
     ): AccountSession
 }

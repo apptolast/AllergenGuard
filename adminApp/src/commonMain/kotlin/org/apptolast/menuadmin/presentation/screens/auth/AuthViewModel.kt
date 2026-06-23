@@ -10,10 +10,12 @@ import kotlinx.coroutines.launch
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.repository.AuthRepository
 import org.apptolast.menuadmin.domain.repository.MembershipRepository
+import org.apptolast.menuadmin.domain.repository.PlatformAdminRepository
 
 class AuthViewModel(
     private val authRepository: AuthRepository,
     private val membershipRepository: MembershipRepository,
+    private val platformAdminRepository: PlatformAdminRepository,
     private val currentAccountHolder: CurrentAccountHolder,
 ) : ViewModel() {
     // Don't enter the app until the tenant membership is resolved. If a token is already stored, start
@@ -131,17 +133,20 @@ class AuthViewModel(
                     failNoAccess()
                     return@launch
                 }
+                val isSuperAdmin = platformAdminRepository.isSuperAdmin(uid)
                 var session = membershipRepository.getMembership(uid)
                 if (session == null && email != null) {
                     membershipRepository.getInvitation(email)?.let { invitation ->
-                        session = membershipRepository.materializeMembership(uid, invitation)
+                        session = membershipRepository.materializeMembership(uid, email, invitation)
                     }
                 }
                 val resolved = session
-                if (resolved == null) {
+                // Enter if the user is a platform owner OR has an account (membership/invitation).
+                if (resolved == null && !isSuperAdmin) {
                     failNoAccess()
                 } else {
-                    currentAccountHolder.set(resolved)
+                    resolved?.let { currentAccountHolder.set(it) }
+                    currentAccountHolder.setSuperAdmin(isSuperAdmin)
                     _uiState.update {
                         it.copy(
                             isLoading = false,

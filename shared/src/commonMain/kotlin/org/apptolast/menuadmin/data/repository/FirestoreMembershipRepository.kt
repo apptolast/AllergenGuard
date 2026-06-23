@@ -38,15 +38,18 @@ class FirestoreMembershipRepository(
 
     override suspend fun materializeMembership(
         uid: String,
+        email: String,
         invitation: AccountInvitation,
     ): AccountSession {
         // Always write restaurantIds (empty for admins) so it matches the invitation exactly: the
         // membership-create rule compares them with ==, which also stops a manager from self-granting
-        // extra restaurants.
+        // extra restaurants. `email` lets the platform panel list users by email (rules require it to
+        // equal the verified token email).
         val fields = mapOf(
             "accountId" to invitation.accountId,
             "role" to invitation.role.wire,
             "restaurantIds" to invitation.restaurantIds,
+            "email" to email.trim().lowercase(),
         )
         firestore.patchDocument("$MEMBERSHIPS/$uid", fields)
         return getMembership(uid) ?: AccountSession(
