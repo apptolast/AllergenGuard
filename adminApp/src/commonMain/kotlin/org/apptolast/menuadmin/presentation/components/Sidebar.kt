@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Person
@@ -44,6 +45,8 @@ import org.apptolast.menuadmin.AppInfo
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
 import org.apptolast.menuadmin.navigation.IngredientsRoute
+import org.apptolast.menuadmin.navigation.PlatformAccountDetailRoute
+import org.apptolast.menuadmin.navigation.PlatformAccountsRoute
 import org.apptolast.menuadmin.navigation.ProfileRoute
 import org.apptolast.menuadmin.navigation.RestaurantDetailRoute
 import org.apptolast.menuadmin.navigation.RestaurantsRoute
@@ -59,6 +62,11 @@ fun Sidebar(
     onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
+    // Admin-only tools (Backup/Restore) are hidden for RESTAURANT_MANAGER. Defaults to true so previews
+    // and the admin flow show everything.
+    isAccountAdmin: Boolean = true,
+    // The Platform section is shown only to platform owners (SUPER_ADMIN). Defaults to false (hidden).
+    isSuperAdmin: Boolean = false,
 ) {
     // True if the given typed route is anywhere in the current destination's hierarchy.
     fun isRoute(predicate: (NavDestination) -> Boolean): Boolean = currentDestination?.hierarchy?.any(predicate) == true
@@ -89,7 +97,7 @@ fun Sidebar(
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.offset(x = (90).dp)
+                modifier = Modifier.offset(x = (90).dp),
             )
 //            Box(
 //                modifier = Modifier
@@ -138,17 +146,35 @@ fun Sidebar(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Section: PLATAFORMA (platform owners only)
+        if (isSuperAdmin) {
+            SectionHeader(title = "PLATAFORMA")
+            Spacer(modifier = Modifier.height(8.dp))
+            NavItem(
+                icon = Icons.Outlined.Business,
+                label = "Cuentas",
+                isSelected = isRoute {
+                    it.hasRoute<PlatformAccountsRoute>() || it.hasRoute<PlatformAccountDetailRoute>()
+                },
+                onClick = { onNavigate(PlatformAccountsRoute) },
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
         // Section: HERRAMIENTAS
         SectionHeader(title = "HERRAMIENTAS")
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        NavItem(
-            icon = Icons.Outlined.Storage,
-            label = "Backup / Restaurar",
-            isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
-            onClick = { onNavigate(BackupRestoreRoute) },
-        )
+        // Backup/Restore writes the whole catalog (ingredients), an ACCOUNT_ADMIN-only operation.
+        if (isAccountAdmin) {
+            NavItem(
+                icon = Icons.Outlined.Storage,
+                label = "Backup / Restaurar",
+                isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
+                onClick = { onNavigate(BackupRestoreRoute) },
+            )
+        }
         NavItem(
             icon = Icons.Outlined.Settings,
             label = "Configuracion",

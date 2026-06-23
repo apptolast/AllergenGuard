@@ -17,6 +17,8 @@ class RemoteAuthRepository(
             ?: FirebaseIdToken.claim(tokenManager.accessToken, "sub")
     override val currentUserId: String?
         get() = FirebaseIdToken.claim(tokenManager.accessToken, "sub")
+    override val currentUserName: String?
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "name")?.takeIf { it.isNotBlank() }
     override val isEmailVerified: Boolean get() = false
 
     override suspend fun login(
@@ -34,6 +36,11 @@ class RemoteAuthRepository(
     ) {
         val response = authService.registerAdmin(email, password, name)
         tokenManager.saveTokens(response.accessToken, response.refreshToken, response.expiresIn)
+    }
+
+    override suspend fun updateDisplayName(name: String) {
+        // The legacy backend has no profile-update endpoint; display name editing is Firebase-only.
+        throw UnsupportedOperationException("Editar el nombre no está disponible en el backend antiguo")
     }
 
     override fun logout() {

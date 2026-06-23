@@ -158,7 +158,8 @@ fun IngredientsContent(
                     )
                 }
             }
-            if (!uiState.isEditing) {
+            // Creating ingredients is an ACCOUNT_ADMIN-only action; managers get a read-only catalog.
+            if (!uiState.isEditing && uiState.isAccountAdmin) {
                 Button(
                     onClick = onNewIngredient,
                     colors = ButtonDefaults.buttonColors(containerColor = Blue500),
@@ -417,7 +418,12 @@ fun IngredientsContent(
                 ) { ingredient ->
                     IngredientCard(
                         ingredient = ingredient,
-                        onClick = { onEditIngredient(ingredient) },
+                        // Managers can browse but not open the editor (no write actions for them).
+                        onClick = if (uiState.isAccountAdmin) {
+                            { onEditIngredient(ingredient) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -479,7 +485,8 @@ private fun AllergenFilterBar(
 @Composable
 private fun IngredientCard(
     ingredient: Ingredient,
-    onClick: () -> Unit,
+    // Null = read-only (no click): the card is not interactive (managers browse the catalog).
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -497,7 +504,7 @@ private fun IngredientCard(
             .clip(shape)
             .border(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant, shape = shape)
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -550,6 +557,7 @@ private fun IngredientsContentPreview() {
         IngredientsContent(
             uiState = IngredientsUiState(
                 isLoading = false,
+                isAccountAdmin = true,
                 ingredients = listOf(
                     Ingredient(
                         id = "1",

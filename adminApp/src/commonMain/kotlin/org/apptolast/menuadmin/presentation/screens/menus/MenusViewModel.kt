@@ -13,11 +13,10 @@ import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.MenuRecipeSummary
-import org.apptolast.menuadmin.domain.platform.AllergenMenuPdf
-import org.apptolast.menuadmin.domain.platform.AllergenPdfRow
 import org.apptolast.menuadmin.domain.platform.MenuPdfExporter
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 import org.apptolast.menuadmin.platform.buildAllergenPdfPayload
 import org.apptolast.menuadmin.platform.encodeAllergenPdfPayload
 import org.apptolast.menuadmin.platform.launchAllergenPdf

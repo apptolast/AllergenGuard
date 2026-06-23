@@ -3,6 +3,7 @@ package org.apptolast.menuadmin
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,16 +41,28 @@ fun App() {
         val authState by authViewModel.uiState.collectAsState()
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (authState.isAuthenticated) {
-                val navController = rememberNavController()
-                AdminLayout(
-                    navController = navController,
-                    onLogout = authViewModel::onLogout,
-                )
-            } else {
-                // Share the same AuthViewModel instance App observes, so a successful login flips
-                // authState.isAuthenticated here and navigates to AdminLayout.
-                AuthScreen(viewModel = authViewModel, onAuthenticated = {})
+            when {
+                // Resolving the tenant membership of an already-signed-in user before entering the app,
+                // so scoped repositories always have a resolved account.
+                authState.isResolvingSession -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                authState.isAuthenticated -> {
+                    val navController = rememberNavController()
+                    AdminLayout(
+                        navController = navController,
+                        onLogout = authViewModel::onLogout,
+                    )
+                }
+
+                else -> {
+                    // Share the same AuthViewModel instance App observes, so a successful login flips
+                    // authState.isAuthenticated here and navigates to AdminLayout.
+                    AuthScreen(viewModel = authViewModel, onAuthenticated = {})
+                }
             }
 
             // Single app-wide snackbar host: every screen's errors surface here instead of red text.

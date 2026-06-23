@@ -47,10 +47,20 @@ jobs:
             -   name: Grant execute permission for gradlew
                 run: chmod +x gradlew
 
-            -   name: Create local.properties with API URL
+            -   name: Create local.properties
                 run: |
                     echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" > local.properties
-                    echo "local.properties created with API_BASE_URL"
+                    # Firebase config so the WASM admin actually works against Firestore/Auth. Without these
+                    # the build bakes an empty FIREBASE_API_KEY while USE_FIRESTORE defaults to true -> the
+                    # deployed admin is broken. The admin signs in with email/password, so no Google client id.
+                    echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> local.properties
+                    echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> local.properties
+                    echo "USE_FIRESTORE=true" >> local.properties
+                    # The admin web has NO runtime override of the Firestore DB (unlike the consumer apps),
+                    # so it is frozen at build time. Pin production to the `(default)` database explicitly so
+                    # a CI build never points at the `debug` database.
+                    echo 'FIRESTORE_DATABASE_ID=(default)' >> local.properties
+                    echo "local.properties created"
 
             -   name: Upgrade Yarn Lock files
                 run: |

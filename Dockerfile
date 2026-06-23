@@ -41,8 +41,10 @@ COPY --chown=gradle:gradle adminApp/ adminApp/
 # Make gradlew executable
 RUN chmod +x gradlew
 
-# Create local.properties with API base URL + Firebase config (consumed by BuildKonfig in :shared)
-RUN printf 'API_BASE_URL=%s\nFIREBASE_API_KEY=%s\nFIREBASE_PROJECT_ID=%s\nUSE_FIRESTORE=%s\n' \
+# Create local.properties with API base URL + Firebase config (consumed by BuildKonfig in :shared).
+# The admin web has NO runtime override of the Firestore DB (unlike the consumer apps), so it is frozen
+# at build time: pin production to the `(default)` database explicitly (this image is always production).
+RUN printf 'API_BASE_URL=%s\nFIREBASE_API_KEY=%s\nFIREBASE_PROJECT_ID=%s\nUSE_FIRESTORE=%s\nFIRESTORE_DATABASE_ID=(default)\n' \
     "${API_BASE_URL}" "${FIREBASE_API_KEY}" "${FIREBASE_PROJECT_ID}" "${USE_FIRESTORE}" > local.properties
 
 # Upgrade Yarn lock files (required after dependency changes)
