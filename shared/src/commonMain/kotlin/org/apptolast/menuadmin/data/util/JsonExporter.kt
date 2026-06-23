@@ -20,6 +20,9 @@ data class BackupData(
     val recipes: List<Recipe>,
     val menus: List<Menu>,
     val exportedAt: Instant,
+    // Owning account (tenant) of this backup. Empty for legacy files exported before multi-tenancy; used
+    // on import to reject app-native backups that belong to a different account.
+    val accountId: String = "",
 )
 
 object JsonExporter {
@@ -38,12 +41,14 @@ object JsonExporter {
         recipes: List<Recipe>,
         menus: List<Menu>,
         json: Json,
+        accountId: String = "",
     ): String {
         val backup = BackupData(
             ingredients = ingredients,
             recipes = recipes,
             menus = menus,
             exportedAt = Clock.System.now(),
+            accountId = accountId,
         )
         return json.encodeToString(BackupData.serializer(), backup)
     }

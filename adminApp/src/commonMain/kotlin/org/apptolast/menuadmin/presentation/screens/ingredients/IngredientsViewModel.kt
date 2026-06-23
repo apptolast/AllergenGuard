@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
@@ -17,13 +18,15 @@ import org.apptolast.menuadmin.domain.repository.IngredientRepository
 
 class IngredientsViewModel(
     private val ingredientRepository: IngredientRepository,
+    private val accountHolder: CurrentAccountHolder,
 ) : ViewModel() {
     private val _formState = MutableStateFlow(IngredientsUiState())
 
     val uiState: StateFlow<IngredientsUiState> = combine(
         ingredientRepository.getAllIngredients(),
         _formState,
-    ) { ingredients, formState ->
+        accountHolder.session,
+    ) { ingredients, formState, session ->
         var filtered = ingredients
         if (formState.searchQuery.isNotBlank()) {
             filtered = filtered.filter { ingredient ->
@@ -38,6 +41,7 @@ class IngredientsViewModel(
         }
         formState.copy(
             isLoading = false,
+            isAccountAdmin = session?.isAccountAdmin ?: false,
             ingredients = filtered.sortedBy { it.name.lowercase() },
         )
     }

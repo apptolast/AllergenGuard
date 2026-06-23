@@ -12,6 +12,10 @@ FIREBASE_API_KEY=AIza...
 FIREBASE_PROJECT_ID=menusmati
 # Feature flag: true = Firebase/Firestore REST data layer, false = legacy VPS backend.
 USE_FIRESTORE=true
+# Named Firestore database to target. Release/prod uses `(default)`; dev uses the separate `debug`
+# database (so you don't touch release data). Defaults to `(default)` when unset. Override per build with
+# the Gradle property `-PFIRESTORE_DATABASE_ID=debug` (e.g. the wasmJs dev run). For local dev set:
+FIRESTORE_DATABASE_ID=debug
 
 # --- Google Sign-In (Android) ---
 # Web OAuth client (client_type 3) from google-services.json; used as Credential Manager serverClientId.

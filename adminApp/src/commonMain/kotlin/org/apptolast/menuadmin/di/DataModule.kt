@@ -1,6 +1,7 @@
 package org.apptolast.menuadmin.di
 
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.local.ThemePreferences
 import org.apptolast.menuadmin.data.remote.auth.AuthService
@@ -23,7 +24,9 @@ import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.data.repository.FirebaseAuthRepository
 import org.apptolast.menuadmin.data.repository.FirestoreDashboardRepository
 import org.apptolast.menuadmin.data.repository.FirestoreIngredientRepository
+import org.apptolast.menuadmin.data.repository.FirestoreMembershipRepository
 import org.apptolast.menuadmin.data.repository.FirestoreMenuRepository
+import org.apptolast.menuadmin.data.repository.FirestorePlatformAdminRepository
 import org.apptolast.menuadmin.data.repository.FirestoreRecipeRepository
 import org.apptolast.menuadmin.data.repository.FirestoreRestaurantRepository
 import org.apptolast.menuadmin.data.repository.FirestoreWhitelistRepository
@@ -38,8 +41,10 @@ import org.apptolast.menuadmin.domain.repository.AuthRepository
 import org.apptolast.menuadmin.domain.repository.DashboardRepository
 import org.apptolast.menuadmin.domain.repository.DishRepository
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
+import org.apptolast.menuadmin.domain.repository.MembershipRepository
 import org.apptolast.menuadmin.domain.repository.MenuDigitalCardRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
+import org.apptolast.menuadmin.domain.repository.PlatformAdminRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 import org.apptolast.menuadmin.domain.repository.WhitelistRepository
@@ -81,6 +86,12 @@ val dataModule = module {
     // Admin registration whitelist (Firestore-backed; works in both data-layer modes).
     singleOf(::FirestoreWhitelistRepository) bind WhitelistRepository::class
 
+    // Multi-tenant: resolves the signed-in admin's account + role (replaces the binary whitelist).
+    singleOf(::FirestoreMembershipRepository) bind MembershipRepository::class
+
+    // Platform (SUPER_ADMIN): account CRUD + user/role management across all tenants.
+    singleOf(::FirestorePlatformAdminRepository) bind PlatformAdminRepository::class
+
     // Repositories — Auth + Ingredients feature-flagged: Firestore vs custom backend
     if (FirebaseConfig.useFirestore) {
         singleOf(::FirebaseAuthRepository) bind AuthRepository::class
@@ -107,4 +118,5 @@ val dataModule = module {
 
     // Shared state holders
     single { SelectedRestaurantHolder() }
+    single { CurrentAccountHolder() }
 }

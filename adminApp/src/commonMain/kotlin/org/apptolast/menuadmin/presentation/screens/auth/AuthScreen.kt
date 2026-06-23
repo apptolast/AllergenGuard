@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -195,6 +196,11 @@ fun AuthContent(
                     keyboardType = KeyboardType.Password,
                     imeAction = if (uiState.isLoginMode) ImeAction.Done else ImeAction.Next,
                 ),
+                // In login mode, Enter on the password submits directly (in register mode it advances
+                // to the name field, whose own Enter submits).
+                keyboardActions = KeyboardActions(
+                    onDone = { if (uiState.isLoginMode && !uiState.isLoading) onLogin() },
+                ),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -215,6 +221,9 @@ fun AuthContent(
                     },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done,
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { if (!uiState.isLoading) onRegister() },
                     ),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),

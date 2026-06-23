@@ -10,20 +10,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 
 class RestaurantsListViewModel(
     private val restaurantRepository: RestaurantRepository,
+    private val accountHolder: CurrentAccountHolder,
 ) : ViewModel() {
     private val _formState = MutableStateFlow(RestaurantsListUiState())
 
     val uiState: StateFlow<RestaurantsListUiState> = combine(
         restaurantRepository.getAllRestaurants(),
         _formState,
-    ) { restaurants, formState ->
+        accountHolder.session,
+    ) { restaurants, formState, session ->
         formState.copy(
             isLoading = false,
+            isAccountAdmin = session?.isAccountAdmin ?: false,
             restaurants = restaurants,
         )
     }

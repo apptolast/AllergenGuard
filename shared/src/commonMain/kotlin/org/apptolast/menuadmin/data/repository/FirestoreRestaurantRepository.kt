@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import org.apptolast.menuadmin.data.remote.auth.TokenManager
-import org.apptolast.menuadmin.data.remote.firebase.FirebaseIdToken
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreDocument
+import org.apptolast.menuadmin.domain.model.AccountSession
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 
@@ -15,25 +15,47 @@ import org.apptolast.menuadmin.domain.repository.RestaurantRepository
  * [RestaurantRepository] backed by the top-level Firestore `restaurants` collection. Document id =
  * restaurant slug (matches the seeded data and keeps recipe/menu subcollection paths stable).
  *
+ * Restaurants stay top-level because the consumer app reads them globally (a public marketplace). The
+ * admin scopes them to the signed-in account **client-side** (the REST client has no server-side query):
+ * only restaurants whose `accountId` matches the session, and for a RESTAURANT_MANAGER only the ones
+ * assigned in their membership.
+ *
  * Writes use an [updateMask] so admin-owned fields are set without clobbering server/MVP fields the
- * admin model doesn't carry (`rating`, `location`, `openingHours`). `accountId` is taken from the
- * signed-in user's token claim so the security rules accept the write.
+ * admin model doesn't carry (`rating`, `location`, `openingHours`). `accountId` is stamped from the
+ * current session so the security rules accept the write.
  */
 class FirestoreRestaurantRepository(
     private val firestore: FirestoreClient,
-    private val tokenManager: TokenManager,
+    private val accountHolder: CurrentAccountHolder,
 ) : RestaurantRepository {
     private val _restaurants = MutableStateFlow<List<Restaurant>>(emptyList())
     private var hasLoaded = false
 
+    // This repo is a singleton, so its cache outlives a logout. Remember which session the cache was
+    // built for and reload when it changes (a different user signing in on the same browser, or an
+    // admin↔manager switch) — otherwise the new user would see the previous user's restaurants. The
+    // whole session is compared, not just the account, because role/restaurantIds change the filter.
+    private var loadedSession: AccountSession? = null
+
     override fun getAllRestaurants(): Flow<List<Restaurant>> =
         flow {
-            if (!hasLoaded) runCatching { refresh() }
+            if (!hasLoaded || loadedSession != accountHolder.session.value) {
+                runCatching { refresh() }
+            }
             emitAll(_restaurants)
         }
 
     private suspend fun refresh() {
-        _restaurants.value = firestore.listDocuments(COLLECTION).map { it.toRestaurant() }
+        val session = accountHolder.session.value
+        loadedSession = session
+        if (session == null) {
+            _restaurants.value = emptyList()
+            hasLoaded = true
+            return
+        }
+        _restaurants.value = firestore.listDocuments(COLLECTION)
+            .filter { (it.fields["accountId"] as? String) == session.accountId && session.canSeeRestaurant(it.id) }
+            .map { it.toRestaurant() }
         hasLoaded = true
     }
 
@@ -79,12 +101,11 @@ class FirestoreRestaurantRepository(
             "phone" to phone,
             "logoUrl" to logoUrl,
             "active" to active,
-            "accountId" to (FirebaseIdToken.claim(tokenManager.accessToken, "accountId") ?: DEFAULT_ACCOUNT),
+            "accountId" to accountHolder.requireAccountId(),
         )
 
     private companion object {
         const val COLLECTION = "restaurants"
-        const val DEFAULT_ACCOUNT = "acc_apptolast"
         val FIELD_MASK = listOf("name", "slug", "description", "address", "phone", "logoUrl", "active", "accountId")
     }
 }

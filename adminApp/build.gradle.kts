@@ -13,7 +13,7 @@ plugins {
 }
 
 // Single source of truth for the admin platform version (exposed to code via BuildKonfig.APP_VERSION).
-version = "1.3.0"
+version = "1.4.0"
 
 kotlin {
     compilerOptions {
@@ -75,6 +75,12 @@ kotlin {
 ktlint {
     android.set(false)
     outputToConsole.set(true)
+    // Never lint generated sources (e.g. Compose resources `Res.kt`), which live
+    // under a `/generated/` build directory. The predicate must not capture the
+    // Gradle Project (keeps the configuration cache happy).
+    filter {
+        exclude { entry -> entry.file.path.contains("/generated/") }
+    }
 }
 
 buildkonfig {

@@ -116,12 +116,15 @@ fun RestaurantsListContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Button(
-                onClick = onNewRestaurant,
-                colors = ButtonDefaults.buttonColors(containerColor = Blue500),
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                Text("Nuevo Restaurante", color = Color.White)
+            // Creating restaurants is an ACCOUNT_ADMIN-only action; managers edit their assigned ones.
+            if (uiState.isAccountAdmin) {
+                Button(
+                    onClick = onNewRestaurant,
+                    colors = ButtonDefaults.buttonColors(containerColor = Blue500),
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Text("Nuevo Restaurante", color = Color.White)
+                }
             }
         }
 
@@ -147,7 +150,11 @@ fun RestaurantsListContent(
             }
         } else if (uiState.restaurants.isEmpty()) {
             Text(
-                text = "No tienes restaurantes. Crea uno con el boton superior.",
+                text = if (uiState.isAccountAdmin) {
+                    "No tienes restaurantes. Crea uno con el boton superior."
+                } else {
+                    "No tienes restaurantes asignados."
+                },
                 fontSize = 14.sp,
                 color = MenuAdminTheme.colors.textMuted,
                 modifier = Modifier.padding(vertical = 24.dp),
@@ -419,6 +426,7 @@ private fun PreviewRestaurantsListContentEmpty() {
         RestaurantsListContent(
             uiState = RestaurantsListUiState(
                 isLoading = false,
+                isAccountAdmin = true,
                 restaurants = emptyList(),
             ),
             onNavigateToRestaurant = {},
@@ -443,6 +451,7 @@ private fun PreviewRestaurantsListContentWithData() {
         RestaurantsListContent(
             uiState = RestaurantsListUiState(
                 isLoading = false,
+                isAccountAdmin = true,
                 restaurants = listOf(
                     Restaurant(
                         id = "1",

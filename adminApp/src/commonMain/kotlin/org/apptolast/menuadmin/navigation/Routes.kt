@@ -27,3 +27,13 @@ object BackupRestoreRoute
 
 @Serializable
 object ProfileRoute
+
+// --- Platform (SUPER_ADMIN) ---
+
+@Serializable
+object PlatformAccountsRoute
+
+@Serializable
+data class PlatformAccountDetailRoute(
+    val accountId: String,
+)

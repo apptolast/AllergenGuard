@@ -746,3 +746,6 @@ obj/
 /supabase/*
 /.mcp.json
 *.klib
+
+# Local Firestore pre-delete snapshots (not for VCS)
+/.firestore-backups/

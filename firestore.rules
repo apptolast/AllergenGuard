@@ -1,58 +1,86 @@
 rules_version = '2';
 
-// Modelo: alérgenos + ingredientes GLOBALES (catálogo de empresa); restaurantes con subcolecciones
-// recipes/menus/reviews; users privados. La ESCRITURA de admin se autoriza por WHITELIST de correos
-// (colección `whitelist`, gestionada solo desde la consola/Admin SDK), no por self-registration.
+// Multi-tenant model. Each ACCOUNT (tenant) owns a private ingredient catalog
+// (accounts/{id}/ingredients) and a set of restaurants (kept top-level and tagged with `accountId` so
+// the consumer app can read them globally as a public marketplace). Admin access is by MEMBERSHIP
+// (memberships/{uid} -> {accountId, role, restaurantIds}); onboarding is by INVITATION
+// (invitations/{email}, provisioned by the platform owner from the console/Admin SDK). Roles:
+// ACCOUNT_ADMIN (every restaurant + the account's ingredient catalog) and RESTAURANT_MANAGER (only the
+// restaurants assigned in their membership).
+//
+// Cost note: writes do a couple of get()s (membership + parent restaurant). Reads never get() — they are
+// public or self. `match /databases/{database}/documents` is database-agnostic, so this same file is
+// deployed to both the `(default)` (release) and `debug` databases.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function isSignedIn() { return request.auth != null; }
 
-    // Admin autorizado = sesión iniciada cuyo email está en la whitelist.
-    function isWhitelisted() {
-      return isSignedIn()
-        && request.auth.token.email != null
-        && exists(/databases/$(database)/documents/whitelist/$(request.auth.token.email));
+    // The caller's own membership (account + role + assigned restaurants). Guard reads with hasMembership().
+    function membershipPath() {
+      return /databases/$(database)/documents/memberships/$(request.auth.uid);
+    }
+    function hasMembership() { return isSignedIn() && exists(membershipPath()); }
+    function myMembership() { return get(membershipPath()).data; }
+
+    function isMember(accountId) {
+      return hasMembership() && myMembership().accountId == accountId;
+    }
+    function isAccountAdmin(accountId) {
+      return isMember(accountId) && myMembership().role == 'ACCOUNT_ADMIN';
+    }
+    // Admin of the restaurant's account, or a manager who has that restaurant assigned.
+    function canManageRestaurant(restaurantId) {
+      let acc = get(/databases/$(database)/documents/restaurants/$(restaurantId)).data.accountId;
+      return isAccountAdmin(acc)
+        || (isMember(acc)
+            && myMembership().role == 'RESTAURANT_MANAGER'
+            && restaurantId in myMembership().restaurantIds);
+    }
+    // The invitation authorizing this user, keyed by their verified token email.
+    function myInvitation() {
+      return get(/databases/$(database)/documents/invitations/$(request.auth.token.email)).data;
+    }
+    // Platform owner / SUPER_ADMIN: a uid listed in `platformAdmins` (seeded by the owner). Transcends
+    // accounts — full read/write across tenants for account + user/role management.
+    function isSuperAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/platformAdmins/$(request.auth.uid));
     }
 
-    // Whitelist de registro de admins. Lectura GET por email exacto (el formulario de registro puede
-    // comprobar un correo concreto, pero NO listar todos → no expone la lista). Escritura solo desde
-    // la consola de Firebase / Admin SDK (nunca desde el cliente).
-    match /whitelist/{email} {
-      allow get: if true;
-      allow list, write: if false;
+    // Accounts: a member reads their own account; the super-admin reads/lists/writes all (account CRUD).
+    match /accounts/{accountId} {
+      allow read: if isMember(accountId) || isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create, update, delete: if isSuperAdmin();
+
+      // Account-private ingredient catalog: members read; Account Admin or super-admin writes.
+      match /ingredients/{ingredientId} {
+        allow read: if isMember(accountId) || isSuperAdmin();
+        allow write: if isAccountAdmin(accountId) || isSuperAdmin();
+      }
     }
 
-    // Catálogo legal de alérgenos (14 fijos): lectura pública; escritura solo admin whitelisted.
-    match /allergens/{code} {
-      allow read: if true;
-      allow write: if isWhitelisted();
-    }
-
-    // Catálogo global de ingredientes (empresa): lectura pública; escritura solo admin whitelisted.
-    match /ingredients/{ingredientId} {
-      allow read: if true;
-      allow write: if isWhitelisted();
-    }
-
-    // Restaurantes + subárbol.
+    // Restaurants + subtree. Public read (consumer marketplace); writes gated by account/role.
     match /restaurants/{restaurantId} {
       allow read: if true;
-      allow write: if isWhitelisted();
+      // New restaurant must be stamped with an account the caller administers (no forging another tenant).
+      allow create: if isAccountAdmin(request.resource.data.accountId) || isSuperAdmin();
+      // Can edit if admin/assigned-manager (or super-admin), and cannot move it to another account.
+      allow update: if (canManageRestaurant(restaurantId) || isSuperAdmin())
+        && request.resource.data.accountId == resource.data.accountId;
+      allow delete: if isAccountAdmin(resource.data.accountId) || isSuperAdmin();
 
-      // Recetas (= platos del cliente): lectura pública; escritura admin whitelisted.
+      // Recipes (= the client's dishes): public read; write by admin/assigned-manager (or super-admin).
       match /recipes/{recipeId} {
         allow read: if true;
-        allow write: if isWhitelisted();
+        allow write: if canManageRestaurant(restaurantId) || isSuperAdmin();
       }
-
-      // Menús: lectura pública; escritura admin whitelisted.
+      // Menus: public read; write by admin/assigned-manager (or super-admin).
       match /menus/{menuId} {
         allow read: if true;
-        allow write: if isWhitelisted();
+        allow write: if canManageRestaurant(restaurantId) || isSuperAdmin();
       }
-
-      // Reseñas (post-MVP): lectura pública; escribe/edita el consumidor dueño.
+      // Consumer reviews (post-MVP): public read; the owning consumer writes/edits their own.
       match /reviews/{reviewId} {
         allow read: if true;
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
@@ -60,7 +88,49 @@ service cloud.firestore {
       }
     }
 
-    // Datos privados de usuario (perfil de alérgenos, favoritos).
+    // Invitations: per-email GET (the sign-up form checks one address before creating the account); listed
+    // and written only by the super-admin (the platform panel) — previously console/Admin SDK only.
+    match /invitations/{email} {
+      allow get: if true;
+      allow list: if isSuperAdmin();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Memberships: a user reads only their own and materializes it ONCE from their invitation on first
+    // login. The written account/role/restaurantIds MUST equal the invitation keyed by the verified token
+    // email, so a user cannot self-promote or grant themselves restaurants. The super-admin lists and
+    // edits memberships (user/role management); an optional `email` field, if present, must match the
+    // verified token email (so it can't be spoofed) and lets the panel show users by email.
+    match /memberships/{uid} {
+      allow get: if (isSignedIn() && request.auth.uid == uid) || isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create: if isSuperAdmin()
+        || (isSignedIn()
+          && request.auth.uid == uid
+          && exists(/databases/$(database)/documents/invitations/$(request.auth.token.email))
+          && request.resource.data.accountId == myInvitation().accountId
+          && request.resource.data.role == myInvitation().role
+          && request.resource.data.restaurantIds == myInvitation().restaurantIds
+          && request.resource.data.get('email', request.auth.token.email) == request.auth.token.email);
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Platform admins (SUPER_ADMIN): a uid here is a platform owner. A user reads their own doc (to learn
+    // they are super-admin at login); the super-admin lists them. Written only by the owner via the
+    // console / Admin SDK (the first one is seeded manually — there is no in-app self-promotion).
+    match /platformAdmins/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin());
+      allow list: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    // Legal allergen catalog (shared, 14 fixed): public read; seeded by the owner via console/Admin SDK.
+    match /allergens/{code} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Private consumer data (allergen profile, favorites).
     match /users/{uid} {
       allow read, write: if isSignedIn() && request.auth.uid == uid;
     }

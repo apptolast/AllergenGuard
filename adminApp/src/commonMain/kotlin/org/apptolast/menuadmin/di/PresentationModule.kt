@@ -7,6 +7,8 @@ import org.apptolast.menuadmin.presentation.screens.cartadigital.CartaDigitalVie
 import org.apptolast.menuadmin.presentation.screens.dashboard.DashboardViewModel
 import org.apptolast.menuadmin.presentation.screens.ingredients.IngredientsViewModel
 import org.apptolast.menuadmin.presentation.screens.menus.MenusViewModel
+import org.apptolast.menuadmin.presentation.screens.platform.accountdetail.PlatformAccountDetailViewModel
+import org.apptolast.menuadmin.presentation.screens.platform.accounts.PlatformAccountsViewModel
 import org.apptolast.menuadmin.presentation.screens.profile.ProfileViewModel
 import org.apptolast.menuadmin.presentation.screens.recipes.RecipesViewModel
 import org.apptolast.menuadmin.presentation.screens.restaurants.RestaurantsListViewModel
@@ -30,9 +32,13 @@ val presentationModule = module {
     viewModel { (restaurantId: String) ->
         CartaDigitalViewModel(get(), get(), restaurantId)
     }
-    viewModel { BackupViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { BackupViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModelOf(::ProfileViewModel)
     viewModelOf(::RestaurantsListViewModel)
     viewModelOf(::RestaurantDetailViewModel)
+    viewModelOf(::PlatformAccountsViewModel)
+    viewModel { (accountId: String) ->
+        PlatformAccountDetailViewModel(get(), accountId)
+    }
 }
