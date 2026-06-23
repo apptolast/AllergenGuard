@@ -18,6 +18,14 @@ ENV FIREBASE_API_KEY=${FIREBASE_API_KEY}
 ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
 ENV USE_FIRESTORE=${USE_FIRESTORE}
 
+# EmailJS client config (PUBLIC key only — never the private/access key), consumed by BuildKonfig.
+ARG EMAILJS_PUBLIC_KEY
+ARG EMAILJS_SERVICE_ID
+ARG EMAILJS_TEMPLATE_ID
+ENV EMAILJS_PUBLIC_KEY=${EMAILJS_PUBLIC_KEY}
+ENV EMAILJS_SERVICE_ID=${EMAILJS_SERVICE_ID}
+ENV EMAILJS_TEMPLATE_ID=${EMAILJS_TEMPLATE_ID}
+
 # Install libatomic1 for Node.js v25+ (required by Kotlin/WASM)
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -44,8 +52,8 @@ RUN chmod +x gradlew
 # Create local.properties with API base URL + Firebase config (consumed by BuildKonfig in :shared).
 # The admin web has NO runtime override of the Firestore DB (unlike the consumer apps), so it is frozen
 # at build time: pin production to the `(default)` database explicitly (this image is always production).
-RUN printf 'API_BASE_URL=%s\nFIREBASE_API_KEY=%s\nFIREBASE_PROJECT_ID=%s\nUSE_FIRESTORE=%s\nFIRESTORE_DATABASE_ID=(default)\n' \
-    "${API_BASE_URL}" "${FIREBASE_API_KEY}" "${FIREBASE_PROJECT_ID}" "${USE_FIRESTORE}" > local.properties
+RUN printf 'API_BASE_URL=%s\nFIREBASE_API_KEY=%s\nFIREBASE_PROJECT_ID=%s\nUSE_FIRESTORE=%s\nFIRESTORE_DATABASE_ID=(default)\nEMAILJS_PUBLIC_KEY=%s\nEMAILJS_SERVICE_ID=%s\nEMAILJS_TEMPLATE_ID=%s\n' \
+    "${API_BASE_URL}" "${FIREBASE_API_KEY}" "${FIREBASE_PROJECT_ID}" "${USE_FIRESTORE}" "${EMAILJS_PUBLIC_KEY}" "${EMAILJS_SERVICE_ID}" "${EMAILJS_TEMPLATE_ID}" > local.properties
 
 # Upgrade Yarn lock files (required after dependency changes)
 RUN ./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock --no-daemon

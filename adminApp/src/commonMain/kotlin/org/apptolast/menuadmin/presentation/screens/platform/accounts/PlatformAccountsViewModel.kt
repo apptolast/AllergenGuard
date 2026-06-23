@@ -10,15 +10,28 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.error_unknown
+import menuadmin.adminapp.generated.resources.platform_accounts_created
+import menuadmin.adminapp.generated.resources.platform_accounts_deleted
+import menuadmin.adminapp.generated.resources.platform_accounts_error_deleting
+import menuadmin.adminapp.generated.resources.platform_accounts_error_loading
+import menuadmin.adminapp.generated.resources.platform_accounts_error_saving
+import menuadmin.adminapp.generated.resources.platform_accounts_updated
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.Account
+import org.apptolast.menuadmin.domain.model.AccountRole
+import org.apptolast.menuadmin.domain.platform.EmailSender
 import org.apptolast.menuadmin.domain.platform.FileHandler
 import org.apptolast.menuadmin.domain.repository.PlatformAdminRepository
+import org.apptolast.menuadmin.presentation.screens.platform.buildInvitationEmail
+import org.jetbrains.compose.resources.getString
 
 class PlatformAccountsViewModel(
     private val repository: PlatformAdminRepository,
     private val fileHandler: FileHandler,
     private val currentAccountHolder: CurrentAccountHolder,
+    private val emailSender: EmailSender,
 ) : ViewModel() {
     private val _formState = MutableStateFlow(PlatformAccountsUiState())
 
@@ -29,7 +42,12 @@ class PlatformAccountsViewModel(
         form.copy(isLoading = false, accounts = accounts)
     }
         .catch { e ->
-            emit(_formState.value.copy(isLoading = false, error = e.message ?: "Error al cargar cuentas"))
+            emit(
+                _formState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: getString(Res.string.platform_accounts_error_loading),
+                ),
+            )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlatformAccountsUiState())
 
@@ -83,27 +101,42 @@ class PlatformAccountsViewModel(
                         editing.copy(name = s.formName, region = s.formRegion, language = s.formLanguage),
                     )
                 } else {
-                    repository.createAccount(
-                        s.formName,
-                        s.formRegion,
-                        s.formLanguage,
-                        s.formFirstAdminEmail.ifBlank {
-                            null
-                        },
-                    )
+                    val firstAdminEmail = s.formFirstAdminEmail.ifBlank { null }
+                    repository.createAccount(s.formName, s.formRegion, s.formLanguage, firstAdminEmail)
+                    // Best-effort invitation email: never fail account creation if mail delivery fails.
+                    if (firstAdminEmail != null) {
+                        runCatching {
+                            emailSender.sendInvitationEmail(
+                                buildInvitationEmail(
+                                    email = firstAdminEmail,
+                                    accountName = s.formName,
+                                    role = AccountRole.ACCOUNT_ADMIN,
+                                    accountLanguage = s.formLanguage,
+                                ),
+                            )
+                        }
+                    }
                 }
+                val successMessage =
+                    if (editing != null) {
+                        getString(Res.string.platform_accounts_updated)
+                    } else {
+                        getString(Res.string.platform_accounts_created)
+                    }
                 _formState.update {
                     it.copy(
                         isSaving = false,
                         isFormVisible = false,
                         editingAccount = null,
-                        successMessage = if (editing != null) "Cuenta actualizada" else "Cuenta creada",
+                        successMessage = successMessage,
                     )
                 }
             } catch (e: Exception) {
-                _formState.update {
-                    it.copy(isSaving = false, error = "Error al guardar: ${e.message ?: "desconocido"}")
-                }
+                val msg = getString(
+                    Res.string.platform_accounts_error_saving,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
+                _formState.update { it.copy(isSaving = false, error = msg) }
             }
         }
     }
@@ -126,18 +159,21 @@ class PlatformAccountsViewModel(
                 val backup = repository.exportAccountBackup(account.id)
                 fileHandler.saveFile(backup, "backup_${account.id}_pre-delete.json")
                 repository.deleteAccountCascade(account.id)
+                val successMessage = getString(Res.string.platform_accounts_deleted, account.name)
                 _formState.update {
                     it.copy(
                         isDeleting = false,
                         deletingAccount = null,
                         deleteConfirmText = "",
-                        successMessage = "Cuenta '${account.name}' eliminada (backup descargado)",
+                        successMessage = successMessage,
                     )
                 }
             } catch (e: Exception) {
-                _formState.update {
-                    it.copy(isDeleting = false, error = "Error al eliminar: ${e.message ?: "desconocido"}")
-                }
+                val msg = getString(
+                    Res.string.platform_accounts_error_deleting,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
+                _formState.update { it.copy(isDeleting = false, error = msg) }
             }
         }
     }

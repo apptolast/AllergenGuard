@@ -20,10 +20,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.common_allergen_contains
+import menuadmin.adminapp.generated.resources.common_allergen_free
+import menuadmin.adminapp.generated.resources.common_allergen_traces
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AllergenSummaryCard(
@@ -75,9 +80,9 @@ fun AllergenSummaryCard(
         )
         Text(
             text = when {
-                mayContain -> "TRAZAS"
-                isPresent -> "CONTIENE"
-                else -> "Libre"
+                mayContain -> stringResource(Res.string.common_allergen_traces)
+                isPresent -> stringResource(Res.string.common_allergen_contains)
+                else -> stringResource(Res.string.common_allergen_free)
             },
             color = textColor,
             fontSize = 9.sp,

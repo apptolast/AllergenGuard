@@ -42,6 +42,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.action_save
+import menuadmin.adminapp.generated.resources.field_description
+import menuadmin.adminapp.generated.resources.field_name
+import menuadmin.adminapp.generated.resources.nav_menus
+import menuadmin.adminapp.generated.resources.nav_recipes
+import menuadmin.adminapp.generated.resources.restaurants_edit
+import menuadmin.adminapp.generated.resources.restaurants_field_address
+import menuadmin.adminapp.generated.resources.restaurants_field_phone
+import menuadmin.adminapp.generated.resources.restaurants_info_title
+import menuadmin.adminapp.generated.resources.restaurants_not_found
+import menuadmin.adminapp.generated.resources.restaurants_published
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.StatCard
@@ -49,6 +62,7 @@ import org.apptolast.menuadmin.presentation.theme.Amber500
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -74,7 +88,7 @@ fun RestaurantOverviewContent(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = uiState.error ?: "Restaurante no encontrado",
+                text = uiState.error ?: stringResource(Res.string.restaurants_not_found),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -104,7 +118,7 @@ fun RestaurantOverviewContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             StatCard(
-                label = "Recetas",
+                label = stringResource(Res.string.nav_recipes),
                 value = uiState.recipesCount.toString(),
                 icon = Icons.Outlined.Fastfood,
                 iconTint = Green500,
@@ -112,7 +126,7 @@ fun RestaurantOverviewContent(
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Menus",
+                label = stringResource(Res.string.nav_menus),
                 value = uiState.menusCount.toString(),
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
                 iconTint = Amber500,
@@ -120,7 +134,7 @@ fun RestaurantOverviewContent(
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Publicados",
+                label = stringResource(Res.string.restaurants_published),
                 value = uiState.publishedMenusCount.toString(),
                 icon = Icons.Outlined.Publish,
                 iconTint = Blue500,
@@ -161,7 +175,7 @@ private fun RestaurantInfoCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "Informacion del restaurante",
+                text = stringResource(Res.string.restaurants_info_title),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -236,7 +250,7 @@ private fun RestaurantEditCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Editar restaurante",
+                text = stringResource(Res.string.restaurants_edit),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -244,7 +258,7 @@ private fun RestaurantEditCard(
             OutlinedTextField(
                 value = uiState.editName,
                 onValueChange = onNameChange,
-                label = { Text("Nombre") },
+                label = { Text(stringResource(Res.string.field_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
@@ -252,7 +266,7 @@ private fun RestaurantEditCard(
             OutlinedTextField(
                 value = uiState.editDescription,
                 onValueChange = onDescriptionChange,
-                label = { Text("Descripcion") },
+                label = { Text(stringResource(Res.string.field_description)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 minLines = 2,
@@ -260,7 +274,7 @@ private fun RestaurantEditCard(
             OutlinedTextField(
                 value = uiState.editAddress,
                 onValueChange = onAddressChange,
-                label = { Text("Direccion") },
+                label = { Text(stringResource(Res.string.restaurants_field_address)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
@@ -268,7 +282,7 @@ private fun RestaurantEditCard(
             OutlinedTextField(
                 value = uiState.editPhone,
                 onValueChange = onPhoneChange,
-                label = { Text("Telefono") },
+                label = { Text(stringResource(Res.string.restaurants_field_phone)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
@@ -293,7 +307,7 @@ private fun RestaurantEditCard(
                             modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Guardar", color = Color.White)
+                        Text(stringResource(Res.string.action_save), color = Color.White)
                     }
                 }
                 OutlinedButton(
@@ -301,7 +315,7 @@ private fun RestaurantEditCard(
                     enabled = !uiState.isSaving,
                     shape = RoundedCornerShape(8.dp),
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(Res.string.action_cancel))
                 }
             }
         }

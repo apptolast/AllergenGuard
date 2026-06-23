@@ -7,10 +7,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.auth_error_login
+import menuadmin.adminapp.generated.resources.auth_error_not_invited
+import menuadmin.adminapp.generated.resources.auth_error_register
+import menuadmin.adminapp.generated.resources.auth_error_session_load
+import menuadmin.adminapp.generated.resources.auth_error_unknown
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.repository.AuthRepository
 import org.apptolast.menuadmin.domain.repository.MembershipRepository
 import org.apptolast.menuadmin.domain.repository.PlatformAdminRepository
+import org.jetbrains.compose.resources.getString
 
 class AuthViewModel(
     private val authRepository: AuthRepository,
@@ -56,10 +63,12 @@ class AuthViewModel(
                 authRepository.login(state.email.trim().lowercase(), state.password)
                 resolveSessionAndEnter()
             } catch (e: Exception) {
+                val reason = e.message ?: getString(Res.string.auth_error_unknown)
+                val message = getString(Res.string.auth_error_login, reason)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Error al iniciar sesión: ${e.message ?: "Error desconocido"}",
+                        error = message,
                     )
                 }
             }
@@ -83,11 +92,11 @@ class AuthViewModel(
                 // Invitation gate: only emails the platform owner has invited can register. The invitation
                 // also carries the account + role; the membership is materialized in resolveSessionAndEnter().
                 if (membershipRepository.getInvitation(email) == null) {
+                    val message = getString(Res.string.auth_error_not_invited)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = "Este correo no está autorizado para registrarse. " +
-                                "Contacta con el administrador para que te dé de alta.",
+                            error = message,
                         )
                     }
                     return@launch
@@ -99,10 +108,12 @@ class AuthViewModel(
                 )
                 resolveSessionAndEnter()
             } catch (e: Exception) {
+                val reason = e.message ?: getString(Res.string.auth_error_unknown)
+                val message = getString(Res.string.auth_error_register, reason)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Error al registrarse: ${e.message ?: "Error desconocido"}",
+                        error = message,
                     )
                 }
             }
@@ -159,12 +170,14 @@ class AuthViewModel(
             } catch (e: Exception) {
                 // Transient error (e.g. network): keep the token and let the user retry; don't lock them out.
                 currentAccountHolder.clear()
+                val reason = e.message ?: getString(Res.string.auth_error_unknown)
+                val message = getString(Res.string.auth_error_session_load, reason)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isResolvingSession = false,
                         isAuthenticated = false,
-                        error = "No se pudo cargar tu cuenta: ${e.message ?: "Error desconocido"}",
+                        error = message,
                     )
                 }
             }

@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.dashboard_error_loading
 import org.apptolast.menuadmin.domain.repository.DashboardRepository
+import org.jetbrains.compose.resources.getString
 
 class DashboardViewModel(
     dashboardRepository: DashboardRepository,
@@ -26,7 +29,7 @@ class DashboardViewModel(
                 DashboardUiState(
                     isLoading = false,
                     stats = null,
-                    error = throwable.message ?: "Error al cargar el dashboard",
+                    error = throwable.message ?: getString(Res.string.dashboard_error_loading),
                 ),
             )
         }

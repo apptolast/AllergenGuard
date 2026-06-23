@@ -54,6 +54,48 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_back
+import menuadmin.adminapp.generated.resources.action_delete
+import menuadmin.adminapp.generated.resources.action_edit
+import menuadmin.adminapp.generated.resources.field_description
+import menuadmin.adminapp.generated.resources.menus_activate
+import menuadmin.adminapp.generated.resources.menus_active
+import menuadmin.adminapp.generated.resources.menus_allergen_menu_title
+import menuadmin.adminapp.generated.resources.menus_badge_dishes
+import menuadmin.adminapp.generated.resources.menus_badge_recipes
+import menuadmin.adminapp.generated.resources.menus_badge_sections
+import menuadmin.adminapp.generated.resources.menus_delete_message
+import menuadmin.adminapp.generated.resources.menus_delete_title
+import menuadmin.adminapp.generated.resources.menus_edit_menu
+import menuadmin.adminapp.generated.resources.menus_export_pdf
+import menuadmin.adminapp.generated.resources.menus_form_create
+import menuadmin.adminapp.generated.resources.menus_form_description_hint
+import menuadmin.adminapp.generated.resources.menus_form_edit_title
+import menuadmin.adminapp.generated.resources.menus_form_name_hint
+import menuadmin.adminapp.generated.resources.menus_form_name_label
+import menuadmin.adminapp.generated.resources.menus_form_new_title
+import menuadmin.adminapp.generated.resources.menus_form_no_recipes
+import menuadmin.adminapp.generated.resources.menus_form_recipes_selected
+import menuadmin.adminapp.generated.resources.menus_form_recipes_title
+import menuadmin.adminapp.generated.resources.menus_form_save_changes
+import menuadmin.adminapp.generated.resources.menus_form_subtitle
+import menuadmin.adminapp.generated.resources.menus_generate_adapted
+import menuadmin.adminapp.generated.resources.menus_logo_change
+import menuadmin.adminapp.generated.resources.menus_logo_company
+import menuadmin.adminapp.generated.resources.menus_logo_none
+import menuadmin.adminapp.generated.resources.menus_logo_preview
+import menuadmin.adminapp.generated.resources.menus_logo_remove
+import menuadmin.adminapp.generated.resources.menus_logo_restaurant
+import menuadmin.adminapp.generated.resources.menus_logo_upload
+import menuadmin.adminapp.generated.resources.menus_logo_uploading
+import menuadmin.adminapp.generated.resources.menus_new
+import menuadmin.adminapp.generated.resources.menus_no_recipes_associated
+import menuadmin.adminapp.generated.resources.menus_recipe_ingredients_short
+import menuadmin.adminapp.generated.resources.menus_recipe_not_selected
+import menuadmin.adminapp.generated.resources.menus_recipe_selected
+import menuadmin.adminapp.generated.resources.menus_subtitle
+import menuadmin.adminapp.generated.resources.menus_title
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Dish
 import org.apptolast.menuadmin.domain.model.Menu
@@ -67,6 +109,7 @@ import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 
 @Composable
@@ -162,9 +205,9 @@ fun MenusContent(
     // Delete confirmation dialog
     uiState.menuToDelete?.let { menu ->
         ConfirmDialog(
-            title = "Eliminar menu",
-            message = "Se archivara el menu \"${menu.name}\". Esta accion se puede deshacer.",
-            confirmText = "Eliminar",
+            title = stringResource(Res.string.menus_delete_title),
+            message = stringResource(Res.string.menus_delete_message, menu.name),
+            confirmText = stringResource(Res.string.action_delete),
             onConfirm = onConfirmDeleteMenu,
             onDismiss = onDismissDeleteDialog,
             isDanger = true,
@@ -208,19 +251,23 @@ private fun MenuEditorForm(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Volver",
+                        contentDescription = stringResource(Res.string.action_back),
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
                 Column {
                     Text(
-                        text = if (uiState.editingMenu != null) "Editar Menu" else "Nuevo Menu",
+                        text = if (uiState.editingMenu != null) {
+                            stringResource(Res.string.menus_form_edit_title)
+                        } else {
+                            stringResource(Res.string.menus_form_new_title)
+                        },
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Configura el menu y selecciona las recetas",
+                        text = stringResource(Res.string.menus_form_subtitle),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -243,8 +290,8 @@ private fun MenuEditorForm(
                 OutlinedTextField(
                     value = uiState.formName,
                     onValueChange = onFormNameChange,
-                    label = { Text("Nombre del Menu") },
-                    placeholder = { Text("Ej. Menu Primavera 2026") },
+                    label = { Text(stringResource(Res.string.menus_form_name_label)) },
+                    placeholder = { Text(stringResource(Res.string.menus_form_name_hint)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -256,8 +303,8 @@ private fun MenuEditorForm(
                 OutlinedTextField(
                     value = uiState.formDescription,
                     onValueChange = onFormDescriptionChange,
-                    label = { Text("Descripcion") },
-                    placeholder = { Text("Descripcion del menu...") },
+                    label = { Text(stringResource(Res.string.field_description)) },
+                    placeholder = { Text(stringResource(Res.string.menus_form_description_hint)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -275,7 +322,7 @@ private fun MenuEditorForm(
                 verticalAlignment = Alignment.Top,
             ) {
                 LogoUploadField(
-                    label = "Logo del Restaurante",
+                    label = stringResource(Res.string.menus_logo_restaurant),
                     imageUrl = uiState.formRestaurantLogoUrl,
                     isUploading = uiState.isUploadingRestaurantLogo,
                     onPick = onPickRestaurantLogo,
@@ -283,7 +330,7 @@ private fun MenuEditorForm(
                     modifier = Modifier.weight(1f),
                 )
                 LogoUploadField(
-                    label = "Logo de la Empresa",
+                    label = stringResource(Res.string.menus_logo_company),
                     imageUrl = uiState.formCompanyLogoUrl,
                     isUploading = uiState.isUploadingCompanyLogo,
                     onPick = onPickCompanyLogo,
@@ -294,7 +341,7 @@ private fun MenuEditorForm(
 
             // Recipe Selection
             Text(
-                text = "Recetas del Menu",
+                text = stringResource(Res.string.menus_form_recipes_title),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -302,13 +349,17 @@ private fun MenuEditorForm(
 
             if (uiState.availableRecipes.isEmpty()) {
                 Text(
-                    text = "No hay recetas disponibles. Crea recetas primero.",
+                    text = stringResource(Res.string.menus_form_no_recipes),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
                 Text(
-                    text = "${uiState.formSelectedRecipeIds.size} de ${uiState.availableRecipes.size} seleccionadas",
+                    text = stringResource(
+                        Res.string.menus_form_recipes_selected,
+                        uiState.formSelectedRecipeIds.size,
+                        uiState.availableRecipes.size,
+                    ),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -358,7 +409,11 @@ private fun MenuEditorForm(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (uiState.editingMenu != null) "Guardar Cambios" else "Crear Menu",
+                    text = if (uiState.editingMenu != null) {
+                        stringResource(Res.string.menus_form_save_changes)
+                    } else {
+                        stringResource(Res.string.menus_form_create)
+                    },
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -407,7 +462,7 @@ private fun LogoUploadField(
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                         Text(
-                            text = "Subiendo...",
+                            text = stringResource(Res.string.menus_logo_uploading),
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -417,7 +472,7 @@ private fun LogoUploadField(
                 imageUrl.isNotBlank() -> {
                     AsyncImage(
                         model = imageUrl,
-                        contentDescription = "Vista previa de $label",
+                        contentDescription = stringResource(Res.string.menus_logo_preview, label),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize()
@@ -437,7 +492,7 @@ private fun LogoUploadField(
                             modifier = Modifier.size(28.dp),
                         )
                         Text(
-                            text = "Sin logo",
+                            text = stringResource(Res.string.menus_logo_none),
                             fontSize = 12.sp,
                             color = Color.Gray,
                         )
@@ -457,11 +512,17 @@ private fun LogoUploadField(
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(if (imageUrl.isNotBlank()) "Cambiar logo" else "Subir logo")
+                Text(
+                    if (imageUrl.isNotBlank()) {
+                        stringResource(Res.string.menus_logo_change)
+                    } else {
+                        stringResource(Res.string.menus_logo_upload)
+                    },
+                )
             }
             if (imageUrl.isNotBlank() && !isUploading) {
                 TextButton(onClick = onRemove) {
-                    Text("Quitar", color = Red500)
+                    Text(stringResource(Res.string.menus_logo_remove), color = Red500)
                 }
             }
         }
@@ -487,7 +548,11 @@ private fun RecipeSelectionRow(
     ) {
         Icon(
             imageVector = if (isSelected) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
-            contentDescription = if (isSelected) "Seleccionada" else "No seleccionada",
+            contentDescription = if (isSelected) {
+                stringResource(Res.string.menus_recipe_selected)
+            } else {
+                stringResource(Res.string.menus_recipe_not_selected)
+            },
             tint = if (isSelected) Blue500 else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp),
         )
@@ -509,7 +574,7 @@ private fun RecipeSelectionRow(
             }
         }
         Text(
-            text = "${recipe.ingredientCount} ing.",
+            text = stringResource(Res.string.menus_recipe_ingredients_short, recipe.ingredientCount),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -540,13 +605,13 @@ private fun MenuListView(
         ) {
             Column {
                 Text(
-                    text = "Menus",
+                    text = stringResource(Res.string.menus_title),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Gestiona los menus y sus alergenos",
+                    text = stringResource(Res.string.menus_subtitle),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -558,13 +623,13 @@ private fun MenuListView(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Nuevo",
+                    contentDescription = stringResource(Res.string.menus_new),
                     tint = Color.White,
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Nuevo Menu",
+                    text = stringResource(Res.string.menus_new),
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -633,19 +698,19 @@ private fun MenuCard(
                 ) {
                     if (menu.sections.isNotEmpty()) {
                         Badge(
-                            text = "${menu.sections.size} secciones",
+                            text = stringResource(Res.string.menus_badge_sections, menu.sections.size),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     if (menu.dishes.isNotEmpty()) {
                         Badge(
-                            text = "${menu.dishes.size} platos",
+                            text = stringResource(Res.string.menus_badge_dishes, menu.dishes.size),
                             color = Green500,
                         )
                     }
                     if (menu.recipes.isNotEmpty()) {
                         Badge(
-                            text = "${menu.recipes.size} recetas",
+                            text = stringResource(Res.string.menus_badge_recipes, menu.recipes.size),
                             color = Blue500,
                         )
                     }
@@ -658,7 +723,11 @@ private fun MenuCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = if (menu.published) "Activo" else "Activar",
+                        text = if (menu.published) {
+                            stringResource(Res.string.menus_active)
+                        } else {
+                            stringResource(Res.string.menus_activate)
+                        },
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = if (menu.published) Green500 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -681,7 +750,7 @@ private fun MenuCard(
                 IconButton(onClick = onEdit) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
-                        contentDescription = "Editar",
+                        contentDescription = stringResource(Res.string.action_edit),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp),
                     )
@@ -689,7 +758,7 @@ private fun MenuCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = "Eliminar",
+                        contentDescription = stringResource(Res.string.action_delete),
                         tint = Red500,
                         modifier = Modifier.size(20.dp),
                     )
@@ -746,7 +815,7 @@ private fun AllergenMatrixView(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Volver",
+                    contentDescription = stringResource(Res.string.action_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -759,7 +828,7 @@ private fun AllergenMatrixView(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "Menu de Alergenos",
+                    text = stringResource(Res.string.menus_allergen_menu_title),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -771,11 +840,11 @@ private fun AllergenMatrixView(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PictureAsPdf,
-                    contentDescription = "Exportar PDF",
+                    contentDescription = stringResource(Res.string.menus_export_pdf),
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Exportar PDF")
+                Text(stringResource(Res.string.menus_export_pdf))
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -790,7 +859,7 @@ private fun AllergenMatrixView(
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Editar Menu", color = Color.White)
+                Text(stringResource(Res.string.menus_edit_menu), color = Color.White)
             }
             Spacer(modifier = Modifier.width(8.dp))
             OutlinedButton(
@@ -800,11 +869,11 @@ private fun AllergenMatrixView(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Eliminar",
+                    contentDescription = stringResource(Res.string.action_delete),
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Eliminar")
+                Text(stringResource(Res.string.action_delete))
             }
         }
 
@@ -822,8 +891,7 @@ private fun AllergenMatrixView(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Generar Menu Adaptado (Libre de...): Selecciona una categoria y consulta " +
-                    "la tabla de alergenos para cada plato.",
+                text = stringResource(Res.string.menus_generate_adapted),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -862,8 +930,7 @@ private fun AllergenMatrixView(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Este menu no tiene recetas asociadas. " +
-                        "Edita el menu para seleccionar recetas y ver la tabla de alergenos.",
+                    text = stringResource(Res.string.menus_no_recipes_associated),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -35,9 +35,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.action_save
+import menuadmin.adminapp.generated.resources.profile_account
+import menuadmin.adminapp.generated.resources.profile_edit_name
+import menuadmin.adminapp.generated.resources.profile_field_email
+import menuadmin.adminapp.generated.resources.profile_field_email_verified
+import menuadmin.adminapp.generated.resources.profile_field_name
+import menuadmin.adminapp.generated.resources.profile_field_role
+import menuadmin.adminapp.generated.resources.profile_field_user_id
+import menuadmin.adminapp.generated.resources.profile_subtitle
+import menuadmin.adminapp.generated.resources.profile_title
+import menuadmin.adminapp.generated.resources.profile_value_no
+import menuadmin.adminapp.generated.resources.profile_value_unavailable
+import menuadmin.adminapp.generated.resources.profile_value_yes
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -74,13 +90,13 @@ fun ProfileContent(
         // Header
         Column {
             Text(
-                text = "Mi Perfil",
+                text = stringResource(Res.string.profile_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Informacion de tu cuenta",
+                text = stringResource(Res.string.profile_subtitle),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -98,7 +114,7 @@ fun ProfileContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
-                    text = "Cuenta",
+                    text = stringResource(Res.string.profile_account),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -113,12 +129,19 @@ fun ProfileContent(
                     onSave = onSaveName,
                     onCancel = onCancelEditName,
                 )
-                InfoRow(label = "Correo", value = uiState.email ?: "No disponible")
-                InfoRow(label = "ID de usuario", value = uiState.userId ?: "—")
-                InfoRow(label = "Rol", value = uiState.roleLabel ?: "—")
                 InfoRow(
-                    label = "Correo verificado",
-                    value = if (uiState.emailVerified) "Si" else "No",
+                    label = stringResource(Res.string.profile_field_email),
+                    value = uiState.email ?: stringResource(Res.string.profile_value_unavailable),
+                )
+                InfoRow(label = stringResource(Res.string.profile_field_user_id), value = uiState.userId ?: "—")
+                InfoRow(label = stringResource(Res.string.profile_field_role), value = uiState.roleLabel ?: "—")
+                InfoRow(
+                    label = stringResource(Res.string.profile_field_email_verified),
+                    value = if (uiState.emailVerified) {
+                        stringResource(Res.string.profile_value_yes)
+                    } else {
+                        stringResource(Res.string.profile_value_no)
+                    },
                 )
             }
         }
@@ -145,7 +168,7 @@ private fun EditableNameRow(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "Nombre",
+            text = stringResource(Res.string.profile_field_name),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -177,11 +200,15 @@ private fun EditableNameRow(
                             strokeWidth = 2.dp,
                         )
                     } else {
-                        Text("Guardar", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            stringResource(Res.string.action_save),
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                        )
                     }
                 }
                 TextButton(onClick = onCancel, enabled = !isSaving) {
-                    Text("Cancelar")
+                    Text(stringResource(Res.string.action_cancel))
                 }
             }
         } else {
@@ -190,14 +217,14 @@ private fun EditableNameRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = name ?: "No disponible",
+                    text = name ?: stringResource(Res.string.profile_value_unavailable),
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 IconButton(onClick = onStartEdit, modifier = Modifier.size(28.dp)) {
                     Icon(
                         imageVector = Icons.Outlined.Edit,
-                        contentDescription = "Editar nombre",
+                        contentDescription = stringResource(Res.string.profile_edit_name),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp),
                     )

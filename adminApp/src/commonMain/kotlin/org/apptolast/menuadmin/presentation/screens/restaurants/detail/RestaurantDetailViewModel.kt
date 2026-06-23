@@ -9,11 +9,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.error_unknown
+import menuadmin.adminapp.generated.resources.restaurants_error_loading_detail
+import menuadmin.adminapp.generated.resources.restaurants_error_saving
+import menuadmin.adminapp.generated.resources.restaurants_not_found
+import menuadmin.adminapp.generated.resources.restaurants_updated
 import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
+import org.jetbrains.compose.resources.getString
 
 class RestaurantDetailViewModel(
     private val restaurantRepository: RestaurantRepository,
@@ -53,18 +60,23 @@ class RestaurantDetailViewModel(
                         )
                     }
                 } else {
+                    val message = getString(Res.string.restaurants_not_found)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = "Restaurante no encontrado",
+                            error = message,
                         )
                     }
                 }
             } catch (e: Exception) {
+                val errorMessage = getString(
+                    Res.string.restaurants_error_loading_detail,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Error al cargar el restaurante: ${e.message ?: "Error desconocido"}",
+                        error = errorMessage,
                     )
                 }
             }
@@ -124,19 +136,24 @@ class RestaurantDetailViewModel(
                     ),
                 )
                 selectedRestaurantHolder.select(updated)
+                val successMessage = getString(Res.string.restaurants_updated)
                 _uiState.update {
                     it.copy(
                         isSaving = false,
                         isEditing = false,
                         restaurant = updated,
-                        successMessage = "Restaurante actualizado",
+                        successMessage = successMessage,
                     )
                 }
             } catch (e: Exception) {
+                val errorMessage = getString(
+                    Res.string.restaurants_error_saving,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
                 _uiState.update {
                     it.copy(
                         isSaving = false,
-                        error = "Error al guardar: ${e.message ?: "Error desconocido"}",
+                        error = errorMessage,
                     )
                 }
             }

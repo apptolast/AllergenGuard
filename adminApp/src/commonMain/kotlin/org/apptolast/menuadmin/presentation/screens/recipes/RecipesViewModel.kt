@@ -9,11 +9,17 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.recipes_error_deleting
+import menuadmin.adminapp.generated.resources.recipes_error_loading
+import menuadmin.adminapp.generated.resources.recipes_error_saving
+import menuadmin.adminapp.generated.resources.recipes_error_uploading_image
 import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.jetbrains.compose.resources.getString
 
 class RecipesViewModel(
     private val recipeRepository: RecipeRepository,
@@ -52,7 +58,7 @@ class RecipesViewModel(
             emit(
                 _formState.value.copy(
                     isLoading = false,
-                    error = throwable.message ?: "Error al cargar recetas",
+                    error = throwable.message ?: getString(Res.string.recipes_error_loading),
                 ),
             )
         }
@@ -127,7 +133,7 @@ class RecipesViewModel(
             } catch (e: Exception) {
                 _formState.value = _formState.value.copy(
                     isUploadingImage = false,
-                    error = e.message ?: "Error al subir la imagen",
+                    error = e.message ?: getString(Res.string.recipes_error_uploading_image),
                 )
             }
         }
@@ -207,7 +213,7 @@ class RecipesViewModel(
             } catch (e: Exception) {
                 _formState.value = _formState.value.copy(
                     isSaving = false,
-                    error = e.message ?: "Error al guardar receta",
+                    error = e.message ?: getString(Res.string.recipes_error_saving),
                 )
             }
         }
@@ -220,7 +226,7 @@ class RecipesViewModel(
                 onDismissEditor()
             } catch (e: Exception) {
                 _formState.value = _formState.value.copy(
-                    error = e.message ?: "Error al eliminar receta",
+                    error = e.message ?: getString(Res.string.recipes_error_deleting),
                 )
             }
         }

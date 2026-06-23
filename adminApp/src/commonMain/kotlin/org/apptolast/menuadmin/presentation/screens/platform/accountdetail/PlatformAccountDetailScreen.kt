@@ -43,6 +43,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_back
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.action_edit
+import menuadmin.adminapp.generated.resources.action_save
+import menuadmin.adminapp.generated.resources.platform_detail_email_label
+import menuadmin.adminapp.generated.resources.platform_detail_empty
+import menuadmin.adminapp.generated.resources.platform_detail_form_edit_title
+import menuadmin.adminapp.generated.resources.platform_detail_form_invite_title
+import menuadmin.adminapp.generated.resources.platform_detail_invite
+import menuadmin.adminapp.generated.resources.platform_detail_no_restaurants
+import menuadmin.adminapp.generated.resources.platform_detail_remove
+import menuadmin.adminapp.generated.resources.platform_detail_remove_confirm
+import menuadmin.adminapp.generated.resources.platform_detail_remove_title
+import menuadmin.adminapp.generated.resources.platform_detail_restaurant_count
+import menuadmin.adminapp.generated.resources.platform_detail_restaurants_assigned
+import menuadmin.adminapp.generated.resources.platform_detail_role_admin
+import menuadmin.adminapp.generated.resources.platform_detail_role_label
+import menuadmin.adminapp.generated.resources.platform_detail_role_manager
+import menuadmin.adminapp.generated.resources.platform_detail_role_manager_full
+import menuadmin.adminapp.generated.resources.platform_detail_status_active
+import menuadmin.adminapp.generated.resources.platform_detail_status_pending
+import menuadmin.adminapp.generated.resources.platform_detail_subtitle
 import org.apptolast.menuadmin.domain.model.AccountRole
 import org.apptolast.menuadmin.domain.model.AccountUser
 import org.apptolast.menuadmin.domain.model.AccountUserStatus
@@ -52,6 +75,7 @@ import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -105,7 +129,11 @@ fun PlatformAccountDetailContent(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        stringResource(Res.string.action_back),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
                 Column {
                     Text(
@@ -115,7 +143,7 @@ fun PlatformAccountDetailContent(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        "Usuarios y roles de la cuenta",
+                        stringResource(Res.string.platform_detail_subtitle),
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -126,7 +154,7 @@ fun PlatformAccountDetailContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Blue500),
                 shape = RoundedCornerShape(8.dp),
             ) {
-                Text("Invitar usuario", color = Color.White)
+                Text(stringResource(Res.string.platform_detail_invite), color = Color.White)
             }
         }
 
@@ -139,7 +167,7 @@ fun PlatformAccountDetailContent(
             }
         } else if (uiState.users.isEmpty()) {
             Text(
-                "Esta cuenta no tiene usuarios. Invita al primero.",
+                stringResource(Res.string.platform_detail_empty),
                 fontSize = 14.sp,
                 color = MenuAdminTheme.colors.textMuted,
             )
@@ -156,10 +184,16 @@ fun PlatformAccountDetailContent(
     uiState.removingUser?.let { user ->
         AlertDialog(
             onDismissRequest = onDismissRemove,
-            title = { Text("Quitar usuario", fontWeight = FontWeight.Bold, color = Red500) },
+            title = {
+                Text(
+                    stringResource(Res.string.platform_detail_remove_title),
+                    fontWeight = FontWeight.Bold,
+                    color = Red500,
+                )
+            },
             text = {
                 Text(
-                    "¿Quitar a ${user.email} de la cuenta? Se eliminará su acceso (membresía e invitación).",
+                    stringResource(Res.string.platform_detail_remove_confirm, user.email),
                     fontSize = 14.sp,
                 )
             },
@@ -177,12 +211,14 @@ fun PlatformAccountDetailContent(
                             strokeWidth = 2.dp,
                         )
                     } else {
-                        Text("Quitar", color = Color.White)
+                        Text(stringResource(Res.string.platform_detail_remove), color = Color.White)
                     }
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismissRemove, enabled = !uiState.isRemoving) { Text("Cancelar") }
+                TextButton(onClick = onDismissRemove, enabled = !uiState.isRemoving) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
             },
             shape = RoundedCornerShape(16.dp),
             containerColor = MaterialTheme.colorScheme.surface,
@@ -219,12 +255,12 @@ private fun UserCard(
                 val statusText = if (user.status ==
                     AccountUserStatus.PENDING
                 ) {
-                    "Pendiente (sin primer login)"
+                    stringResource(Res.string.platform_detail_status_pending)
                 } else {
-                    "Activo"
+                    stringResource(Res.string.platform_detail_status_active)
                 }
                 val detail = if (user.role == AccountRole.RESTAURANT_MANAGER && user.restaurantIds.isNotEmpty()) {
-                    " · ${user.restaurantIds.size} restaurante(s)"
+                    " · " + stringResource(Res.string.platform_detail_restaurant_count, user.restaurantIds.size)
                 } else {
                     ""
                 }
@@ -237,13 +273,18 @@ private fun UserCard(
             IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Outlined.Edit,
-                    "Editar",
+                    stringResource(Res.string.action_edit),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }
             IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.Outlined.Delete, "Quitar", tint = Red500, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Outlined.Delete,
+                    stringResource(Res.string.platform_detail_remove),
+                    tint = Red500,
+                    modifier = Modifier.size(18.dp),
+                )
             }
         }
     }
@@ -261,32 +302,57 @@ private fun UserFormDialog(
     val isInvite = uiState.editingUser == null
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (isInvite) "Invitar usuario" else "Editar usuario", fontWeight = FontWeight.Bold) },
+        title = {
+            Text(
+                if (isInvite) {
+                    stringResource(Res.string.platform_detail_form_invite_title)
+                } else {
+                    stringResource(Res.string.platform_detail_form_edit_title)
+                },
+                fontWeight = FontWeight.Bold,
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = uiState.formEmail,
                     onValueChange = onEmailChange,
-                    label = { Text("Email") },
+                    label = { Text(stringResource(Res.string.platform_detail_email_label)) },
                     singleLine = true,
                     enabled = isInvite, // email is the doc id; not editable once it exists
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                 )
-                Text("Rol", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(Res.string.platform_detail_role_label),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    RoleButton("Administrador", uiState.formRole == AccountRole.ACCOUNT_ADMIN, Modifier.weight(1f)) {
+                    RoleButton(
+                        stringResource(Res.string.platform_detail_role_admin),
+                        uiState.formRole == AccountRole.ACCOUNT_ADMIN,
+                        Modifier.weight(1f),
+                    ) {
                         onRoleChange(AccountRole.ACCOUNT_ADMIN)
                     }
-                    RoleButton("Encargado", uiState.formRole == AccountRole.RESTAURANT_MANAGER, Modifier.weight(1f)) {
+                    RoleButton(
+                        stringResource(Res.string.platform_detail_role_manager),
+                        uiState.formRole == AccountRole.RESTAURANT_MANAGER,
+                        Modifier.weight(1f),
+                    ) {
                         onRoleChange(AccountRole.RESTAURANT_MANAGER)
                     }
                 }
                 if (uiState.formRole == AccountRole.RESTAURANT_MANAGER) {
-                    Text("Restaurantes asignados", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(Res.string.platform_detail_restaurants_assigned),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     if (uiState.accountRestaurants.isEmpty()) {
                         Text(
-                            "La cuenta no tiene restaurantes todavía.",
+                            stringResource(Res.string.platform_detail_no_restaurants),
                             fontSize = 12.sp,
                             color = MenuAdminTheme.colors.textMuted,
                         )
@@ -330,11 +396,15 @@ private fun UserFormDialog(
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Guardar", color = Color.White)
+                    Text(stringResource(Res.string.action_save), color = Color.White)
                 }
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !uiState.isSaving) { Text("Cancelar") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !uiState.isSaving) {
+                Text(stringResource(Res.string.action_cancel))
+            }
+        },
         shape = RoundedCornerShape(16.dp),
         containerColor = MaterialTheme.colorScheme.surface,
     )
@@ -363,10 +433,11 @@ private fun RoleButton(
     }
 }
 
+@Composable
 private fun roleLabel(role: AccountRole): String =
     when (role) {
-        AccountRole.ACCOUNT_ADMIN -> "Administrador"
-        AccountRole.RESTAURANT_MANAGER -> "Encargado de restaurante"
+        AccountRole.ACCOUNT_ADMIN -> stringResource(Res.string.platform_detail_role_admin)
+        AccountRole.RESTAURANT_MANAGER -> stringResource(Res.string.platform_detail_role_manager_full)
     }
 
 @Preview

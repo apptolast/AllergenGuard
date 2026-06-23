@@ -7,12 +7,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.error_unknown
+import menuadmin.adminapp.generated.resources.platform_detail_error_deleting
+import menuadmin.adminapp.generated.resources.platform_detail_error_loading
+import menuadmin.adminapp.generated.resources.platform_detail_error_saving
+import menuadmin.adminapp.generated.resources.platform_detail_invitation_created
+import menuadmin.adminapp.generated.resources.platform_detail_user_removed
+import menuadmin.adminapp.generated.resources.platform_detail_user_updated
 import org.apptolast.menuadmin.domain.model.AccountRole
 import org.apptolast.menuadmin.domain.model.AccountUser
+import org.apptolast.menuadmin.domain.platform.EmailSender
 import org.apptolast.menuadmin.domain.repository.PlatformAdminRepository
+import org.apptolast.menuadmin.presentation.screens.platform.buildInvitationEmail
+import org.jetbrains.compose.resources.getString
 
 class PlatformAccountDetailViewModel(
     private val repository: PlatformAdminRepository,
+    private val emailSender: EmailSender,
     private val accountId: String,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PlatformAccountDetailUiState())
@@ -33,12 +45,14 @@ class PlatformAccountDetailViewModel(
                     it.copy(
                         isLoading = false,
                         accountName = account?.name ?: accountId,
+                        accountLanguage = account?.language ?: "es",
                         users = users,
                         accountRestaurants = restaurants,
                     )
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = e.message ?: "Error al cargar usuarios") }
+                val msg = e.message ?: getString(Res.string.platform_detail_error_loading)
+                _state.update { it.copy(isLoading = false, error = msg) }
             }
         }
     }
@@ -118,24 +132,39 @@ class PlatformAccountDetailViewModel(
                     repository.updateUser(editing.uid, editing.email, accountId, s.formRole, restaurantIds)
                 } else {
                     repository.inviteUser(accountId, email, s.formRole, restaurantIds)
+                    // Best-effort invitation email: never fail the invitation if mail delivery fails.
+                    runCatching {
+                        emailSender.sendInvitationEmail(
+                            buildInvitationEmail(
+                                email = email,
+                                accountName = s.accountName,
+                                role = s.formRole,
+                                accountLanguage = s.accountLanguage,
+                            ),
+                        )
+                    }
                 }
+                val successMessage =
+                    if (editing != null) {
+                        getString(Res.string.platform_detail_user_updated)
+                    } else {
+                        getString(Res.string.platform_detail_invitation_created)
+                    }
                 _state.update {
                     it.copy(
                         isSaving = false,
                         isFormVisible = false,
                         editingUser = null,
-                        successMessage = if (editing !=
-                            null
-                        ) {
-                            "Usuario actualizado"
-                        } else {
-                            "Invitación creada"
-                        },
+                        successMessage = successMessage,
                     )
                 }
                 load()
             } catch (e: Exception) {
-                _state.update { it.copy(isSaving = false, error = "Error al guardar: ${e.message ?: "desconocido"}") }
+                val msg = getString(
+                    Res.string.platform_detail_error_saving,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
+                _state.update { it.copy(isSaving = false, error = msg) }
             }
         }
     }
@@ -150,12 +179,15 @@ class PlatformAccountDetailViewModel(
             _state.update { it.copy(isRemoving = true, error = null) }
             try {
                 repository.removeUser(user.uid, user.email)
-                _state.update { it.copy(isRemoving = false, removingUser = null, successMessage = "Usuario eliminado") }
+                val successMessage = getString(Res.string.platform_detail_user_removed)
+                _state.update { it.copy(isRemoving = false, removingUser = null, successMessage = successMessage) }
                 load()
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(isRemoving = false, error = "Error al eliminar: ${e.message ?: "desconocido"}")
-                }
+                val msg = getString(
+                    Res.string.platform_detail_error_deleting,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
+                _state.update { it.copy(isRemoving = false, error = msg) }
             }
         }
     }

@@ -10,9 +10,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.error_unknown
+import menuadmin.adminapp.generated.resources.restaurants_created
+import menuadmin.adminapp.generated.resources.restaurants_deleted
+import menuadmin.adminapp.generated.resources.restaurants_error_deleting
+import menuadmin.adminapp.generated.resources.restaurants_error_loading
+import menuadmin.adminapp.generated.resources.restaurants_error_saving
+import menuadmin.adminapp.generated.resources.restaurants_updated
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
+import org.jetbrains.compose.resources.getString
 
 class RestaurantsListViewModel(
     private val restaurantRepository: RestaurantRepository,
@@ -35,7 +44,7 @@ class RestaurantsListViewModel(
             emit(
                 _formState.value.copy(
                     isLoading = false,
-                    error = throwable.message ?: "Error al cargar restaurantes",
+                    error = throwable.message ?: getString(Res.string.restaurants_error_loading),
                 ),
             )
         }
@@ -131,23 +140,28 @@ class RestaurantsListViewModel(
                         ),
                     )
                 }
+                val successMessage = if (existing != null) {
+                    getString(Res.string.restaurants_updated)
+                } else {
+                    getString(Res.string.restaurants_created)
+                }
                 _formState.update {
                     it.copy(
                         isSaving = false,
                         isFormVisible = false,
                         editingRestaurant = null,
-                        successMessage = if (existing != null) {
-                            "Restaurante actualizado"
-                        } else {
-                            "Restaurante creado"
-                        },
+                        successMessage = successMessage,
                     )
                 }
             } catch (e: Exception) {
+                val errorMessage = getString(
+                    Res.string.restaurants_error_saving,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
                 _formState.update {
                     it.copy(
                         isSaving = false,
-                        error = "Error al guardar: ${e.message ?: "Error desconocido"}",
+                        error = errorMessage,
                     )
                 }
             }
@@ -159,10 +173,15 @@ class RestaurantsListViewModel(
             _formState.update { it.copy(error = null) }
             try {
                 restaurantRepository.deleteRestaurant(id)
-                _formState.update { it.copy(successMessage = "Restaurante eliminado") }
+                val message = getString(Res.string.restaurants_deleted)
+                _formState.update { it.copy(successMessage = message) }
             } catch (e: Exception) {
+                val errorMessage = getString(
+                    Res.string.restaurants_error_deleting,
+                    e.message ?: getString(Res.string.error_unknown),
+                )
                 _formState.update {
-                    it.copy(error = "Error al eliminar: ${e.message ?: "Error desconocido"}")
+                    it.copy(error = errorMessage)
                 }
             }
         }

@@ -41,6 +41,21 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import menuadmin.adminapp.generated.resources.Res
 import menuadmin.adminapp.generated.resources.logo_android
+import menuadmin.adminapp.generated.resources.nav_backup
+import menuadmin.adminapp.generated.resources.nav_dashboard
+import menuadmin.adminapp.generated.resources.nav_ingredients
+import menuadmin.adminapp.generated.resources.nav_section_main
+import menuadmin.adminapp.generated.resources.nav_section_tools
+import menuadmin.adminapp.generated.resources.nav_settings
+import menuadmin.adminapp.generated.resources.sidebar_brand_name
+import menuadmin.adminapp.generated.resources.sidebar_logo_description
+import menuadmin.adminapp.generated.resources.sidebar_logout
+import menuadmin.adminapp.generated.resources.sidebar_nav_accounts
+import menuadmin.adminapp.generated.resources.sidebar_nav_profile
+import menuadmin.adminapp.generated.resources.sidebar_nav_restaurants
+import menuadmin.adminapp.generated.resources.sidebar_section_account
+import menuadmin.adminapp.generated.resources.sidebar_section_platform
+import menuadmin.adminapp.generated.resources.sidebar_version
 import org.apptolast.menuadmin.AppInfo
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
@@ -55,6 +70,7 @@ import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.SidebarDark
 import org.apptolast.menuadmin.presentation.theme.SidebarDarkSurface
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun Sidebar(
@@ -88,12 +104,12 @@ fun Sidebar(
         ) {
             Icon(
                 painter = painterResource(Res.drawable.logo_android),
-                contentDescription = "Allergen Guard",
+                contentDescription = stringResource(Res.string.sidebar_logo_description),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(160.dp).offset(x = (-40).dp),
             )
             Text(
-                text = "Allergen\nGuard",
+                text = stringResource(Res.string.sidebar_brand_name),
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -121,25 +137,25 @@ fun Sidebar(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Section: MENU PRINCIPAL
-        SectionHeader(title = "MENU PRINCIPAL")
+        SectionHeader(title = stringResource(Res.string.nav_section_main))
 
         Spacer(modifier = Modifier.height(8.dp))
 
         NavItem(
             icon = Icons.Outlined.Dashboard,
-            label = "Dashboard",
+            label = stringResource(Res.string.nav_dashboard),
             isSelected = isRoute { it.hasRoute<DashboardRoute>() },
             onClick = { onNavigate(DashboardRoute) },
         )
         NavItem(
             icon = Icons.Outlined.Inventory2,
-            label = "Ingredientes",
+            label = stringResource(Res.string.nav_ingredients),
             isSelected = isRoute { it.hasRoute<IngredientsRoute>() },
             onClick = { onNavigate(IngredientsRoute) },
         )
         NavItem(
             icon = Icons.Outlined.Storefront,
-            label = "Restaurantes",
+            label = stringResource(Res.string.sidebar_nav_restaurants),
             isSelected = isRoute { it.hasRoute<RestaurantsRoute>() || it.hasRoute<RestaurantDetailRoute>() },
             onClick = { onNavigate(RestaurantsRoute) },
         )
@@ -148,11 +164,11 @@ fun Sidebar(
 
         // Section: PLATAFORMA (platform owners only)
         if (isSuperAdmin) {
-            SectionHeader(title = "PLATAFORMA")
+            SectionHeader(title = stringResource(Res.string.sidebar_section_platform))
             Spacer(modifier = Modifier.height(8.dp))
             NavItem(
                 icon = Icons.Outlined.Business,
-                label = "Cuentas",
+                label = stringResource(Res.string.sidebar_nav_accounts),
                 isSelected = isRoute {
                     it.hasRoute<PlatformAccountsRoute>() || it.hasRoute<PlatformAccountDetailRoute>()
                 },
@@ -162,7 +178,7 @@ fun Sidebar(
         }
 
         // Section: HERRAMIENTAS
-        SectionHeader(title = "HERRAMIENTAS")
+        SectionHeader(title = stringResource(Res.string.nav_section_tools))
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -170,14 +186,14 @@ fun Sidebar(
         if (isAccountAdmin) {
             NavItem(
                 icon = Icons.Outlined.Storage,
-                label = "Backup / Restaurar",
+                label = stringResource(Res.string.nav_backup),
                 isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
                 onClick = { onNavigate(BackupRestoreRoute) },
             )
         }
         NavItem(
             icon = Icons.Outlined.Settings,
-            label = "Configuracion",
+            label = stringResource(Res.string.nav_settings),
             isSelected = isRoute { it.hasRoute<SettingsRoute>() },
             onClick = { onNavigate(SettingsRoute) },
         )
@@ -185,13 +201,13 @@ fun Sidebar(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Section: CUENTA
-        SectionHeader(title = "CUENTA")
+        SectionHeader(title = stringResource(Res.string.sidebar_section_account))
 
         Spacer(modifier = Modifier.height(8.dp))
 
         NavItem(
             icon = Icons.Outlined.Person,
-            label = "Mi Perfil",
+            label = stringResource(Res.string.sidebar_nav_profile),
             isSelected = isRoute { it.hasRoute<ProfileRoute>() },
             onClick = { onNavigate(ProfileRoute) },
         )
@@ -199,7 +215,7 @@ fun Sidebar(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "Versión ${AppInfo.VERSION}",
+            text = stringResource(Res.string.sidebar_version, AppInfo.VERSION),
             color = MenuAdminTheme.colors.textMuted,
             fontSize = 11.sp,
             textAlign = TextAlign.Center,
@@ -214,7 +230,7 @@ fun Sidebar(
 
         NavItem(
             icon = Icons.AutoMirrored.Outlined.Logout,
-            label = "Cerrar sesion",
+            label = stringResource(Res.string.sidebar_logout),
             isSelected = false,
             onClick = onLogout,
             destructive = true,

@@ -43,12 +43,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.action_edit
+import menuadmin.adminapp.generated.resources.action_save
+import menuadmin.adminapp.generated.resources.field_description
+import menuadmin.adminapp.generated.resources.field_name
+import menuadmin.adminapp.generated.resources.restaurants_active
+import menuadmin.adminapp.generated.resources.restaurants_edit
+import menuadmin.adminapp.generated.resources.restaurants_empty_admin
+import menuadmin.adminapp.generated.resources.restaurants_empty_manager
+import menuadmin.adminapp.generated.resources.restaurants_field_address
+import menuadmin.adminapp.generated.resources.restaurants_field_phone
+import menuadmin.adminapp.generated.resources.restaurants_field_slug
+import menuadmin.adminapp.generated.resources.restaurants_inactive
+import menuadmin.adminapp.generated.resources.restaurants_new
+import menuadmin.adminapp.generated.resources.restaurants_subtitle
+import menuadmin.adminapp.generated.resources.restaurants_title
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -105,13 +123,13 @@ fun RestaurantsListContent(
         ) {
             Column {
                 Text(
-                    text = "Restaurantes",
+                    text = stringResource(Res.string.restaurants_title),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Gestiona tus restaurantes",
+                    text = stringResource(Res.string.restaurants_subtitle),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -123,7 +141,7 @@ fun RestaurantsListContent(
                     colors = ButtonDefaults.buttonColors(containerColor = Blue500),
                     shape = RoundedCornerShape(8.dp),
                 ) {
-                    Text("Nuevo Restaurante", color = Color.White)
+                    Text(stringResource(Res.string.restaurants_new), color = Color.White)
                 }
             }
         }
@@ -151,9 +169,9 @@ fun RestaurantsListContent(
         } else if (uiState.restaurants.isEmpty()) {
             Text(
                 text = if (uiState.isAccountAdmin) {
-                    "No tienes restaurantes. Crea uno con el boton superior."
+                    stringResource(Res.string.restaurants_empty_admin)
                 } else {
-                    "No tienes restaurantes asignados."
+                    stringResource(Res.string.restaurants_empty_manager)
                 },
                 fontSize = 14.sp,
                 color = MenuAdminTheme.colors.textMuted,
@@ -238,7 +256,7 @@ private fun RestaurantCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Edit,
-                        contentDescription = "Editar",
+                        contentDescription = stringResource(Res.string.action_edit),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp),
                     )
@@ -311,7 +329,11 @@ private fun RestaurantCard(
 
             // Active/Inactive badge
             Text(
-                text = if (restaurant.active) "Activo" else "Inactivo",
+                text = if (restaurant.active) {
+                    stringResource(Res.string.restaurants_active)
+                } else {
+                    stringResource(Res.string.restaurants_inactive)
+                },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (restaurant.active) Green500 else Red500,
@@ -337,7 +359,11 @@ private fun RestaurantFormDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = if (uiState.editingRestaurant != null) "Editar Restaurante" else "Nuevo Restaurante",
+                text = if (uiState.editingRestaurant != null) {
+                    stringResource(Res.string.restaurants_edit)
+                } else {
+                    stringResource(Res.string.restaurants_new)
+                },
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -349,7 +375,7 @@ private fun RestaurantFormDialog(
                 OutlinedTextField(
                     value = uiState.formName,
                     onValueChange = onNameChange,
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(Res.string.field_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -357,7 +383,7 @@ private fun RestaurantFormDialog(
                 OutlinedTextField(
                     value = uiState.formSlug,
                     onValueChange = onSlugChange,
-                    label = { Text("Slug") },
+                    label = { Text(stringResource(Res.string.restaurants_field_slug)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -365,7 +391,7 @@ private fun RestaurantFormDialog(
                 OutlinedTextField(
                     value = uiState.formDescription,
                     onValueChange = onDescriptionChange,
-                    label = { Text("Descripcion") },
+                    label = { Text(stringResource(Res.string.field_description)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     minLines = 2,
@@ -373,7 +399,7 @@ private fun RestaurantFormDialog(
                 OutlinedTextField(
                     value = uiState.formAddress,
                     onValueChange = onAddressChange,
-                    label = { Text("Direccion") },
+                    label = { Text(stringResource(Res.string.restaurants_field_address)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -381,7 +407,7 @@ private fun RestaurantFormDialog(
                 OutlinedTextField(
                     value = uiState.formPhone,
                     onValueChange = onPhoneChange,
-                    label = { Text("Telefono") },
+                    label = { Text(stringResource(Res.string.restaurants_field_phone)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -402,7 +428,7 @@ private fun RestaurantFormDialog(
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Guardar", color = Color.White)
+                    Text(stringResource(Res.string.action_save), color = Color.White)
                 }
             }
         },
@@ -411,7 +437,7 @@ private fun RestaurantFormDialog(
                 onClick = onDismiss,
                 enabled = !uiState.isSaving,
             ) {
-                Text("Cancelar")
+                Text(stringResource(Res.string.action_cancel))
             }
         },
         shape = RoundedCornerShape(16.dp),

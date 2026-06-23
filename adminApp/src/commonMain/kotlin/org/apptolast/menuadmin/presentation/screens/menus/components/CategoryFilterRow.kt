@@ -14,8 +14,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.menus_filter_all
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CategoryFilterRow(
@@ -34,7 +37,7 @@ fun CategoryFilterRow(
             onClick = { onCategorySelected(null) },
             label = {
                 Text(
-                    text = "Todos",
+                    text = stringResource(Res.string.menus_filter_all),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                 )
