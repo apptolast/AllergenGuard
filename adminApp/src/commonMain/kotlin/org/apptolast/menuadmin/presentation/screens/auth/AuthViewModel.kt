@@ -7,15 +7,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.repository.AuthRepository
-import org.apptolast.menuadmin.domain.repository.WhitelistRepository
+import org.apptolast.menuadmin.domain.repository.MembershipRepository
 
 class AuthViewModel(
     private val authRepository: AuthRepository,
-    private val whitelistRepository: WhitelistRepository,
+    private val membershipRepository: MembershipRepository,
+    private val currentAccountHolder: CurrentAccountHolder,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AuthUiState(isAuthenticated = authRepository.isLoggedIn))
+    // Don't enter the app until the tenant membership is resolved. If a token is already stored, start
+    // in the "resolving" state and resolve before flipping isAuthenticated (so scoped repos always have
+    // an account).
+    private val _uiState = MutableStateFlow(AuthUiState(isResolvingSession = authRepository.isLoggedIn))
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    init {
+        if (authRepository.isLoggedIn) resolveSessionAndEnter()
+    }
 
     fun onEmailChange(email: String) {
         _uiState.update { it.copy(email = email, error = null) }
@@ -43,7 +52,7 @@ class AuthViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 authRepository.login(state.email.trim().lowercase(), state.password)
-                _uiState.update { it.copy(isLoading = false, isAuthenticated = true) }
+                resolveSessionAndEnter()
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -69,9 +78,9 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // Whitelist gate: only emails pre-authorised by an admin can register. This is a UX
-                // gate; the actual enforcement lives in the Firestore security rules.
-                if (!whitelistRepository.isWhitelisted(email)) {
+                // Invitation gate: only emails the platform owner has invited can register. The invitation
+                // also carries the account + role; the membership is materialized in resolveSessionAndEnter().
+                if (membershipRepository.getInvitation(email) == null) {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -86,7 +95,7 @@ class AuthViewModel(
                     state.password,
                     state.name.trim().ifEmpty { null },
                 )
-                _uiState.update { it.copy(isLoading = false, isAuthenticated = true) }
+                resolveSessionAndEnter()
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -100,12 +109,73 @@ class AuthViewModel(
 
     fun onLogout() {
         authRepository.logout()
-        _uiState.update {
-            AuthUiState(isAuthenticated = false)
-        }
+        currentAccountHolder.clear()
+        _uiState.update { AuthUiState(isAuthenticated = false) }
     }
 
     fun onDismissError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    /**
+     * Resolves the signed-in user's [org.apptolast.menuadmin.domain.model.AccountSession] (membership, or
+     * materialized from an invitation on first login) into [currentAccountHolder], then enters the app.
+     * A user with neither membership nor invitation is signed out (no account-less access).
+     */
+    private fun resolveSessionAndEnter() {
+        viewModelScope.launch {
+            try {
+                val uid = authRepository.currentUserId
+                val email = authRepository.currentUserEmail
+                if (uid == null) {
+                    failNoAccess()
+                    return@launch
+                }
+                var session = membershipRepository.getMembership(uid)
+                if (session == null && email != null) {
+                    membershipRepository.getInvitation(email)?.let { invitation ->
+                        session = membershipRepository.materializeMembership(uid, invitation)
+                    }
+                }
+                val resolved = session
+                if (resolved == null) {
+                    failNoAccess()
+                } else {
+                    currentAccountHolder.set(resolved)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isResolvingSession = false,
+                            isAuthenticated = true,
+                            error = null,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                // Transient error (e.g. network): keep the token and let the user retry; don't lock them out.
+                currentAccountHolder.clear()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isResolvingSession = false,
+                        isAuthenticated = false,
+                        error = "No se pudo cargar tu cuenta: ${e.message ?: "Error desconocido"}",
+                    )
+                }
+            }
+        }
+    }
+
+    private fun failNoAccess() {
+        authRepository.logout()
+        currentAccountHolder.clear()
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                isResolvingSession = false,
+                isAuthenticated = false,
+                error = "Tu cuenta no tiene acceso. Pide al administrador que te invite.",
+            )
+        }
     }
 }

@@ -4,6 +4,8 @@ import org.apptolast.menuadmin.domain.model.Restaurant
 
 data class RestaurantsListUiState(
     val isLoading: Boolean = true,
+    // Whether the current user may create restaurants (ACCOUNT_ADMIN). Managers only edit assigned ones.
+    val isAccountAdmin: Boolean = false,
     val restaurants: List<Restaurant> = emptyList(),
     val isFormVisible: Boolean = false,
     val editingRestaurant: Restaurant? = null,

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreDocument
 import org.apptolast.menuadmin.domain.model.AllergenType
@@ -16,15 +17,20 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
- * [IngredientRepository] backed by the global Firestore `ingredients` collection. Same caching
- * (StateFlow + lazy load) behaviour as the backend version, so the UI/ViewModels are unchanged.
+ * [IngredientRepository] backed by the account-private Firestore subcollection
+ * `accounts/{accountId}/ingredients`, scoped to the current tenant via [CurrentAccountHolder]. Same
+ * caching (StateFlow + lazy load) behaviour as before, so the UI/ViewModels are unchanged.
  */
 @OptIn(ExperimentalUuidApi::class)
 class FirestoreIngredientRepository(
     private val firestore: FirestoreClient,
+    private val accountHolder: CurrentAccountHolder,
 ) : IngredientRepository {
     private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
     private var hasLoaded = false
+
+    /** Path to the current account's ingredient catalog. */
+    private fun collection(): String = "accounts/${accountHolder.requireAccountId()}/ingredients"
 
     override fun getAllIngredients(): Flow<List<Ingredient>> =
         flow {
@@ -33,28 +39,33 @@ class FirestoreIngredientRepository(
         }
 
     private suspend fun refresh() {
-        _ingredients.value = firestore.listDocuments(COLLECTION).map { it.toIngredient() }
+        if (accountHolder.accountIdOrNull == null) {
+            _ingredients.value = emptyList()
+            hasLoaded = true
+            return
+        }
+        _ingredients.value = firestore.listDocuments(collection()).map { it.toIngredient() }
         hasLoaded = true
     }
 
     override suspend fun getIngredientById(id: String): Ingredient? =
-        firestore.getDocument("$COLLECTION/$id")?.toIngredient()
+        firestore.getDocument("${collection()}/$id")?.toIngredient()
 
     override suspend fun addIngredient(ingredient: Ingredient): Ingredient {
         val id = ingredient.id.ifEmpty { Uuid.random().toString() }
-        firestore.patchDocument("$COLLECTION/$id", ingredient.toFields())
+        firestore.patchDocument("${collection()}/$id", ingredient.toFields())
         refresh()
         return _ingredients.value.find { it.id == id } ?: ingredient.copy(id = id)
     }
 
     override suspend fun updateIngredient(ingredient: Ingredient): Ingredient {
-        firestore.patchDocument("$COLLECTION/${ingredient.id}", ingredient.toFields())
+        firestore.patchDocument("${collection()}/${ingredient.id}", ingredient.toFields())
         refresh()
         return _ingredients.value.find { it.id == ingredient.id } ?: ingredient
     }
 
     override suspend fun deleteIngredient(id: String) {
-        firestore.deleteDocument("$COLLECTION/$id")
+        firestore.deleteDocument("${collection()}/$id")
         refresh()
     }
 
@@ -103,8 +114,4 @@ class FirestoreIngredientRepository(
                 mapOf("code" to it.allergenCode, "level" to it.containmentLevel.apiValue)
             },
         )
-
-    private companion object {
-        const val COLLECTION = "ingredients"
-    }
 }

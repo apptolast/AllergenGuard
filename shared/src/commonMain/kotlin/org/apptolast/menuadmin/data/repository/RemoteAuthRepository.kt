@@ -17,6 +17,8 @@ class RemoteAuthRepository(
             ?: FirebaseIdToken.claim(tokenManager.accessToken, "sub")
     override val currentUserId: String?
         get() = FirebaseIdToken.claim(tokenManager.accessToken, "sub")
+    override val currentUserName: String?
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "name")?.takeIf { it.isNotBlank() }
     override val isEmailVerified: Boolean get() = false
 
     override suspend fun login(

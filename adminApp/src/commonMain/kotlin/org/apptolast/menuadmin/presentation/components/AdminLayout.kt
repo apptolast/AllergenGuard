@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
 import org.apptolast.menuadmin.navigation.IngredientsRoute
@@ -30,6 +32,7 @@ import org.apptolast.menuadmin.presentation.screens.profile.ProfileScreen
 import org.apptolast.menuadmin.presentation.screens.restaurants.RestaurantsListScreen
 import org.apptolast.menuadmin.presentation.screens.restaurants.workspace.RestaurantWorkspace
 import org.apptolast.menuadmin.presentation.screens.settings.SettingsScreen
+import org.koin.compose.koinInject
 
 @Composable
 fun AdminLayout(
@@ -40,9 +43,15 @@ fun AdminLayout(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    // Role drives which sidebar tools are shown (admin-only tools are hidden for managers).
+    val accountHolder: CurrentAccountHolder = koinInject()
+    val session by accountHolder.session.collectAsState()
+    val isAccountAdmin = session?.isAccountAdmin ?: false
+
     Row(modifier = modifier.fillMaxSize()) {
         Sidebar(
             currentDestination = currentDestination,
+            isAccountAdmin = isAccountAdmin,
             onNavigate = { route ->
                 navController.navigate(route) {
                     // Always pop back to Dashboard (the start destination) without removing it, so

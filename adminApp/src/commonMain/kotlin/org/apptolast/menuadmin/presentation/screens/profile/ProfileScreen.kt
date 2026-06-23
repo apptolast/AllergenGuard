@@ -54,7 +54,7 @@ fun ProfileContent(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Informacion de tu cuenta de administrador",
+                text = "Informacion de tu cuenta",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -77,9 +77,10 @@ fun ProfileContent(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
+                InfoRow(label = "Nombre", value = uiState.name ?: "No disponible")
                 InfoRow(label = "Correo", value = uiState.email ?: "No disponible")
                 InfoRow(label = "ID de usuario", value = uiState.userId ?: "—")
-                InfoRow(label = "Rol", value = "Administrador")
+                InfoRow(label = "Rol", value = uiState.roleLabel ?: "—")
                 InfoRow(
                     label = "Correo verificado",
                     value = if (uiState.emailVerified) "Si" else "No",
@@ -119,8 +120,10 @@ private fun PreviewProfileContent() {
     MenuAdminTheme {
         ProfileContent(
             uiState = ProfileUiState(
+                name = "Ana Administradora",
                 email = "admin@apptolast.com",
                 userId = "kJ3mZ9x...",
+                roleLabel = "Administrador",
                 emailVerified = true,
             ),
         )

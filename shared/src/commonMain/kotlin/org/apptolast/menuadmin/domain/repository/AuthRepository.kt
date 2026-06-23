@@ -9,6 +9,9 @@ interface AuthRepository {
     /** Stable user id (uid) of the logged-in user. Null if unknown. */
     val currentUserId: String?
 
+    /** Display name of the logged-in user, recovered from the stored token. Null if not set. */
+    val currentUserName: String?
+
     /** Whether the logged-in user's email has been verified. */
     val isEmailVerified: Boolean
 

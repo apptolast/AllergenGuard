@@ -6,6 +6,8 @@ import org.apptolast.menuadmin.domain.model.Ingredient
 
 data class IngredientsUiState(
     val isLoading: Boolean = true,
+    // Whether the current user may write the ingredient catalog (ACCOUNT_ADMIN). Managers see it read-only.
+    val isAccountAdmin: Boolean = false,
     val ingredients: List<Ingredient> = emptyList(),
     val searchQuery: String = "",
     val filterAllergens: Set<AllergenType> = emptySet(),

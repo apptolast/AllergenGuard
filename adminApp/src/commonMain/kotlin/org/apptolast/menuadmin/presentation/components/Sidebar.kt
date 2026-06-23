@@ -59,6 +59,9 @@ fun Sidebar(
     onNavigate: (Any) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
+    // Admin-only tools (Backup/Restore) are hidden for RESTAURANT_MANAGER. Defaults to true so previews
+    // and the admin flow show everything.
+    isAccountAdmin: Boolean = true,
 ) {
     // True if the given typed route is anywhere in the current destination's hierarchy.
     fun isRoute(predicate: (NavDestination) -> Boolean): Boolean = currentDestination?.hierarchy?.any(predicate) == true
@@ -89,7 +92,7 @@ fun Sidebar(
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.offset(x = (90).dp)
+                modifier = Modifier.offset(x = (90).dp),
             )
 //            Box(
 //                modifier = Modifier
@@ -143,12 +146,15 @@ fun Sidebar(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        NavItem(
-            icon = Icons.Outlined.Storage,
-            label = "Backup / Restaurar",
-            isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
-            onClick = { onNavigate(BackupRestoreRoute) },
-        )
+        // Backup/Restore writes the whole catalog (ingredients), an ACCOUNT_ADMIN-only operation.
+        if (isAccountAdmin) {
+            NavItem(
+                icon = Icons.Outlined.Storage,
+                label = "Backup / Restaurar",
+                isSelected = isRoute { it.hasRoute<BackupRestoreRoute>() },
+                onClick = { onNavigate(BackupRestoreRoute) },
+            )
+        }
         NavItem(
             icon = Icons.Outlined.Settings,
             label = "Configuracion",

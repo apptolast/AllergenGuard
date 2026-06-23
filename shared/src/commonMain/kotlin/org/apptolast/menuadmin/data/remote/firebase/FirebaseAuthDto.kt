@@ -52,6 +52,18 @@ data class FirebaseDeleteAccountRequest(
     val idToken: String,
 )
 
+/**
+ * Request for Identity Toolkit `accounts:update` — sets profile fields on the signed-in account.
+ * Here it is used to persist the `displayName`; `returnSecureToken` asks for a refreshed session so the
+ * caller can immediately pick up the new `name` claim.
+ */
+@Serializable
+data class FirebaseUpdateProfileRequest(
+    val idToken: String,
+    val displayName: String,
+    val returnSecureToken: Boolean,
+)
+
 /** Response from the Secure Token refresh endpoint (snake_case fields). */
 @Serializable
 data class FirebaseRefreshResponse(

@@ -20,6 +20,8 @@ class FirebaseAuthRepository(
         get() = FirebaseIdToken.claim(tokenManager.accessToken, "email")
     override val currentUserId: String?
         get() = FirebaseIdToken.claim(tokenManager.accessToken, "user_id")
+    override val currentUserName: String?
+        get() = FirebaseIdToken.claim(tokenManager.accessToken, "name")?.takeIf { it.isNotBlank() }
     override val isEmailVerified: Boolean
         get() = FirebaseIdToken.claim(tokenManager.accessToken, "email_verified") == "true"
 
@@ -38,6 +40,18 @@ class FirebaseAuthRepository(
     ) {
         val r = authService.signUp(email, password)
         tokenManager.saveTokens(r.idToken, r.refreshToken, r.expiresIn.toLongOrNull() ?: 3600L)
+        // Persist the display name on the new account so the `name` claim is available afterwards.
+        // accounts:update returns a refreshed session, so re-store it to pick up the name immediately.
+        val displayName = name?.trim()
+        if (!displayName.isNullOrBlank()) {
+            runCatching { authService.updateProfile(r.idToken, displayName) }.getOrNull()?.let { u ->
+                tokenManager.saveTokens(
+                    u.idToken.ifBlank { r.idToken },
+                    u.refreshToken.ifBlank { r.refreshToken },
+                    u.expiresIn.toLongOrNull() ?: 3600L,
+                )
+            }
+        }
     }
 
     override fun logout() {

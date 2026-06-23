@@ -95,5 +95,15 @@ buildkonfig {
         buildConfigField(STRING, "FIREBASE_API_KEY", localProperties.getProperty("FIREBASE_API_KEY", ""))
         buildConfigField(STRING, "FIREBASE_PROJECT_ID", localProperties.getProperty("FIREBASE_PROJECT_ID", ""))
         buildConfigField(STRING, "USE_FIRESTORE", localProperties.getProperty("USE_FIRESTORE", "true"))
+        // Named Firestore database to target. Release/prod uses the reused `(default)` database; debug
+        // builds point at the separate `debug` database. Resolved (highest priority first) from a Gradle
+        // property (`-PFIRESTORE_DATABASE_ID=debug`, e.g. for the wasmJs dev task), then local.properties,
+        // then the release default. Android build types can pass the `-P` flag per variant.
+        buildConfigField(
+            STRING,
+            "FIRESTORE_DATABASE_ID",
+            (project.findProperty("FIRESTORE_DATABASE_ID") as String?)
+                ?: localProperties.getProperty("FIRESTORE_DATABASE_ID", "(default)"),
+        )
     }
 }

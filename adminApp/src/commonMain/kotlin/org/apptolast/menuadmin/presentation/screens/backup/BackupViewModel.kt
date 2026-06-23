@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.util.BackupData
 import org.apptolast.menuadmin.data.util.JsonExporter
@@ -72,6 +73,7 @@ class BackupViewModel(
     private val json: Json,
     private val selectedRestaurantHolder: SelectedRestaurantHolder,
     private val restaurantRepository: RestaurantRepository,
+    private val currentAccountHolder: CurrentAccountHolder,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(BackupUiState())
     val uiState: StateFlow<BackupUiState> = _uiState.asStateFlow()
@@ -110,7 +112,13 @@ class BackupViewModel(
             _uiState.update { it.copy(isExporting = true, message = null) }
             try {
                 val s = globalSnapshot()
-                val jsonString = JsonExporter.exportAllData(s.ingredients, s.recipes, s.menus, json)
+                val jsonString = JsonExporter.exportAllData(
+                    s.ingredients,
+                    s.recipes,
+                    s.menus,
+                    json,
+                    accountId = currentAccountHolder.accountIdOrNull ?: "",
+                )
                 fileHandler.saveFile(jsonString, "menuadmin_backup.json")
                 _uiState.update {
                     it.copy(
@@ -138,6 +146,25 @@ class BackupViewModel(
                 val parsed = parseImport(content)
                 val backup = parsed.data
 
+                // Reject an app-native backup that belongs to a different account: its recipes/menus carry
+                // foreign restaurantIds the security rules would refuse. Legacy files have no account and
+                // re-target by the chosen restaurant of the current account.
+                val currentAccountId = currentAccountHolder.accountIdOrNull
+                if (!parsed.isLegacy &&
+                    backup.accountId.isNotEmpty() &&
+                    currentAccountId != null &&
+                    backup.accountId != currentAccountId
+                ) {
+                    _uiState.update {
+                        it.copy(
+                            isImporting = false,
+                            preview = null,
+                            message = "Este backup pertenece a otra cuenta y no se puede importar aquí.",
+                        )
+                    }
+                    return@launch
+                }
+
                 // Baseline for the preview, the REPLACE delete-set and the safety backup. App-native
                 // files span the whole platform; legacy files only touch their target restaurant.
                 val current = if (parsed.isLegacy) {
@@ -155,7 +182,13 @@ class BackupViewModel(
                 val backupFileName = "menuadmin_backup_pre-import_" +
                     Clock.System.now().toString().replace(":", "-").substringBefore(".") + ".json"
                 fileHandler.saveFile(
-                    JsonExporter.exportAllData(current.ingredients, current.recipes, current.menus, json),
+                    JsonExporter.exportAllData(
+                        current.ingredients,
+                        current.recipes,
+                        current.menus,
+                        json,
+                        accountId = currentAccountHolder.accountIdOrNull ?: "",
+                    ),
                     backupFileName,
                 )
 

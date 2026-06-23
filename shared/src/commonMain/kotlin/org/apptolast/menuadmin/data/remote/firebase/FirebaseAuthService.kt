@@ -71,6 +71,26 @@ class FirebaseAuthService(
         }.body()
     }
 
+    /**
+     * Sets the `displayName` on the account that owns [idToken] (Identity Toolkit `accounts:update`).
+     * Returns the refreshed session (new idToken/refreshToken) so the caller can store the updated claims.
+     */
+    suspend fun updateProfile(
+        idToken: String,
+        displayName: String,
+    ): FirebaseSignInResponse =
+        client.post("${FirebaseConfig.IDENTITY_TOOLKIT}/accounts:update") {
+            url { parameters.append("key", FirebaseConfig.apiKey) }
+            contentType(ContentType.Application.Json)
+            setBody(
+                FirebaseUpdateProfileRequest(
+                    idToken = idToken,
+                    displayName = displayName,
+                    returnSecureToken = true,
+                ),
+            )
+        }.body()
+
     /** Permanently deletes the account that owns [idToken] (Identity Toolkit `accounts:delete`). */
     suspend fun deleteAccount(idToken: String) {
         client.post("${FirebaseConfig.IDENTITY_TOOLKIT}/accounts:delete") {
