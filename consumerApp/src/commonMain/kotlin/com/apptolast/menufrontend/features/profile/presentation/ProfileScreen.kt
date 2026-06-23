@@ -80,7 +80,16 @@ import com.apptolast.menufrontend.resources.profile_my_allergies
 import com.apptolast.menufrontend.resources.profile_no_allergies
 import com.apptolast.menufrontend.resources.profile_share_app
 import com.apptolast.menufrontend.resources.share_app_message
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material3.RadioButton
+import com.apptolast.menufrontend.resources.profile_language
+import com.apptolast.menufrontend.resources.profile_language_en
+import com.apptolast.menufrontend.resources.profile_language_es
+import com.apptolast.menufrontend.resources.profile_language_system
+import org.apptolast.menuadmin.data.local.LanguagePreferences
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -89,8 +98,10 @@ fun ProfileScreenRoot(
     onNavigateToExplore: () -> Unit,
     onNavigateToFavorites: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel(),
+    languagePreferences: LanguagePreferences = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentLanguage by languagePreferences.languageFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -110,6 +121,8 @@ fun ProfileScreenRoot(
                 BottomNavTab.PROFILE -> { /* Already here */ }
             }
         },
+        currentLanguage = currentLanguage,
+        onSelectLanguage = languagePreferences::setLanguage,
     )
 }
 
@@ -119,12 +132,15 @@ fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
     onTabSelected: (BottomNavTab) -> Unit,
+    currentLanguage: String? = null,
+    onSelectLanguage: (String?) -> Unit = {},
 ) {
     val user = state.user
     val allergenLabels = allergenLabels()
     val share = rememberShareLauncher()
     val shareMessage = stringResource(Res.string.share_app_message, APP_SHARE_URL)
     var showDisclaimer by rememberSaveable { mutableStateOf(false) }
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -251,6 +267,11 @@ fun ProfileScreen(
                 label = stringResource(Res.string.profile_allergen_disclaimer),
                 onClick = { showDisclaimer = true },
             )
+            SettingsItem(
+                icon = Icons.Outlined.Language,
+                label = stringResource(Res.string.profile_language),
+                onClick = { showLanguageDialog = true },
+            )
 
                 Spacer(Modifier.height(24.dp))
 
@@ -336,6 +357,46 @@ fun ProfileScreen(
         DisclaimerSheet(onDismiss = { showDisclaimer = false })
     }
 
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(Res.string.profile_language)) },
+            text = {
+                Column {
+                    LanguageOptionRow(
+                        label = stringResource(Res.string.profile_language_system),
+                        selected = currentLanguage == null,
+                        onClick = {
+                            onSelectLanguage(null)
+                            showLanguageDialog = false
+                        },
+                    )
+                    LanguageOptionRow(
+                        label = stringResource(Res.string.profile_language_es),
+                        selected = currentLanguage == "es",
+                        onClick = {
+                            onSelectLanguage("es")
+                            showLanguageDialog = false
+                        },
+                    )
+                    LanguageOptionRow(
+                        label = stringResource(Res.string.profile_language_en),
+                        selected = currentLanguage == "en",
+                        onClick = {
+                            onSelectLanguage("en")
+                            showLanguageDialog = false
+                        },
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(Res.string.action_cancel))
+                }
+            },
+        )
+    }
+
     // Logout confirmation (reversible action → simple confirm).
     if (state.showLogoutDialog) {
         AlertDialog(
@@ -396,6 +457,25 @@ fun ProfileScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun LanguageOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

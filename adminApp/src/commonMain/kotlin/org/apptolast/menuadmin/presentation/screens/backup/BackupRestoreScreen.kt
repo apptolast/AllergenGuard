@@ -50,10 +50,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.backup_confirm_destination
+import menuadmin.adminapp.generated.resources.backup_confirm_import_title
+import menuadmin.adminapp.generated.resources.backup_confirm_ingredients
+import menuadmin.adminapp.generated.resources.backup_confirm_menus
+import menuadmin.adminapp.generated.resources.backup_confirm_pre_import_backup
+import menuadmin.adminapp.generated.resources.backup_confirm_recipes
+import menuadmin.adminapp.generated.resources.backup_confirm_replace_title
+import menuadmin.adminapp.generated.resources.backup_confirm_to_delete
+import menuadmin.adminapp.generated.resources.backup_export_button
+import menuadmin.adminapp.generated.resources.backup_export_description
+import menuadmin.adminapp.generated.resources.backup_export_title
+import menuadmin.adminapp.generated.resources.backup_import_button
+import menuadmin.adminapp.generated.resources.backup_import_description
+import menuadmin.adminapp.generated.resources.backup_import_mode_label
+import menuadmin.adminapp.generated.resources.backup_import_title
+import menuadmin.adminapp.generated.resources.backup_mode_merge
+import menuadmin.adminapp.generated.resources.backup_mode_merge_desc
+import menuadmin.adminapp.generated.resources.backup_mode_replace
+import menuadmin.adminapp.generated.resources.backup_mode_replace_desc
+import menuadmin.adminapp.generated.resources.backup_screen_subtitle
+import menuadmin.adminapp.generated.resources.backup_screen_title
+import menuadmin.adminapp.generated.resources.backup_target_expand
+import menuadmin.adminapp.generated.resources.backup_target_hint
+import menuadmin.adminapp.generated.resources.backup_target_label
+import menuadmin.adminapp.generated.resources.backup_target_placeholder
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -102,13 +130,13 @@ fun BackupRestoreContent(
     ) {
         Column {
             Text(
-                text = "Backup / Restaurar",
+                text = stringResource(Res.string.backup_screen_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Exporta e importa tus datos",
+                text = stringResource(Res.string.backup_screen_subtitle),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -148,7 +176,7 @@ fun BackupRestoreContent(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Exportar Datos",
+                        text = stringResource(Res.string.backup_export_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -158,8 +186,7 @@ fun BackupRestoreContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Descarga todos los ingredientes, recetas y menus de todos los restaurantes " +
-                        "en un solo archivo JSON",
+                    text = stringResource(Res.string.backup_export_description),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -189,7 +216,7 @@ fun BackupRestoreContent(
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Exportar JSON")
+                    Text(text = stringResource(Res.string.backup_export_button))
                 }
             }
         }
@@ -211,7 +238,7 @@ fun BackupRestoreContent(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Importar Datos",
+                        text = stringResource(Res.string.backup_import_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -221,8 +248,7 @@ fun BackupRestoreContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Restaura tus datos desde un archivo JSON. Antes de aplicar se descarga " +
-                        "automaticamente una copia de seguridad del estado actual.",
+                    text = stringResource(Res.string.backup_import_description),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -239,21 +265,21 @@ fun BackupRestoreContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Modo de importacion",
+                    text = stringResource(Res.string.backup_import_mode_label),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 ImportModeOption(
                     selected = importMode == ImportMode.MERGE,
-                    title = "Combinar",
-                    description = "Actualiza los existentes y anade los nuevos. No borra nada.",
+                    title = stringResource(Res.string.backup_mode_merge),
+                    description = stringResource(Res.string.backup_mode_merge_desc),
                     onSelect = { importMode = ImportMode.MERGE },
                 )
                 ImportModeOption(
                     selected = importMode == ImportMode.REPLACE,
-                    title = "Reemplazar",
-                    description = "Deja la base de datos igual que el fichero (borra lo que no este en el).",
+                    title = stringResource(Res.string.backup_mode_replace),
+                    description = stringResource(Res.string.backup_mode_replace_desc),
                     onSelect = { importMode = ImportMode.REPLACE },
                 )
 
@@ -281,7 +307,7 @@ fun BackupRestoreContent(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Importar JSON",
+                        text = stringResource(Res.string.backup_import_button),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
@@ -297,11 +323,12 @@ private fun TargetRestaurantSelector(
     onSelect: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedName = restaurants.find { it.id == selectedId }?.name ?: "Selecciona un restaurante"
+    val selectedName = restaurants.find { it.id == selectedId }?.name
+        ?: stringResource(Res.string.backup_target_placeholder)
 
     Column {
         Text(
-            text = "Restaurante destino",
+            text = stringResource(Res.string.backup_target_label),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -325,7 +352,7 @@ private fun TargetRestaurantSelector(
                 )
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Desplegar",
+                    contentDescription = stringResource(Res.string.backup_target_expand),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -343,8 +370,7 @@ private fun TargetRestaurantSelector(
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Solo se usa para archivos antiguos sin restaurante. Los backups de la app restauran " +
-                "todos los restaurantes automaticamente.",
+            text = stringResource(Res.string.backup_target_hint),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -392,28 +418,55 @@ private fun ImportConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = if (mode == ImportMode.REPLACE) "Confirmar reemplazo" else "Confirmar importacion") },
+        title = {
+            Text(
+                text = if (mode == ImportMode.REPLACE) {
+                    stringResource(Res.string.backup_confirm_replace_title)
+                } else {
+                    stringResource(Res.string.backup_confirm_import_title)
+                },
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = "Destino: ${preview.restaurantName}", fontSize = 14.sp)
                 Text(
-                    text = "Ingredientes: ${preview.ingredientsNew} nuevos, ${preview.ingredientsUpdated} actualizados",
+                    text = stringResource(Res.string.backup_confirm_destination, preview.restaurantName),
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = "Recetas: ${preview.recipesNew} nuevas, ${preview.recipesUpdated} actualizadas",
+                    text = stringResource(
+                        Res.string.backup_confirm_ingredients,
+                        preview.ingredientsNew,
+                        preview.ingredientsUpdated,
+                    ),
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = "Menus: ${preview.menusNew} nuevos, ${preview.menusUpdated} actualizados",
+                    text = stringResource(
+                        Res.string.backup_confirm_recipes,
+                        preview.recipesNew,
+                        preview.recipesUpdated,
+                    ),
+                    fontSize = 14.sp,
+                )
+                Text(
+                    text = stringResource(
+                        Res.string.backup_confirm_menus,
+                        preview.menusNew,
+                        preview.menusUpdated,
+                    ),
                     fontSize = 14.sp,
                 )
                 if (mode == ImportMode.REPLACE) {
                     val toDelete = preview.ingredientsToDelete + preview.recipesToDelete + preview.menusToDelete
                     Text(
-                        text = "Se eliminaran $toDelete elementos que no estan en el fichero " +
-                            "(${preview.ingredientsToDelete} ingredientes, ${preview.recipesToDelete} recetas, " +
-                            "${preview.menusToDelete} menus).",
+                        text = stringResource(
+                            Res.string.backup_confirm_to_delete,
+                            toDelete,
+                            preview.ingredientsToDelete,
+                            preview.recipesToDelete,
+                            preview.menusToDelete,
+                        ),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.error,
@@ -421,7 +474,7 @@ private fun ImportConfirmDialog(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Copia de seguridad descargada: ${preview.backupFileName}",
+                    text = stringResource(Res.string.backup_confirm_pre_import_backup, preview.backupFileName),
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -430,13 +483,17 @@ private fun ImportConfirmDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = if (mode == ImportMode.REPLACE) "Reemplazar" else "Combinar",
+                    text = if (mode == ImportMode.REPLACE) {
+                        stringResource(Res.string.backup_mode_replace)
+                    } else {
+                        stringResource(Res.string.backup_mode_merge)
+                    },
                     color = if (mode == ImportMode.REPLACE) MaterialTheme.colorScheme.error else Blue500,
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(text = "Cancelar") }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.action_cancel)) }
         },
     )
 }

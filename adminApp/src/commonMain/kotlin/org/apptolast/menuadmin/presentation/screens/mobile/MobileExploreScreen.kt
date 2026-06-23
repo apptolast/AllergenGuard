@@ -28,10 +28,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.mobile_explore_nearby
+import menuadmin.adminapp.generated.resources.mobile_explore_rating
+import menuadmin.adminapp.generated.resources.mobile_explore_search_hint
+import menuadmin.adminapp.generated.resources.mobile_explore_title
 import org.apptolast.menuadmin.presentation.components.SearchBar
 import org.apptolast.menuadmin.presentation.theme.Amber500
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MobileExploreScreen() {
@@ -48,7 +54,7 @@ fun MobileExploreContent(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = "Explorar Restaurantes",
+            text = stringResource(Res.string.mobile_explore_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -57,11 +63,11 @@ fun MobileExploreContent(modifier: Modifier = Modifier) {
         SearchBar(
             query = "",
             onQueryChange = { },
-            placeholder = "Buscar restaurantes...",
+            placeholder = stringResource(Res.string.mobile_explore_search_hint),
         )
 
         Text(
-            text = "Cerca de ti",
+            text = stringResource(Res.string.mobile_explore_nearby),
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -140,7 +146,7 @@ private fun RestaurantCard(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Star,
-                contentDescription = "Rating",
+                contentDescription = stringResource(Res.string.mobile_explore_rating),
                 tint = Amber500,
                 modifier = Modifier.size(16.dp),
             )

@@ -58,6 +58,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import coil3.compose.AsyncImage
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_back
+import menuadmin.adminapp.generated.resources.field_category
+import menuadmin.adminapp.generated.resources.field_description
+import menuadmin.adminapp.generated.resources.recipes_add_ingredient_hint
+import menuadmin.adminapp.generated.resources.recipes_add_ingredients
+import menuadmin.adminapp.generated.resources.recipes_allergen_summary
+import menuadmin.adminapp.generated.resources.recipes_category_placeholder
+import menuadmin.adminapp.generated.resources.recipes_change_image
+import menuadmin.adminapp.generated.resources.recipes_composition_detail
+import menuadmin.adminapp.generated.resources.recipes_delete
+import menuadmin.adminapp.generated.resources.recipes_description_placeholder
+import menuadmin.adminapp.generated.resources.recipes_dish_image
+import menuadmin.adminapp.generated.resources.recipes_dish_image_description
+import menuadmin.adminapp.generated.resources.recipes_editing
+import menuadmin.adminapp.generated.resources.recipes_items_count
+import menuadmin.adminapp.generated.resources.recipes_name_label
+import menuadmin.adminapp.generated.resources.recipes_name_placeholder
+import menuadmin.adminapp.generated.resources.recipes_new
+import menuadmin.adminapp.generated.resources.recipes_new_recipe
+import menuadmin.adminapp.generated.resources.recipes_no_image
+import menuadmin.adminapp.generated.resources.recipes_price_label
+import menuadmin.adminapp.generated.resources.recipes_price_placeholder
+import menuadmin.adminapp.generated.resources.recipes_remove
+import menuadmin.adminapp.generated.resources.recipes_remove_image
+import menuadmin.adminapp.generated.resources.recipes_save_changes
+import menuadmin.adminapp.generated.resources.recipes_search
+import menuadmin.adminapp.generated.resources.recipes_subtitle
+import menuadmin.adminapp.generated.resources.recipes_title
+import menuadmin.adminapp.generated.resources.recipes_upload_image
+import menuadmin.adminapp.generated.resources.recipes_uploading_image
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Recipe
@@ -70,6 +101,7 @@ import org.apptolast.menuadmin.presentation.screens.recipes.components.RecipeCar
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RecipesScreen(viewModel: RecipesViewModel) {
@@ -138,23 +170,27 @@ fun RecipesContent(
                     IconButton(onClick = onDismissEditor) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(Res.string.action_back),
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
                 Column {
                     Text(
-                        text = "Recetas y Subelaboraciones",
+                        text = stringResource(Res.string.recipes_title),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = if (uiState.isEditing) {
-                            if (uiState.editingRecipe != null) "Editando receta" else "Nueva receta"
+                            if (uiState.editingRecipe != null) {
+                                stringResource(Res.string.recipes_editing)
+                            } else {
+                                stringResource(Res.string.recipes_new_recipe)
+                            }
                         } else {
-                            "Gestiona tus recetas y sus ingredientes"
+                            stringResource(Res.string.recipes_subtitle)
                         },
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -169,13 +205,13 @@ fun RecipesContent(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = "Nueva",
+                        contentDescription = stringResource(Res.string.recipes_new),
                         tint = Color.White,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Nueva Receta",
+                        text = stringResource(Res.string.recipes_new),
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -200,7 +236,7 @@ fun RecipesContent(
                                 modifier = Modifier.size(18.dp),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = "Eliminar", fontWeight = FontWeight.SemiBold)
+                            Text(text = stringResource(Res.string.recipes_delete), fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Button(
@@ -225,7 +261,7 @@ fun RecipesContent(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Guardar Cambios",
+                            text = stringResource(Res.string.recipes_save_changes),
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -252,7 +288,7 @@ fun RecipesContent(
             SearchBar(
                 query = uiState.searchQuery,
                 onQueryChange = onSearchQueryChange,
-                placeholder = "Buscar recetas...",
+                placeholder = stringResource(Res.string.recipes_search),
             )
 
             // Recipe Cards Grid
@@ -303,7 +339,7 @@ private fun DishImagePanel(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Imagen del Plato",
+            text = stringResource(Res.string.recipes_dish_image),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -327,7 +363,7 @@ private fun DishImagePanel(
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                         Text(
-                            text = "Comprimiendo y subiendo...",
+                            text = stringResource(Res.string.recipes_uploading_image),
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -337,7 +373,7 @@ private fun DishImagePanel(
                 imageUrl != null -> {
                     AsyncImage(
                         model = imageUrl,
-                        contentDescription = "Imagen del plato",
+                        contentDescription = stringResource(Res.string.recipes_dish_image_description),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxWidth().height(200.dp),
                     )
@@ -355,7 +391,7 @@ private fun DishImagePanel(
                             modifier = Modifier.size(40.dp),
                         )
                         Text(
-                            text = "Sin imagen",
+                            text = stringResource(Res.string.recipes_no_image),
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -377,11 +413,17 @@ private fun DishImagePanel(
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(if (imageUrl != null) "Cambiar imagen" else "Subir imagen")
+                Text(
+                    if (imageUrl != null) {
+                        stringResource(Res.string.recipes_change_image)
+                    } else {
+                        stringResource(Res.string.recipes_upload_image)
+                    },
+                )
             }
             if (imageUrl != null && !isUploading) {
                 TextButton(onClick = onRemoveImage) {
-                    Text("Quitar", color = Red500)
+                    Text(stringResource(Res.string.recipes_remove_image), color = Red500)
                 }
             }
         }
@@ -445,8 +487,8 @@ private fun RecipeEditorForm(
                 OutlinedTextField(
                     value = uiState.formName,
                     onValueChange = onFormNameChange,
-                    label = { Text("Nombre del Plato / Subelaboracion") },
-                    placeholder = { Text("Ej. Croquetas de jamon") },
+                    label = { Text(stringResource(Res.string.recipes_name_label)) },
+                    placeholder = { Text(stringResource(Res.string.recipes_name_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -460,8 +502,8 @@ private fun RecipeEditorForm(
                 OutlinedTextField(
                     value = uiState.formDescription,
                     onValueChange = onFormDescriptionChange,
-                    label = { Text("Descripcion") },
-                    placeholder = { Text("Ej. Crujientes croquetas caseras de jamon iberico") },
+                    label = { Text(stringResource(Res.string.field_description)) },
+                    placeholder = { Text(stringResource(Res.string.recipes_description_placeholder)) },
                     minLines = 2,
                     maxLines = 4,
                     modifier = Modifier.fillMaxWidth(),
@@ -480,8 +522,8 @@ private fun RecipeEditorForm(
                             onFormPriceChange(value)
                         }
                     },
-                    label = { Text("Precio") },
-                    placeholder = { Text("Ej. 12.50") },
+                    label = { Text(stringResource(Res.string.recipes_price_label)) },
+                    placeholder = { Text(stringResource(Res.string.recipes_price_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
@@ -496,8 +538,8 @@ private fun RecipeEditorForm(
                     OutlinedTextField(
                         value = uiState.formCategory,
                         onValueChange = onFormCategoryChange,
-                        label = { Text("Categoria") },
-                        placeholder = { Text("Ej. Entrantes, Principales, Postres...") },
+                        label = { Text(stringResource(Res.string.field_category)) },
+                        placeholder = { Text(stringResource(Res.string.recipes_category_placeholder)) },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -535,7 +577,7 @@ private fun RecipeEditorForm(
                 // Add ingredients section
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Anadir Ingredientes",
+                        text = stringResource(Res.string.recipes_add_ingredients),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -543,7 +585,7 @@ private fun RecipeEditorForm(
                     OutlinedTextField(
                         value = ingredientSearchQuery,
                         onValueChange = { ingredientSearchQuery = it },
-                        placeholder = { Text("Buscar ingrediente...") },
+                        placeholder = { Text(stringResource(Res.string.recipes_add_ingredient_hint)) },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -578,7 +620,7 @@ private fun RecipeEditorForm(
                                 trailingIcon = {
                                     Icon(
                                         imageVector = Icons.Filled.Add,
-                                        contentDescription = "Anadir",
+                                        contentDescription = stringResource(Res.string.recipes_add_ingredients),
                                         tint = Blue500,
                                         modifier = Modifier.size(18.dp),
                                     )
@@ -613,13 +655,13 @@ private fun RecipeEditorForm(
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
-                                text = "COMPOSICION DETALLADA",
+                                text = stringResource(Res.string.recipes_composition_detail),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                text = "${uiState.formIngredients.size} items",
+                                text = stringResource(Res.string.recipes_items_count, uiState.formIngredients.size),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -671,7 +713,7 @@ private fun RecipeEditorForm(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.Close,
-                                        contentDescription = "Quitar",
+                                        contentDescription = stringResource(Res.string.recipes_remove),
                                         tint = Red500,
                                         modifier = Modifier.size(18.dp),
                                     )
@@ -688,7 +730,7 @@ private fun RecipeEditorForm(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = "Resumen Total de Alergenos",
+                    text = stringResource(Res.string.recipes_allergen_summary),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

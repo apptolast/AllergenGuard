@@ -60,6 +60,10 @@ jobs:
                     # so it is frozen at build time. Pin production to the `(default)` database explicitly so
                     # a CI build never points at the `debug` database.
                     echo 'FIRESTORE_DATABASE_ID=(default)' >> local.properties
+                    # EmailJS client config (PUBLIC key only). Empty secret => email sending is a no-op.
+                    echo "EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> local.properties
+                    echo "EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" >> local.properties
+                    echo "EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> local.properties
                     echo "local.properties created"
 
             -   name: Upgrade Yarn Lock files
@@ -131,3 +135,6 @@ jobs:
                     platforms: linux/amd64
                     build-args: |
                         API_BASE_URL=${{ secrets.API_BASE_URL }}
+                        EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}
+                        EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}
+                        EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}

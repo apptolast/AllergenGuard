@@ -15,8 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_clear
+import menuadmin.adminapp.generated.resources.action_search
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SearchBar(
@@ -37,7 +41,7 @@ fun SearchBar(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Outlined.Search,
-                contentDescription = "Buscar",
+                contentDescription = stringResource(Res.string.action_search),
                 tint = MenuAdminTheme.colors.textMuted,
             )
         },
@@ -46,7 +50,7 @@ fun SearchBar(
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
-                        contentDescription = "Limpiar",
+                        contentDescription = stringResource(Res.string.action_clear),
                         tint = MenuAdminTheme.colors.textMuted,
                     )
                 }

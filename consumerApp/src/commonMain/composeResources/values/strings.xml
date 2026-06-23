@@ -68,6 +68,8 @@
     <string name="profile_notifications">Notificaciones</string>
     <string name="profile_language">Idioma</string>
     <string name="profile_language_es">Español</string>
+    <string name="profile_language_en">Inglés</string>
+    <string name="profile_language_system">Predeterminado del sistema</string>
     <string name="profile_favorite_restaurants">Restaurantes favoritos</string>
     <string name="profile_help">Ayuda y soporte</string>
     <string name="profile_logout">Cerrar sesión</string>

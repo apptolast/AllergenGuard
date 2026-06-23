@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.recipecard_allergens_count
+import menuadmin.adminapp.generated.resources.recipecard_ingredients_count
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
@@ -34,6 +37,7 @@ import org.apptolast.menuadmin.presentation.components.LucideIcon
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -115,7 +119,7 @@ fun RecipeCard(
                 }
             } else if (recipe.allergenCount > 0) {
                 Text(
-                    text = "${recipe.allergenCount} alergenos",
+                    text = stringResource(Res.string.recipecard_allergens_count, recipe.allergenCount),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Blue500,
@@ -133,7 +137,7 @@ fun RecipeCard(
             ) {
                 // Section header
                 Text(
-                    text = "${recipe.ingredients.size} ingredientes",
+                    text = stringResource(Res.string.recipecard_ingredients_count, recipe.ingredients.size),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -157,7 +161,7 @@ fun RecipeCard(
                     .padding(16.dp),
             ) {
                 Text(
-                    text = "${recipe.ingredientCount} ingredientes",
+                    text = stringResource(Res.string.recipecard_ingredients_count, recipe.ingredientCount),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

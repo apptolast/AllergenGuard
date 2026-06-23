@@ -1,5 +1,6 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import java.util.Properties
 
 // Admin app: WEB ONLY (wasmJs/js). Android & iOS targets live in :shared and will be consumed by
 // the mobile consumer app (:consumerApp), not by this admin panel.
@@ -13,11 +14,22 @@ plugins {
 }
 
 // Single source of truth for the admin platform version (exposed to code via BuildKonfig.APP_VERSION).
-version = "1.4.0"
+version = "1.4.1"
+
+// Load local.properties for BuildKonfig (EmailJS client config: public key + service/template ids).
+val localProperties: Properties by lazy {
+    Properties().apply {
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { load(it) }
+        }
+    }
+}
 
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
+            "-Xexpect-actual-classes",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlin.uuid.ExperimentalUuidApi",
         )
@@ -87,5 +99,10 @@ buildkonfig {
     packageName = "org.apptolast.menuadmin.config"
     defaultConfigs {
         buildConfigField(STRING, "APP_VERSION", project.version.toString())
+        // EmailJS client config (PUBLIC key only — never the private/access key). Empty by default;
+        // real values come from local.properties (dev) or CI secrets (see .github/workflows/ci-cd.yml).
+        buildConfigField(STRING, "EMAILJS_PUBLIC_KEY", localProperties.getProperty("EMAILJS_PUBLIC_KEY", ""))
+        buildConfigField(STRING, "EMAILJS_SERVICE_ID", localProperties.getProperty("EMAILJS_SERVICE_ID", ""))
+        buildConfigField(STRING, "EMAILJS_TEMPLATE_ID", localProperties.getProperty("EMAILJS_TEMPLATE_ID", ""))
     }
 }

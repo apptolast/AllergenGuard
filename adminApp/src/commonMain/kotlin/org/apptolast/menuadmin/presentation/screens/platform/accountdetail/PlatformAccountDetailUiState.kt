@@ -7,6 +7,8 @@ import org.apptolast.menuadmin.domain.model.Restaurant
 data class PlatformAccountDetailUiState(
     val isLoading: Boolean = true,
     val accountName: String = "",
+    // Account language ("es"/"en"); drives the invitation email's content language.
+    val accountLanguage: String = "es",
     val users: List<AccountUser> = emptyList(),
     val accountRestaurants: List<Restaurant> = emptyList(),
     // Invite / edit form (editingUser == null => invite a new email).

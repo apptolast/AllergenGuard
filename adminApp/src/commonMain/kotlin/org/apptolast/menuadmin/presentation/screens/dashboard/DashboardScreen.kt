@@ -31,6 +31,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.dashboard_active_recipes
+import menuadmin.adminapp.generated.resources.dashboard_common_allergens
+import menuadmin.adminapp.generated.resources.dashboard_recent_activity
+import menuadmin.adminapp.generated.resources.dashboard_subtitle
+import menuadmin.adminapp.generated.resources.dashboard_title
+import menuadmin.adminapp.generated.resources.dashboard_view_all
+import menuadmin.adminapp.generated.resources.nav_ingredients
+import menuadmin.adminapp.generated.resources.nav_menus
+import menuadmin.adminapp.generated.resources.restaurants_title
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.DashboardStats
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
@@ -42,6 +52,7 @@ import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -73,13 +84,13 @@ fun DashboardContent(
         // Header
         Column {
             Text(
-                text = "Dashboard",
+                text = stringResource(Res.string.dashboard_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Bienvenido de nuevo, aqui tienes un resumen de tu actividad",
+                text = stringResource(Res.string.dashboard_subtitle),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -92,28 +103,28 @@ fun DashboardContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             StatCard(
-                label = "Ingredientes",
+                label = stringResource(Res.string.nav_ingredients),
                 value = (stats?.totalIngredients ?: 0).toString(),
                 icon = Icons.Outlined.Restaurant,
                 iconTint = Blue500,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Recetas activas",
+                label = stringResource(Res.string.dashboard_active_recipes),
                 value = (stats?.activeRecipes ?: 0).toString(),
                 icon = Icons.Outlined.Fastfood,
                 iconTint = Green500,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Menus",
+                label = stringResource(Res.string.nav_menus),
                 value = (stats?.totalMenus ?: 0).toString(),
                 icon = Icons.AutoMirrored.Outlined.MenuBook,
                 iconTint = Amber500,
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                label = "Restaurantes",
+                label = stringResource(Res.string.restaurants_title),
                 value = (stats?.totalRestaurants ?: 0).toString(),
                 icon = Icons.Outlined.Business,
                 iconTint = Red500,
@@ -133,13 +144,13 @@ fun DashboardContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "Actividad Reciente",
+                        text = stringResource(Res.string.dashboard_recent_activity),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Ver Toda",
+                        text = stringResource(Res.string.dashboard_view_all),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Blue500,
@@ -153,7 +164,7 @@ fun DashboardContent(
             // Most common allergens
             DashboardSectionCard(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Alergenos mas comunes",
+                    text = stringResource(Res.string.dashboard_common_allergens),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,

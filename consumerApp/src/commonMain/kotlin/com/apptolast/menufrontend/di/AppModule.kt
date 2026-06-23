@@ -18,6 +18,7 @@ import com.apptolast.menufrontend.features.menu.presentation.MenuViewModel
 import com.apptolast.menufrontend.features.profile.presentation.ProfileViewModel
 import com.apptolast.menufrontend.features.scanner.presentation.ScannerViewModel
 import kotlinx.serialization.json.Json
+import org.apptolast.menuadmin.data.local.LanguagePreferences
 import org.apptolast.menuadmin.data.remote.auth.TokenManager
 import org.apptolast.menuadmin.data.remote.createAuthHttpClient
 import org.apptolast.menuadmin.data.remote.firebase.FirebaseAuthService
@@ -35,6 +36,7 @@ import org.koin.dsl.module
 val firebaseModule = module {
     single { Json { ignoreUnknownKeys = true } }
     single { TokenManager() }
+    single { LanguagePreferences() }
     single(named("auth")) { createAuthHttpClient(get()) }
     single { FirebaseAuthService(get(named("auth"))) }
     single(named("firestore")) { createFirestoreHttpClient(get(), get(), get()) }

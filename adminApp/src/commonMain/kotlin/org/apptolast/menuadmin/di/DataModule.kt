@@ -3,6 +3,7 @@ package org.apptolast.menuadmin.di
 import kotlinx.serialization.json.Json
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.SelectedRestaurantHolder
+import org.apptolast.menuadmin.data.local.LanguagePreferences
 import org.apptolast.menuadmin.data.local.ThemePreferences
 import org.apptolast.menuadmin.data.remote.auth.AuthService
 import org.apptolast.menuadmin.data.remote.auth.TokenManager
@@ -115,6 +116,7 @@ val dataModule = module {
 
     // Local preferences
     single { ThemePreferences() }
+    single { LanguagePreferences() }
 
     // Shared state holders
     single { SelectedRestaurantHolder() }

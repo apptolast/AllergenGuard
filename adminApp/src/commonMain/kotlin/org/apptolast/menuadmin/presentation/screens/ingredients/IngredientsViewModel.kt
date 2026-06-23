@@ -9,12 +9,17 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.ingredients_error_deleting
+import menuadmin.adminapp.generated.resources.ingredients_error_loading
+import menuadmin.adminapp.generated.resources.ingredients_error_saving
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
+import org.jetbrains.compose.resources.getString
 
 class IngredientsViewModel(
     private val ingredientRepository: IngredientRepository,
@@ -49,7 +54,7 @@ class IngredientsViewModel(
             emit(
                 _formState.value.copy(
                     isLoading = false,
-                    error = throwable.message ?: "Error al cargar ingredientes",
+                    error = throwable.message ?: getString(Res.string.ingredients_error_loading),
                 ),
             )
         }
@@ -193,7 +198,7 @@ class IngredientsViewModel(
             } catch (e: Exception) {
                 _formState.value = _formState.value.copy(
                     isSaving = false,
-                    error = e.message ?: "Error al guardar ingrediente",
+                    error = e.message ?: getString(Res.string.ingredients_error_saving),
                 )
             }
         }
@@ -206,7 +211,7 @@ class IngredientsViewModel(
                 onDismissEditor()
             } catch (e: Exception) {
                 _formState.value = _formState.value.copy(
-                    error = e.message ?: "Error al eliminar ingrediente",
+                    error = e.message ?: getString(Res.string.ingredients_error_deleting),
                 )
             }
         }

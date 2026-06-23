@@ -40,11 +40,36 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_cancel
+import menuadmin.adminapp.generated.resources.action_delete
+import menuadmin.adminapp.generated.resources.action_edit
+import menuadmin.adminapp.generated.resources.action_save
+import menuadmin.adminapp.generated.resources.platform_accounts_delete_backup_button
+import menuadmin.adminapp.generated.resources.platform_accounts_delete_confirm_hint
+import menuadmin.adminapp.generated.resources.platform_accounts_delete_title
+import menuadmin.adminapp.generated.resources.platform_accounts_delete_warning
+import menuadmin.adminapp.generated.resources.platform_accounts_empty
+import menuadmin.adminapp.generated.resources.platform_accounts_first_admin_hint
+import menuadmin.adminapp.generated.resources.platform_accounts_first_admin_label
+import menuadmin.adminapp.generated.resources.platform_accounts_form_edit_title
+import menuadmin.adminapp.generated.resources.platform_accounts_form_name_label
+import menuadmin.adminapp.generated.resources.platform_accounts_language_en
+import menuadmin.adminapp.generated.resources.platform_accounts_language_es
+import menuadmin.adminapp.generated.resources.platform_accounts_language_label
+import menuadmin.adminapp.generated.resources.platform_accounts_manage
+import menuadmin.adminapp.generated.resources.platform_accounts_new
+import menuadmin.adminapp.generated.resources.platform_accounts_region_eu
+import menuadmin.adminapp.generated.resources.platform_accounts_region_label
+import menuadmin.adminapp.generated.resources.platform_accounts_region_uk
+import menuadmin.adminapp.generated.resources.platform_accounts_subtitle
+import menuadmin.adminapp.generated.resources.platform_accounts_title
 import org.apptolast.menuadmin.domain.model.Account
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -110,13 +135,13 @@ fun PlatformAccountsContent(
         ) {
             Column {
                 Text(
-                    "Cuentas",
+                    stringResource(Res.string.platform_accounts_title),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    "Gestiona las cuentas de la plataforma",
+                    stringResource(Res.string.platform_accounts_subtitle),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -126,7 +151,7 @@ fun PlatformAccountsContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Blue500),
                 shape = RoundedCornerShape(8.dp),
             ) {
-                Text("Nueva Cuenta", color = Color.White)
+                Text(stringResource(Res.string.platform_accounts_new), color = Color.White)
             }
         }
 
@@ -138,7 +163,11 @@ fun PlatformAccountsContent(
                 CircularProgressIndicator(color = Blue500)
             }
         } else if (uiState.accounts.isEmpty()) {
-            Text("No hay cuentas todavía. Crea la primera.", fontSize = 14.sp, color = MenuAdminTheme.colors.textMuted)
+            Text(
+                stringResource(Res.string.platform_accounts_empty),
+                fontSize = 14.sp,
+                color = MenuAdminTheme.colors.textMuted,
+            )
         } else {
             uiState.accounts.forEach { account ->
                 AccountCard(
@@ -203,18 +232,23 @@ private fun AccountCard(
                 )
             }
             OutlinedButton(onClick = onManage, shape = RoundedCornerShape(8.dp)) {
-                Text("Gestionar", fontSize = 13.sp)
+                Text(stringResource(Res.string.platform_accounts_manage), fontSize = 13.sp)
             }
             IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Outlined.Edit,
-                    "Editar",
+                    stringResource(Res.string.action_edit),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }
             IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.Outlined.Delete, "Eliminar", tint = Red500, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Outlined.Delete,
+                    stringResource(Res.string.action_delete),
+                    tint = Red500,
+                    modifier = Modifier.size(18.dp),
+                )
             }
         }
     }
@@ -233,36 +267,63 @@ private fun AccountFormDialog(
     val isCreate = uiState.editingAccount == null
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (isCreate) "Nueva Cuenta" else "Editar Cuenta", fontWeight = FontWeight.Bold) },
+        title = {
+            Text(
+                if (isCreate) {
+                    stringResource(Res.string.platform_accounts_new)
+                } else {
+                    stringResource(Res.string.platform_accounts_form_edit_title)
+                },
+                fontWeight = FontWeight.Bold,
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = uiState.formName,
                     onValueChange = onNameChange,
-                    label = { Text("Nombre de la cuenta") },
+                    label = { Text(stringResource(Res.string.platform_accounts_form_name_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                 )
-                Text("Región", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(Res.string.platform_accounts_region_label),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 SegmentedToggle(
-                    listOf("EU" to "EU (UE)", "UK" to "UK (Reino Unido)"),
+                    listOf(
+                        "EU" to stringResource(Res.string.platform_accounts_region_eu),
+                        "UK" to stringResource(Res.string.platform_accounts_region_uk),
+                    ),
                     uiState.formRegion,
                     onRegionChange,
                 )
-                Text("Idioma", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                SegmentedToggle(listOf("es" to "Español", "en" to "English"), uiState.formLanguage, onLanguageChange)
+                Text(
+                    stringResource(Res.string.platform_accounts_language_label),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                SegmentedToggle(
+                    listOf(
+                        "es" to stringResource(Res.string.platform_accounts_language_es),
+                        "en" to stringResource(Res.string.platform_accounts_language_en),
+                    ),
+                    uiState.formLanguage,
+                    onLanguageChange,
+                )
                 if (isCreate) {
                     OutlinedTextField(
                         value = uiState.formFirstAdminEmail,
                         onValueChange = onFirstAdminEmailChange,
-                        label = { Text("Email del primer administrador (opcional)") },
+                        label = { Text(stringResource(Res.string.platform_accounts_first_admin_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                     )
                     Text(
-                        "Se le creará una invitación como ACCOUNT_ADMIN; entrará en su primer login.",
+                        stringResource(Res.string.platform_accounts_first_admin_hint),
                         fontSize = 11.sp,
                         color = MenuAdminTheme.colors.textMuted,
                     )
@@ -279,11 +340,15 @@ private fun AccountFormDialog(
                 if (uiState.isSaving) {
                     CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
-                    Text("Guardar", color = Color.White)
+                    Text(stringResource(Res.string.action_save), color = Color.White)
                 }
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !uiState.isSaving) { Text("Cancelar") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !uiState.isSaving) {
+                Text(stringResource(Res.string.action_cancel))
+            }
+        },
         shape = RoundedCornerShape(16.dp),
         containerColor = MaterialTheme.colorScheme.surface,
     )
@@ -299,17 +364,22 @@ private fun DeleteAccountDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Eliminar cuenta", fontWeight = FontWeight.Bold, color = Red500) },
+        title = {
+            Text(
+                stringResource(Res.string.platform_accounts_delete_title),
+                fontWeight = FontWeight.Bold,
+                color = Red500,
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    "Esto borrará DEFINITIVAMENTE la cuenta \"${account.name}\" y TODO su contenido: " +
-                        "restaurantes, recetas, menús, catálogo de ingredientes, usuarios e invitaciones.",
+                    stringResource(Res.string.platform_accounts_delete_warning, account.name),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    "Se descargará un backup JSON antes de borrar. Escribe el nombre de la cuenta para confirmar:",
+                    stringResource(Res.string.platform_accounts_delete_confirm_hint),
                     fontSize = 13.sp,
                     color = MenuAdminTheme.colors.textMuted,
                 )
@@ -334,11 +404,15 @@ private fun DeleteAccountDialog(
                 if (uiState.isDeleting) {
                     CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
-                    Text("Descargar backup y borrar", color = Color.White)
+                    Text(stringResource(Res.string.platform_accounts_delete_backup_button), color = Color.White)
                 }
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !uiState.isDeleting) { Text("Cancelar") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !uiState.isDeleting) {
+                Text(stringResource(Res.string.action_cancel))
+            }
+        },
         shape = RoundedCornerShape(16.dp),
         containerColor = MaterialTheme.colorScheme.surface,
     )

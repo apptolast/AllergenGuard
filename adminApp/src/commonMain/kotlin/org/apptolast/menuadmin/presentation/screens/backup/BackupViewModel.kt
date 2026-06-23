@@ -10,6 +10,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.backup_all_restaurants
+import menuadmin.adminapp.generated.resources.backup_error_export
+import menuadmin.adminapp.generated.resources.backup_error_import
+import menuadmin.adminapp.generated.resources.backup_error_read_file
+import menuadmin.adminapp.generated.resources.backup_export_success
+import menuadmin.adminapp.generated.resources.backup_foreign_account
+import menuadmin.adminapp.generated.resources.backup_import_success
+import menuadmin.adminapp.generated.resources.backup_import_success_deleted
+import menuadmin.adminapp.generated.resources.backup_label_merge
+import menuadmin.adminapp.generated.resources.backup_label_replace
+import menuadmin.adminapp.generated.resources.backup_target_restaurant_fallback
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.SelectedRestaurantHolder
 import org.apptolast.menuadmin.data.util.BackupData
@@ -23,6 +35,7 @@ import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
+import org.jetbrains.compose.resources.getString
 import kotlin.time.Clock
 
 /** How an import file is applied over the current database. The user picks this in the UI. */
@@ -120,15 +133,21 @@ class BackupViewModel(
                     accountId = currentAccountHolder.accountIdOrNull ?: "",
                 )
                 fileHandler.saveFile(jsonString, "menuadmin_backup.json")
+                val message = getString(
+                    Res.string.backup_export_success,
+                    s.ingredients.size,
+                    s.recipes.size,
+                    s.menus.size,
+                )
                 _uiState.update {
                     it.copy(
                         isExporting = false,
-                        message = "Exportacion completada: ${s.ingredients.size} ingredientes, " +
-                            "${s.recipes.size} recetas, ${s.menus.size} menus",
+                        message = message,
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isExporting = false, message = "Error al exportar: ${e.message}") }
+                val message = getString(Res.string.backup_error_export, e.message ?: "")
+                _uiState.update { it.copy(isExporting = false, message = message) }
             }
         }
     }
@@ -155,11 +174,12 @@ class BackupViewModel(
                     currentAccountId != null &&
                     backup.accountId != currentAccountId
                 ) {
+                    val message = getString(Res.string.backup_foreign_account)
                     _uiState.update {
                         it.copy(
                             isImporting = false,
                             preview = null,
-                            message = "Este backup pertenece a otra cuenta y no se puede importar aquí.",
+                            message = message,
                         )
                     }
                     return@launch
@@ -205,9 +225,9 @@ class BackupViewModel(
 
                 val restaurantName = if (parsed.isLegacy) {
                     _uiState.value.restaurants.find { it.id == _uiState.value.targetRestaurantId }?.name
-                        ?: "Restaurante destino"
+                        ?: getString(Res.string.backup_target_restaurant_fallback)
                 } else {
-                    "Todos los restaurantes"
+                    getString(Res.string.backup_all_restaurants)
                 }
 
                 _uiState.update {
@@ -230,8 +250,9 @@ class BackupViewModel(
                     )
                 }
             } catch (e: Exception) {
+                val message = getString(Res.string.backup_error_read_file, e.message ?: "")
                 _uiState.update {
-                    it.copy(isImporting = false, preview = null, message = "Error al leer el archivo: ${e.message}")
+                    it.copy(isImporting = false, preview = null, message = message)
                 }
             }
         }
@@ -289,17 +310,38 @@ class BackupViewModel(
                         }
                 }
 
-                val label = if (mode == ImportMode.REPLACE) "Reemplazo" else "Combinacion"
+                val label = if (mode == ImportMode.REPLACE) {
+                    getString(Res.string.backup_label_replace)
+                } else {
+                    getString(Res.string.backup_label_merge)
+                }
+                val message = if (deleted > 0) {
+                    getString(
+                        Res.string.backup_import_success_deleted,
+                        label,
+                        backup.ingredients.size,
+                        backup.recipes.size,
+                        backup.menus.size,
+                        deleted,
+                    )
+                } else {
+                    getString(
+                        Res.string.backup_import_success,
+                        label,
+                        backup.ingredients.size,
+                        backup.recipes.size,
+                        backup.menus.size,
+                    )
+                }
                 _uiState.update {
                     it.copy(
                         isImporting = false,
-                        message = "$label completado: ${backup.ingredients.size} ingredientes, " +
-                            "${backup.recipes.size} recetas, ${backup.menus.size} menus importados" +
-                            if (deleted > 0) ", $deleted eliminados" else "",
+                        message = message,
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isImporting = false, message = "Error al importar: ${e.message}") }
+                val message = getString(Res.string.backup_error_import, e.message ?: "")
+                _uiState.update { it.copy(isImporting = false, message = message) }
             } finally {
                 pending = null
                 currentBeforeImport = null

@@ -21,19 +21,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.mobile_tab_explore
+import menuadmin.adminapp.generated.resources.mobile_tab_favorites
+import menuadmin.adminapp.generated.resources.mobile_tab_profile
 import org.apptolast.menuadmin.presentation.screens.mobile.MobileExploreScreen
 import org.apptolast.menuadmin.presentation.screens.mobile.MobileFavoritesScreen
 import org.apptolast.menuadmin.presentation.screens.mobile.MobileProfileScreen
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private enum class MobileTab(
-    val label: String,
+    val label: StringResource,
     val icon: ImageVector,
 ) {
-    EXPLORE("Explorar", Icons.Outlined.Explore),
-    FAVORITES("Favoritos", Icons.Outlined.FavoriteBorder),
-    PROFILE("Perfil", Icons.Outlined.Person),
+    EXPLORE(Res.string.mobile_tab_explore, Icons.Outlined.Explore),
+    FAVORITES(Res.string.mobile_tab_favorites, Icons.Outlined.FavoriteBorder),
+    PROFILE(Res.string.mobile_tab_profile, Icons.Outlined.Person),
 }
 
 @Composable
@@ -45,16 +51,17 @@ fun MobileLayout(modifier: Modifier = Modifier) {
         bottomBar = {
             NavigationBar {
                 MobileTab.entries.forEach { tab ->
+                    val tabLabel = stringResource(tab.label)
                     NavigationBarItem(
                         selected = currentTab == tab,
                         onClick = { currentTab = tab },
                         icon = {
                             Icon(
                                 imageVector = tab.icon,
-                                contentDescription = tab.label,
+                                contentDescription = tabLabel,
                             )
                         },
-                        label = { Text(tab.label) },
+                        label = { Text(tabLabel) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Blue500,
                             selectedTextColor = Blue500,

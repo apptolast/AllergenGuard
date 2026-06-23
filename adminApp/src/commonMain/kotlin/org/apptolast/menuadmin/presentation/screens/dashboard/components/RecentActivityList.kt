@@ -20,12 +20,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.time_days_ago
+import menuadmin.adminapp.generated.resources.time_hours_ago
+import menuadmin.adminapp.generated.resources.time_minutes_ago
+import menuadmin.adminapp.generated.resources.time_yesterday
 import org.apptolast.menuadmin.domain.model.ActivityEntry
 import org.apptolast.menuadmin.domain.model.ActivityType
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 
 @Composable
@@ -92,15 +98,16 @@ private fun ActivityItem(
     }
 }
 
+@Composable
 private fun formatTimestamp(timestamp: kotlin.time.Instant): String {
     val now = Clock.System.now()
     val duration = now - timestamp
     val hours = duration.inWholeHours
     return when {
-        hours < 1 -> "Hace ${duration.inWholeMinutes} min"
-        hours < 24 -> "Hace $hours h"
-        hours < 48 -> "Hace 1 dia"
-        else -> "Hace ${hours / 24} dias"
+        hours < 1 -> stringResource(Res.string.time_minutes_ago, duration.inWholeMinutes.toInt())
+        hours < 24 -> stringResource(Res.string.time_hours_ago, hours.toInt())
+        hours < 48 -> stringResource(Res.string.time_yesterday)
+        else -> stringResource(Res.string.time_days_ago, (hours / 24).toInt())
     }
 }
 
