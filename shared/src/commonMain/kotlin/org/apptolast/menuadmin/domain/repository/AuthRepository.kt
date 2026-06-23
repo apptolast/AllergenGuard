@@ -26,5 +26,8 @@ interface AuthRepository {
         name: String? = null,
     )
 
+    /** Updates the signed-in user's display name and refreshes the stored session so it takes effect. */
+    suspend fun updateDisplayName(name: String)
+
     fun logout()
 }

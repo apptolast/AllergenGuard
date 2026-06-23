@@ -38,6 +38,11 @@ class RemoteAuthRepository(
         tokenManager.saveTokens(response.accessToken, response.refreshToken, response.expiresIn)
     }
 
+    override suspend fun updateDisplayName(name: String) {
+        // The legacy backend has no profile-update endpoint; display name editing is Firebase-only.
+        throw UnsupportedOperationException("Editar el nombre no está disponible en el backend antiguo")
+    }
+
     override fun logout() {
         tokenManager.clearTokens()
     }

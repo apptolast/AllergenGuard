@@ -29,17 +29,26 @@ class FirestoreIngredientRepository(
     private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
     private var hasLoaded = false
 
+    // Singleton cache outlives a logout. Remember which account the cache was built for and reload when
+    // it changes, so a user from another account signing in on the same browser doesn't see the previous
+    // account's catalog. The catalog is per-account, so the account id is enough (role doesn't change it).
+    private var loadedAccountId: String? = null
+
     /** Path to the current account's ingredient catalog. */
     private fun collection(): String = "accounts/${accountHolder.requireAccountId()}/ingredients"
 
     override fun getAllIngredients(): Flow<List<Ingredient>> =
         flow {
-            if (!hasLoaded) runCatching { refresh() }
+            if (!hasLoaded || loadedAccountId != accountHolder.accountIdOrNull) {
+                runCatching { refresh() }
+            }
             emitAll(_ingredients)
         }
 
     private suspend fun refresh() {
-        if (accountHolder.accountIdOrNull == null) {
+        val accountId = accountHolder.accountIdOrNull
+        loadedAccountId = accountId
+        if (accountId == null) {
             _ingredients.value = emptyList()
             hasLoaded = true
             return

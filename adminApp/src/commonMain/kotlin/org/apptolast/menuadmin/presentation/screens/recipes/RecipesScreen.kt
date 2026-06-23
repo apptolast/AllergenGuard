@@ -3,7 +3,6 @@ package org.apptolast.menuadmin.presentation.screens.recipes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import coil3.compose.AsyncImage
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
@@ -403,6 +404,7 @@ private fun RecipeEditorForm(
 ) {
     var ingredientSearchQuery by remember { mutableStateOf("") }
     var categoryFieldFocused by remember { mutableStateOf(false) }
+    var ingredientFieldFocused by remember { mutableStateOf(false) }
 
     // Aggregate allergens from form ingredients, keeping the strongest containment level per allergen
     // (CONTAINS beats MAY_CONTAIN; FREE_OF ignored) so the summary can mark traces distinctly.
@@ -533,7 +535,7 @@ private fun RecipeEditorForm(
                 // Add ingredients section
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Anadir Componentes",
+                        text = "Anadir Ingredientes",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -543,59 +545,54 @@ private fun RecipeEditorForm(
                         onValueChange = { ingredientSearchQuery = it },
                         placeholder = { Text("Buscar ingrediente...") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged { ingredientFieldFocused = it.isFocused },
                         shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Blue500,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                         ),
                     )
-                    // Show matching ingredients
-                    if (ingredientSearchQuery.isNotBlank()) {
-                        val matchingIngredients = uiState.allIngredients.filter {
-                            it.name.contains(ingredientSearchQuery, ignoreCase = true) &&
-                                uiState.formIngredients.none { fi -> fi.ingredientId == it.id }
-                        }.take(5)
-
-                        if (matchingIngredients.isNotEmpty()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surface),
-                            ) {
-                                matchingIngredients.forEach { ingredient ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                onAddIngredientToForm(
-                                                    RecipeIngredient(
-                                                        ingredientId = ingredient.id,
-                                                        ingredientName = ingredient.name,
-                                                    ),
-                                                )
-                                                ingredientSearchQuery = ""
-                                            }
-                                            .padding(12.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = ingredient.name,
-                                            fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Filled.Add,
-                                            contentDescription = "Anadir",
-                                            tint = Blue500,
-                                            modifier = Modifier.size(18.dp),
-                                        )
-                                    }
-                                }
-                            }
+                    // Ingredients not yet added. On focus, preview the whole catalog (empty query) or the
+                    // matches while typing — so the user can browse without having to type a letter first.
+                    val available = uiState.allIngredients.filter { ing ->
+                        uiState.formIngredients.none { fi -> fi.ingredientId == ing.id }
+                    }
+                    val matchingIngredients = when {
+                        !ingredientFieldFocused -> emptyList()
+                        ingredientSearchQuery.isBlank() -> available
+                        else -> available.filter { it.name.contains(ingredientSearchQuery, ignoreCase = true) }
+                    }
+                    DropdownMenu(
+                        expanded = matchingIngredients.isNotEmpty(),
+                        onDismissRequest = { ingredientFieldFocused = false },
+                        // Keep focus on the search field so typing keeps filtering and the menu stays open
+                        // while the user adds several ingredients in a row.
+                        properties = PopupProperties(focusable = false),
+                        modifier = Modifier.heightIn(max = 280.dp),
+                    ) {
+                        matchingIngredients.forEach { ingredient ->
+                            DropdownMenuItem(
+                                text = { Text(ingredient.name) },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Anadir",
+                                        tint = Blue500,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                },
+                                onClick = {
+                                    onAddIngredientToForm(
+                                        RecipeIngredient(
+                                            ingredientId = ingredient.id,
+                                            ingredientName = ingredient.name,
+                                        ),
+                                    )
+                                    ingredientSearchQuery = ""
+                                },
+                            )
                         }
                     }
                 }

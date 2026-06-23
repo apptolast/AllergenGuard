@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flow
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreDocument
+import org.apptolast.menuadmin.domain.model.AccountSession
 import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 
@@ -30,14 +31,23 @@ class FirestoreRestaurantRepository(
     private val _restaurants = MutableStateFlow<List<Restaurant>>(emptyList())
     private var hasLoaded = false
 
+    // This repo is a singleton, so its cache outlives a logout. Remember which session the cache was
+    // built for and reload when it changes (a different user signing in on the same browser, or an
+    // admin↔manager switch) — otherwise the new user would see the previous user's restaurants. The
+    // whole session is compared, not just the account, because role/restaurantIds change the filter.
+    private var loadedSession: AccountSession? = null
+
     override fun getAllRestaurants(): Flow<List<Restaurant>> =
         flow {
-            if (!hasLoaded) runCatching { refresh() }
+            if (!hasLoaded || loadedSession != accountHolder.session.value) {
+                runCatching { refresh() }
+            }
             emitAll(_restaurants)
         }
 
     private suspend fun refresh() {
         val session = accountHolder.session.value
+        loadedSession = session
         if (session == null) {
             _restaurants.value = emptyList()
             hasLoaded = true

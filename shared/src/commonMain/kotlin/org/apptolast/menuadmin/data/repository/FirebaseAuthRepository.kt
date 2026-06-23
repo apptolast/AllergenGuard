@@ -40,17 +40,29 @@ class FirebaseAuthRepository(
     ) {
         val r = authService.signUp(email, password)
         tokenManager.saveTokens(r.idToken, r.refreshToken, r.expiresIn.toLongOrNull() ?: 3600L)
-        // Persist the display name on the new account so the `name` claim is available afterwards.
-        // accounts:update returns a refreshed session, so re-store it to pick up the name immediately.
+        // Persist the display name, then refresh the session so the new `name` claim is available.
         val displayName = name?.trim()
         if (!displayName.isNullOrBlank()) {
-            runCatching { authService.updateProfile(r.idToken, displayName) }.getOrNull()?.let { u ->
+            runCatching {
+                authService.updateProfile(r.idToken, displayName)
+                val refreshed = authService.refreshIdToken(r.refreshToken)
                 tokenManager.saveTokens(
-                    u.idToken.ifBlank { r.idToken },
-                    u.refreshToken.ifBlank { r.refreshToken },
-                    u.expiresIn.toLongOrNull() ?: 3600L,
+                    refreshed.idToken,
+                    refreshed.refreshToken,
+                    refreshed.expiresIn.toLongOrNull() ?: 3600L,
                 )
             }
+        }
+    }
+
+    override suspend fun updateDisplayName(name: String) {
+        val token = tokenManager.accessToken ?: error("No hay sesión activa")
+        // Persist the display name server-side, then refresh the session so the local idToken carries
+        // the updated `name` claim (accounts:update itself does not reissue tokens).
+        authService.updateProfile(token, name.trim())
+        tokenManager.refreshToken?.takeIf { it.isNotBlank() }?.let { refresh ->
+            val r = authService.refreshIdToken(refresh)
+            tokenManager.saveTokens(r.idToken, r.refreshToken, r.expiresIn.toLongOrNull() ?: 3600L)
         }
     }
 
