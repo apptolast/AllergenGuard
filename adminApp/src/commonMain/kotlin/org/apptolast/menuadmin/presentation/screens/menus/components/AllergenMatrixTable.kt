@@ -29,11 +29,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.matrix_legend
+import menuadmin.adminapp.generated.resources.matrix_legend_contains
+import menuadmin.adminapp.generated.resources.matrix_legend_not_contains
+import menuadmin.adminapp.generated.resources.matrix_note_body
+import menuadmin.adminapp.generated.resources.matrix_note_title
+import menuadmin.adminapp.generated.resources.menus_product_dish
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Dish
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red100
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 
 private val allergenHeaders = mapOf(
     AllergenType.GLUTEN to "Gluten",
@@ -92,7 +100,7 @@ fun AllergenMatrixTable(
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
-                    text = "PRODUCTO / PLATO",
+                    text = stringResource(Res.string.menus_product_dish),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -225,7 +233,7 @@ fun AllergenTableLegend(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "LEYENDA",
+                text = stringResource(Res.string.matrix_legend),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -255,7 +263,7 @@ fun AllergenTableLegend(modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = "Contiene el alérgeno",
+                    text = stringResource(Res.string.matrix_legend_contains),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -276,7 +284,7 @@ fun AllergenTableLegend(modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = "No contiene",
+                    text = stringResource(Res.string.matrix_legend_not_contains),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -291,14 +299,13 @@ fun AllergenTableLegend(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = "Nota Informativa:",
+                text = stringResource(Res.string.matrix_note_title),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Esta información ha sido elaborada en base a las fichas técnicas/fotografías de " +
-                    "listado de ingredientes facilitadas por nuestros clientes.",
+                text = stringResource(Res.string.matrix_note_body),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp,

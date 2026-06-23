@@ -1,5 +1,6 @@
 package org.apptolast.menuadmin.presentation.screens.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,9 +53,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.app_name
+import menuadmin.adminapp.generated.resources.auth_create_account
+import menuadmin.adminapp.generated.resources.auth_email
+import menuadmin.adminapp.generated.resources.auth_login
+import menuadmin.adminapp.generated.resources.auth_name_optional
+import menuadmin.adminapp.generated.resources.auth_password
+import menuadmin.adminapp.generated.resources.auth_password_hide
+import menuadmin.adminapp.generated.resources.auth_password_show
+import menuadmin.adminapp.generated.resources.auth_subtitle
+import menuadmin.adminapp.generated.resources.logo_android
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -108,15 +124,24 @@ fun AuthContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Header
+            // Logo + header. High-res PNG (1536x1024) rendered with high-quality filtering so the heavy
+            // down-scale stays crisp instead of pixelated.
+            Image(
+                painter = BitmapPainter(
+                    image = imageResource(Res.drawable.logo_android),
+                    filterQuality = FilterQuality.High,
+                ),
+                contentDescription = stringResource(Res.string.app_name),
+                modifier = Modifier.size(180.dp),
+            )
             Text(
-                text = "AllergenGuard",
+                text = stringResource(Res.string.app_name),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Blue500,
             )
             Text(
-                text = "Panel de administración",
+                text = stringResource(Res.string.auth_subtitle),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -131,14 +156,14 @@ fun AuthContent(
             ) {
                 TextButton(onClick = { if (!uiState.isLoginMode) onToggleMode() }) {
                     Text(
-                        text = "Iniciar sesión",
+                        text = stringResource(Res.string.auth_login),
                         fontWeight = if (uiState.isLoginMode) FontWeight.Bold else FontWeight.Normal,
                         color = if (uiState.isLoginMode) Blue500 else MenuAdminTheme.colors.textMuted,
                     )
                 }
                 TextButton(onClick = { if (uiState.isLoginMode) onToggleMode() }) {
                     Text(
-                        text = "Crear cuenta",
+                        text = stringResource(Res.string.auth_create_account),
                         fontWeight = if (!uiState.isLoginMode) FontWeight.Bold else FontWeight.Normal,
                         color = if (!uiState.isLoginMode) Blue500 else MenuAdminTheme.colors.textMuted,
                     )
@@ -149,7 +174,7 @@ fun AuthContent(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                label = { Text("Email") },
+                label = { Text(stringResource(Res.string.auth_email)) },
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Email,
@@ -170,7 +195,7 @@ fun AuthContent(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
-                label = { Text("Contraseña") },
+                label = { Text(stringResource(Res.string.auth_password)) },
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Lock,
@@ -182,7 +207,11 @@ fun AuthContent(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = if (passwordVisible) "Ocultar" else "Mostrar",
+                            contentDescription = if (passwordVisible) {
+                                stringResource(Res.string.auth_password_hide)
+                            } else {
+                                stringResource(Res.string.auth_password_show)
+                            },
                             modifier = Modifier.size(20.dp),
                         )
                     }
@@ -211,7 +240,7 @@ fun AuthContent(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = onNameChange,
-                    label = { Text("Nombre (opcional)") },
+                    label = { Text(stringResource(Res.string.auth_name_optional)) },
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Person,
@@ -250,7 +279,11 @@ fun AuthContent(
                     )
                 } else {
                     Text(
-                        text = if (uiState.isLoginMode) "Iniciar sesión" else "Crear cuenta",
+                        text = if (uiState.isLoginMode) {
+                            stringResource(Res.string.auth_login)
+                        } else {
+                            stringResource(Res.string.auth_create_account)
+                        },
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White,
                     )

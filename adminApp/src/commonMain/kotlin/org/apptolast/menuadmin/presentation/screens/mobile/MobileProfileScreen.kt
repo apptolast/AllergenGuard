@@ -34,10 +34,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.mobile_profile_allergies_subtitle
+import menuadmin.adminapp.generated.resources.mobile_profile_allergies_title
+import menuadmin.adminapp.generated.resources.mobile_profile_avatar_description
+import menuadmin.adminapp.generated.resources.mobile_profile_user_name
+import menuadmin.adminapp.generated.resources.profile_title
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MobileProfileScreen() {
@@ -69,7 +76,7 @@ fun MobileProfileContent(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Text(
-            text = "Mi Perfil",
+            text = stringResource(Res.string.profile_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -90,13 +97,13 @@ fun MobileProfileContent(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Person,
-                    contentDescription = "Perfil",
+                    contentDescription = stringResource(Res.string.mobile_profile_avatar_description),
                     tint = Color.White,
                     modifier = Modifier.size(40.dp),
                 )
             }
             Text(
-                text = "Usuario",
+                text = stringResource(Res.string.mobile_profile_user_name),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -125,13 +132,13 @@ fun MobileProfileContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Mis Alergias",
+                text = stringResource(Res.string.mobile_profile_allergies_title),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Selecciona tus alergias para filtrar automaticamente",
+                text = stringResource(Res.string.mobile_profile_allergies_subtitle),
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

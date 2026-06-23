@@ -7,9 +7,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.profile_error_unknown
+import menuadmin.adminapp.generated.resources.profile_error_update_name
+import menuadmin.adminapp.generated.resources.profile_name_updated
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.domain.model.AccountRole
 import org.apptolast.menuadmin.domain.repository.AuthRepository
+import org.jetbrains.compose.resources.getString
 
 class ProfileViewModel(
     private val authRepository: AuthRepository,
@@ -48,19 +53,24 @@ class ProfileViewModel(
             _uiState.update { it.copy(isSavingName = true, error = null) }
             try {
                 authRepository.updateDisplayName(draft)
+                val successMessage = getString(Res.string.profile_name_updated)
                 _uiState.update {
                     it.copy(
                         isSavingName = false,
                         isEditingName = false,
                         name = draft,
-                        successMessage = "Nombre actualizado",
+                        successMessage = successMessage,
                     )
                 }
             } catch (e: Exception) {
+                val errorMessage = getString(
+                    Res.string.profile_error_update_name,
+                    e.message ?: getString(Res.string.profile_error_unknown),
+                )
                 _uiState.update {
                     it.copy(
                         isSavingName = false,
-                        error = "No se pudo actualizar el nombre: ${e.message ?: "Error desconocido"}",
+                        error = errorMessage,
                     )
                 }
             }

@@ -25,10 +25,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.common_allergen_traces_label
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AllergenBadge(
@@ -83,7 +86,11 @@ fun AllergenBadge(
             color = contentColor,
         )
         Text(
-            text = if (mayContain) "${allergenType.nameEs} (trazas)" else allergenType.nameEs,
+            text = if (mayContain) {
+                stringResource(Res.string.common_allergen_traces_label, allergenType.nameEs)
+            } else {
+                allergenType.nameEs
+            },
             color = contentColor,
             fontSize = if (compact) 12.sp else 14.sp,
             fontWeight = FontWeight.SemiBold,

@@ -36,6 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_edit
+import menuadmin.adminapp.generated.resources.nav_carta_digital
+import menuadmin.adminapp.generated.resources.nav_menus
+import menuadmin.adminapp.generated.resources.nav_recipes
+import menuadmin.adminapp.generated.resources.restaurants_back
+import menuadmin.adminapp.generated.resources.restaurants_tab_overview
 import org.apptolast.menuadmin.presentation.screens.cartadigital.CartaDigitalScreen
 import org.apptolast.menuadmin.presentation.screens.cartadigital.CartaDigitalViewModel
 import org.apptolast.menuadmin.presentation.screens.menus.MenusScreen
@@ -46,16 +53,18 @@ import org.apptolast.menuadmin.presentation.screens.restaurants.detail.Restauran
 import org.apptolast.menuadmin.presentation.screens.restaurants.detail.RestaurantOverviewContent
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 private enum class WorkspaceTab(
-    val title: String,
+    val title: StringResource,
 ) {
-    OVERVIEW("Resumen"),
-    RECIPES("Recetas"),
-    MENUS("Menus"),
-    CARTA("Carta Digital"),
+    OVERVIEW(Res.string.restaurants_tab_overview),
+    RECIPES(Res.string.nav_recipes),
+    MENUS(Res.string.nav_menus),
+    CARTA(Res.string.nav_carta_digital),
 }
 
 @Composable
@@ -99,7 +108,7 @@ fun RestaurantWorkspace(
                     onClick = { selectedTab = index },
                     text = {
                         Text(
-                            text = tab.title,
+                            text = stringResource(tab.title),
                             fontWeight = if (selectedTab == index) {
                                 FontWeight.SemiBold
                             } else {
@@ -179,7 +188,7 @@ private fun WorkspaceHeader(
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = "Volver a restaurantes",
+                contentDescription = stringResource(Res.string.restaurants_back),
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -211,11 +220,11 @@ private fun WorkspaceHeader(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Editar",
+                    contentDescription = stringResource(Res.string.action_edit),
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Editar")
+                Text(stringResource(Res.string.action_edit))
             }
         }
     }

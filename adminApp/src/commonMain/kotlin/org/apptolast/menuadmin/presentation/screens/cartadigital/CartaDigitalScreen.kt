@@ -33,6 +33,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.carta_all_dishes
+import menuadmin.adminapp.generated.resources.carta_clear
+import menuadmin.adminapp.generated.resources.carta_empty_no_recipes
+import menuadmin.adminapp.generated.resources.carta_question
+import menuadmin.adminapp.generated.resources.carta_safe_count
+import menuadmin.adminapp.generated.resources.carta_safe_dishes
+import menuadmin.adminapp.generated.resources.carta_section_count
+import menuadmin.adminapp.generated.resources.carta_subtitle
+import menuadmin.adminapp.generated.resources.carta_title
+import menuadmin.adminapp.generated.resources.carta_unsafe_dishes
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
@@ -43,6 +54,7 @@ import org.apptolast.menuadmin.presentation.theme.Green500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red100
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CartaDigitalScreen(viewModel: CartaDigitalViewModel) {
@@ -79,13 +91,13 @@ fun CartaDigitalContent(
         // Header
         Column {
             Text(
-                text = "Carta Digital Interactiva",
+                text = stringResource(Res.string.carta_title),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Filtra platos segun las alergias del cliente",
+                text = stringResource(Res.string.carta_subtitle),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -134,7 +146,7 @@ fun CartaDigitalContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "¿A que tiene alergia el cliente?",
+                    text = stringResource(Res.string.carta_question),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -142,7 +154,7 @@ fun CartaDigitalContent(
                 if (uiState.selectedAllergens.isNotEmpty()) {
                     TextButton(onClick = { onClearAllergens() }) {
                         Text(
-                            text = "Limpiar seleccion",
+                            text = stringResource(Res.string.carta_clear),
                             fontSize = 13.sp,
                             color = Blue500,
                         )
@@ -174,7 +186,11 @@ fun CartaDigitalContent(
                     .padding(16.dp),
             ) {
                 Text(
-                    text = "${uiState.safeRecipes.size} Platos Seguros de ${uiState.allRecipes.size} total",
+                    text = stringResource(
+                        Res.string.carta_safe_count,
+                        uiState.safeRecipes.size,
+                        uiState.allRecipes.size,
+                    ),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MenuAdminTheme.colors.success,
@@ -185,7 +201,7 @@ fun CartaDigitalContent(
         // Safe Recipes
         if (uiState.selectedAllergens.isNotEmpty() && uiState.safeRecipes.isNotEmpty()) {
             RecipeSection(
-                title = "Platos Seguros",
+                title = stringResource(Res.string.carta_safe_dishes),
                 titleColor = Green500,
                 borderColor = Green500,
                 bgColor = Green100,
@@ -197,7 +213,7 @@ fun CartaDigitalContent(
         // Unsafe Recipes
         if (uiState.selectedAllergens.isNotEmpty() && uiState.unsafeRecipes.isNotEmpty()) {
             RecipeSection(
-                title = "Platos con Alergenos",
+                title = stringResource(Res.string.carta_unsafe_dishes),
                 titleColor = Red500,
                 borderColor = Red500,
                 bgColor = Red100,
@@ -209,7 +225,7 @@ fun CartaDigitalContent(
         // Show all recipes when no allergens selected
         if (uiState.selectedAllergens.isEmpty() && uiState.allRecipes.isNotEmpty()) {
             Text(
-                text = "Todos los platos (${uiState.allRecipes.size})",
+                text = stringResource(Res.string.carta_all_dishes, uiState.allRecipes.size),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -234,8 +250,7 @@ fun CartaDigitalContent(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Este menu no tiene recetas asociadas. " +
-                        "Ve a la pestana Menus para editar el menu y seleccionar recetas.",
+                    text = stringResource(Res.string.carta_empty_no_recipes),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -261,7 +276,7 @@ private fun RecipeSection(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = "$title (${recipes.size})",
+            text = stringResource(Res.string.carta_section_count, title, recipes.size),
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             color = titleColor,

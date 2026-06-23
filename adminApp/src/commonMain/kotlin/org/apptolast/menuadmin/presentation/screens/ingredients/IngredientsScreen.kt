@@ -56,6 +56,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.action_back
+import menuadmin.adminapp.generated.resources.action_clear
+import menuadmin.adminapp.generated.resources.field_brand
+import menuadmin.adminapp.generated.resources.field_description
+import menuadmin.adminapp.generated.resources.ingredients_allergens_label
+import menuadmin.adminapp.generated.resources.ingredients_analyze
+import menuadmin.adminapp.generated.resources.ingredients_brand_placeholder
+import menuadmin.adminapp.generated.resources.ingredients_clear_filters
+import menuadmin.adminapp.generated.resources.ingredients_delete
+import menuadmin.adminapp.generated.resources.ingredients_description_placeholder
+import menuadmin.adminapp.generated.resources.ingredients_editor_subtitle
+import menuadmin.adminapp.generated.resources.ingredients_name_placeholder
+import menuadmin.adminapp.generated.resources.ingredients_new
+import menuadmin.adminapp.generated.resources.ingredients_no_allergens
+import menuadmin.adminapp.generated.resources.ingredients_paste_hint
+import menuadmin.adminapp.generated.resources.ingredients_product_name
+import menuadmin.adminapp.generated.resources.ingredients_save
+import menuadmin.adminapp.generated.resources.ingredients_scan_label
+import menuadmin.adminapp.generated.resources.ingredients_search
+import menuadmin.adminapp.generated.resources.ingredients_subtitle
+import menuadmin.adminapp.generated.resources.ingredients_title
+import menuadmin.adminapp.generated.resources.ingredients_upload_photo
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
@@ -68,6 +91,7 @@ import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.Blue600
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.Red500
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -135,23 +159,23 @@ fun IngredientsContent(
                     IconButton(onClick = onDismissEditor) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(Res.string.action_back),
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
                 Column {
                     Text(
-                        text = "Maestro de Ingredientes",
+                        text = stringResource(Res.string.ingredients_title),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = if (uiState.isEditing) {
-                            "Analiza etiquetas y registra materias primas"
+                            stringResource(Res.string.ingredients_editor_subtitle)
                         } else {
-                            "Gestiona los ingredientes y sus alergenos"
+                            stringResource(Res.string.ingredients_subtitle)
                         },
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -167,13 +191,13 @@ fun IngredientsContent(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = "Nuevo",
+                        contentDescription = stringResource(Res.string.ingredients_new),
                         tint = Color.White,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Nuevo Ingrediente",
+                        text = stringResource(Res.string.ingredients_new),
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -205,7 +229,7 @@ fun IngredientsContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
-                            text = "Escanear Etiqueta (OCR) o Pegar Texto",
+                            text = stringResource(Res.string.ingredients_scan_label),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Blue500,
@@ -219,7 +243,7 @@ fun IngredientsContent(
                                 value = uiState.formLabelInfo,
                                 onValueChange = onFormLabelInfoChange,
                                 placeholder = {
-                                    Text("Sube una foto o pega aqui el texto de la etiqueta..")
+                                    Text(stringResource(Res.string.ingredients_paste_hint))
                                 },
                                 modifier = Modifier.weight(1f).height(100.dp),
                                 shape = RoundedCornerShape(8.dp),
@@ -237,11 +261,11 @@ fun IngredientsContent(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.CameraAlt,
-                                        contentDescription = "Subir Foto",
+                                        contentDescription = stringResource(Res.string.ingredients_upload_photo),
                                         modifier = Modifier.size(16.dp),
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Subir Foto")
+                                    Text(stringResource(Res.string.ingredients_upload_photo))
                                 }
                                 Button(
                                     onClick = { /* Analyze */ },
@@ -252,12 +276,12 @@ fun IngredientsContent(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Search,
-                                        contentDescription = "Analizar",
+                                        contentDescription = stringResource(Res.string.ingredients_analyze),
                                         tint = Color.White,
                                         modifier = Modifier.size(16.dp),
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Analizar", color = Color.White)
+                                    Text(stringResource(Res.string.ingredients_analyze), color = Color.White)
                                 }
                             }
                         }
@@ -272,8 +296,8 @@ fun IngredientsContent(
                     OutlinedTextField(
                         value = uiState.formName,
                         onValueChange = onFormNameChange,
-                        label = { Text("Nombre del Producto") },
-                        placeholder = { Text("Ej. Salsa de Soja Kikkoman") },
+                        label = { Text(stringResource(Res.string.ingredients_product_name)) },
+                        placeholder = { Text(stringResource(Res.string.ingredients_name_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp),
@@ -285,8 +309,8 @@ fun IngredientsContent(
                     OutlinedTextField(
                         value = uiState.formBrand,
                         onValueChange = onFormBrandChange,
-                        label = { Text("Marca") },
-                        placeholder = { Text("Ej. Kikkoman") },
+                        label = { Text(stringResource(Res.string.field_brand)) },
+                        placeholder = { Text(stringResource(Res.string.ingredients_brand_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(8.dp),
@@ -301,8 +325,8 @@ fun IngredientsContent(
                 OutlinedTextField(
                     value = uiState.formDescription,
                     onValueChange = onFormDescriptionChange,
-                    label = { Text("Descripcion") },
-                    placeholder = { Text("Descripcion del ingrediente...") },
+                    label = { Text(stringResource(Res.string.field_description)) },
+                    placeholder = { Text(stringResource(Res.string.ingredients_description_placeholder)) },
                     modifier = Modifier.fillMaxWidth().height(80.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -316,7 +340,7 @@ fun IngredientsContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = "Alergenos (Click: Contiene / Puede contener / Desactivar)",
+                        text = stringResource(Res.string.ingredients_allergens_label),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -354,7 +378,7 @@ fun IngredientsContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Eliminar",
+                                text = stringResource(Res.string.ingredients_delete),
                                 fontWeight = FontWeight.SemiBold,
                             )
                         }
@@ -383,7 +407,7 @@ fun IngredientsContent(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Guardar Ingrediente",
+                            text = stringResource(Res.string.ingredients_save),
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -395,7 +419,7 @@ fun IngredientsContent(
             SearchBar(
                 query = uiState.searchQuery,
                 onQueryChange = onSearchQueryChange,
-                placeholder = "Buscar ingredientes...",
+                placeholder = stringResource(Res.string.ingredients_search),
             )
 
             // Allergen filter chips
@@ -453,7 +477,7 @@ private fun AllergenFilterBar(
                 onClick = onClearFilters,
                 label = {
                     Text(
-                        text = "Limpiar filtros",
+                        text = stringResource(Res.string.ingredients_clear_filters),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                     )
@@ -461,7 +485,7 @@ private fun AllergenFilterBar(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Limpiar",
+                        contentDescription = stringResource(Res.string.action_clear),
                         modifier = Modifier.size(16.dp),
                         tint = Red500,
                     )
@@ -528,7 +552,7 @@ private fun IngredientCard(
         Spacer(modifier = Modifier.weight(1f))
         if (allergens.isEmpty()) {
             Text(
-                text = "Sin alergenos",
+                text = stringResource(Res.string.ingredients_no_allergens),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -26,6 +26,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.layout_exit
+import menuadmin.adminapp.generated.resources.layout_managing_account
 import org.apptolast.menuadmin.data.CurrentAccountHolder
 import org.apptolast.menuadmin.navigation.BackupRestoreRoute
 import org.apptolast.menuadmin.navigation.DashboardRoute
@@ -46,6 +49,7 @@ import org.apptolast.menuadmin.presentation.screens.restaurants.RestaurantsListS
 import org.apptolast.menuadmin.presentation.screens.restaurants.workspace.RestaurantWorkspace
 import org.apptolast.menuadmin.presentation.screens.settings.SettingsScreen
 import org.apptolast.menuadmin.presentation.theme.Blue600
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -183,13 +187,13 @@ private fun ImpersonationBanner(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Gestionando la cuenta: $accountName",
+            text = stringResource(Res.string.layout_managing_account, accountName),
             color = Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
         )
         TextButton(onClick = onExit) {
-            Text("Salir", color = Color.White, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(Res.string.layout_exit), color = Color.White, fontWeight = FontWeight.SemiBold)
         }
     }
 }

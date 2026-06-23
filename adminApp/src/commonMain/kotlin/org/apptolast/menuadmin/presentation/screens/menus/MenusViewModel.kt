@@ -9,6 +9,16 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.menus_error_creating
+import menuadmin.adminapp.generated.resources.menus_error_deleting
+import menuadmin.adminapp.generated.resources.menus_error_export_json
+import menuadmin.adminapp.generated.resources.menus_error_export_pdf
+import menuadmin.adminapp.generated.resources.menus_error_loading
+import menuadmin.adminapp.generated.resources.menus_error_loading_recipes
+import menuadmin.adminapp.generated.resources.menus_error_toggle_active
+import menuadmin.adminapp.generated.resources.menus_error_updating
+import menuadmin.adminapp.generated.resources.menus_error_uploading_logo
 import org.apptolast.menuadmin.data.repository.DishImageUploader
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Menu
@@ -20,6 +30,7 @@ import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 import org.apptolast.menuadmin.platform.buildAllergenPdfPayload
 import org.apptolast.menuadmin.platform.encodeAllergenPdfPayload
 import org.apptolast.menuadmin.platform.launchAllergenPdf
+import org.jetbrains.compose.resources.getString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -52,7 +63,7 @@ class MenusViewModel(
             emit(
                 _localState.value.copy(
                     isLoading = false,
-                    error = throwable.message ?: "Error al cargar menus",
+                    error = throwable.message ?: getString(Res.string.menus_error_loading),
                 ),
             )
         }
@@ -81,7 +92,7 @@ class MenusViewModel(
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     isLoadingRecipes = false,
-                    error = e.message ?: "Error al cargar recetas del menu",
+                    error = e.message ?: getString(Res.string.menus_error_loading_recipes),
                 )
             }
         }
@@ -150,7 +161,7 @@ class MenusViewModel(
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     isUploadingRestaurantLogo = false,
-                    error = e.message ?: "Error al subir el logo",
+                    error = e.message ?: getString(Res.string.menus_error_uploading_logo),
                 )
             }
         }
@@ -172,7 +183,7 @@ class MenusViewModel(
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     isUploadingCompanyLogo = false,
-                    error = e.message ?: "Error al subir el logo",
+                    error = e.message ?: getString(Res.string.menus_error_uploading_logo),
                 )
             }
         }
@@ -244,9 +255,9 @@ class MenusViewModel(
                 _localState.value = _localState.value.copy(
                     isSaving = false,
                     error = e.message ?: if (_localState.value.editingMenu != null) {
-                        "Error al actualizar menu"
+                        getString(Res.string.menus_error_updating)
                     } else {
-                        "Error al crear menu"
+                        getString(Res.string.menus_error_creating)
                     },
                 )
             }
@@ -260,7 +271,7 @@ class MenusViewModel(
                 menuRepository.setMenuPublished(restaurantId, menu.id, !menu.published)
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
-                    error = e.message ?: "Error al cambiar el menu activo",
+                    error = e.message ?: getString(Res.string.menus_error_toggle_active),
                 )
             }
         }
@@ -286,7 +297,7 @@ class MenusViewModel(
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
                     menuToDelete = null,
-                    error = e.message ?: "Error al eliminar menu",
+                    error = e.message ?: getString(Res.string.menus_error_deleting),
                 )
             }
         }
@@ -299,7 +310,7 @@ class MenusViewModel(
                 menuRepository.exportMenuToJson(menu.id)
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
-                    error = e.message ?: "Error al exportar JSON",
+                    error = e.message ?: getString(Res.string.menus_error_export_json),
                 )
             }
         }
@@ -319,7 +330,7 @@ class MenusViewModel(
                 launchAllergenPdf(encodeAllergenPdfPayload(payload))
             } catch (e: Exception) {
                 _localState.value = _localState.value.copy(
-                    error = e.message ?: "Error al exportar PDF",
+                    error = e.message ?: getString(Res.string.menus_error_export_pdf),
                 )
             }
         }

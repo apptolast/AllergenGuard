@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import menuadmin.adminapp.generated.resources.Res
+import menuadmin.adminapp.generated.resources.carta_error_loading
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.repository.MenuRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.jetbrains.compose.resources.getString
 
 class CartaDigitalViewModel(
     menuRepository: MenuRepository,
@@ -55,7 +58,7 @@ class CartaDigitalViewModel(
             emit(
                 CartaDigitalUiState(
                     isLoading = false,
-                    error = throwable.message ?: "Error al cargar carta digital",
+                    error = throwable.message ?: getString(Res.string.carta_error_loading),
                 ),
             )
         }
