@@ -32,22 +32,18 @@ class IngredientsViewModel(
         _formState,
         accountHolder.session,
     ) { ingredients, formState, session ->
-        var filtered = ingredients
-        if (formState.searchQuery.isNotBlank()) {
-            filtered = filtered.filter { ingredient ->
-                ingredient.name.contains(formState.searchQuery, ignoreCase = true) ||
-                    ingredient.brand.contains(formState.searchQuery, ignoreCase = true)
-            }
-        }
-        if (formState.filterAllergens.isNotEmpty()) {
-            filtered = filtered.filter { ingredient ->
-                ingredient.allergenTypes.any { it in formState.filterAllergens }
-            }
-        }
+        val availableBrands = ingredients.map { it.brand }.filter { it.isNotBlank() }.distinct().sorted()
+        val filtered = filterIngredientsList(
+            ingredients = ingredients,
+            query = formState.searchQuery,
+            filterAllergens = formState.filterAllergens,
+            filterBrands = formState.filterBrands,
+        )
         formState.copy(
             isLoading = false,
             isAccountAdmin = session?.isAccountAdmin ?: false,
             ingredients = filtered.sortedBy { it.name.lowercase() },
+            availableBrands = availableBrands,
         )
     }
         .catch { throwable ->
@@ -76,6 +72,16 @@ class IngredientsViewModel(
 
     fun onClearAllergenFilters() {
         _formState.value = _formState.value.copy(filterAllergens = emptySet())
+    }
+
+    fun onToggleBrandFilter(brand: String) {
+        val current = _formState.value.filterBrands
+        val updated = if (brand in current) current - brand else current + brand
+        _formState.value = _formState.value.copy(filterBrands = updated)
+    }
+
+    fun onClearBrandFilters() {
+        _formState.value = _formState.value.copy(filterBrands = emptySet())
     }
 
     fun onNewIngredient() {

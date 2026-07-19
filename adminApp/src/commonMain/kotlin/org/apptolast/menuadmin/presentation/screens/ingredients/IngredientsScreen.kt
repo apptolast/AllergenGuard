@@ -112,6 +112,8 @@ fun IngredientsScreen(viewModel: IngredientsViewModel = koinViewModel()) {
         onEditIngredient = viewModel::onEditIngredient,
         onToggleAllergenFilter = viewModel::onToggleAllergenFilter,
         onClearAllergenFilters = viewModel::onClearAllergenFilters,
+        onToggleBrandFilter = viewModel::onToggleBrandFilter,
+        onClearBrandFilters = viewModel::onClearBrandFilters,
     )
 }
 
@@ -132,6 +134,8 @@ fun IngredientsContent(
     onEditIngredient: (Ingredient) -> Unit,
     onToggleAllergenFilter: (AllergenType) -> Unit,
     onClearAllergenFilters: () -> Unit,
+    onToggleBrandFilter: (String) -> Unit,
+    onClearBrandFilters: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (uiState.isLoading) {
@@ -429,6 +433,14 @@ fun IngredientsContent(
                 onClearFilters = onClearAllergenFilters,
             )
 
+            // Brand filter chips
+            BrandFilterBar(
+                availableBrands = uiState.availableBrands,
+                selectedBrands = uiState.filterBrands,
+                onToggleBrand = onToggleBrandFilter,
+                onClearBrands = onClearBrandFilters,
+            )
+
             // Grid of ingredient cards
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 280.dp),
@@ -500,6 +512,67 @@ private fun AllergenFilterBar(
                 allergenType = allergen,
                 isActive = allergen in selectedFilters,
                 onClick = { onToggleFilter(allergen) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun BrandFilterBar(
+    availableBrands: List<String>,
+    selectedBrands: Set<String>,
+    onToggleBrand: (String) -> Unit,
+    onClearBrands: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (availableBrands.isEmpty()) return
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (selectedBrands.isNotEmpty()) {
+            ElevatedAssistChip(
+                onClick = onClearBrands,
+                label = {
+                    Text(
+                        text = stringResource(Res.string.ingredients_clear_filters),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.action_clear),
+                        modifier = Modifier.size(16.dp),
+                        tint = Red500,
+                    )
+                },
+                colors = AssistChipDefaults.elevatedAssistChipColors(labelColor = Red500),
+            )
+        }
+        availableBrands.forEach { brand ->
+            val selected = brand in selectedBrands
+            ElevatedAssistChip(
+                onClick = { onToggleBrand(brand) },
+                label = {
+                    Text(
+                        text = brand,
+                        fontSize = 13.sp,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                },
+                colors = if (selected) {
+                    AssistChipDefaults.elevatedAssistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        labelColor = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    AssistChipDefaults.elevatedAssistChipColors()
+                },
             )
         }
     }
@@ -639,6 +712,8 @@ private fun IngredientsContentPreview() {
             onEditIngredient = {},
             onToggleAllergenFilter = {},
             onClearAllergenFilters = {},
+            onToggleBrandFilter = {},
+            onClearBrandFilters = {},
         )
     }
 }

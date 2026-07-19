@@ -11,6 +11,8 @@ data class IngredientsUiState(
     val ingredients: List<Ingredient> = emptyList(),
     val searchQuery: String = "",
     val filterAllergens: Set<AllergenType> = emptySet(),
+    val filterBrands: Set<String> = emptySet(),
+    val availableBrands: List<String> = emptyList(),
     val isEditing: Boolean = false,
     val editingIngredient: Ingredient? = null,
     val isSaving: Boolean = false,

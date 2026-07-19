@@ -97,6 +97,8 @@ import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.AllergenSummaryCard
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.SearchBar
+import org.apptolast.menuadmin.presentation.screens.ingredients.filterIngredientsForPicker
+import org.apptolast.menuadmin.presentation.screens.ingredients.ingredientPickerLabel
 import org.apptolast.menuadmin.presentation.screens.recipes.components.RecipeCard
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
@@ -604,7 +606,7 @@ private fun RecipeEditorForm(
                     val matchingIngredients = when {
                         !ingredientFieldFocused -> emptyList()
                         ingredientSearchQuery.isBlank() -> available
-                        else -> available.filter { it.name.contains(ingredientSearchQuery, ignoreCase = true) }
+                        else -> filterIngredientsForPicker(ingredientSearchQuery, available)
                     }
                     DropdownMenu(
                         expanded = matchingIngredients.isNotEmpty(),
@@ -616,7 +618,7 @@ private fun RecipeEditorForm(
                     ) {
                         matchingIngredients.forEach { ingredient ->
                             DropdownMenuItem(
-                                text = { Text(ingredient.name) },
+                                text = { Text(ingredientPickerLabel(ingredient)) },
                                 trailingIcon = {
                                     Icon(
                                         imageVector = Icons.Filled.Add,
