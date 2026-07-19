@@ -27,3 +27,13 @@ indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false
+
+# ktlint reads .editorconfig directly, so disabling it here skips generated sources for BOTH
+# ktlintCheck and ktlintFormat. The plugin's `filter { exclude }` does NOT catch generated sources
+# that are the root of their own Kotlin source set (Compose Resources `ActualResourceCollectors.kt`,
+# `Res.kt`, KSP `*_Impl`) in ktlint-gradle 14.x. See kmp-recipes: ktlint-exclude-generated-sources.
+[**/build/**]
+ktlint = disabled
+
+[**/generated/**]
+ktlint = disabled
