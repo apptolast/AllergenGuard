@@ -143,6 +143,8 @@
     <string name="ingredients_product_name">Product Name</string>
     <string name="ingredients_name_placeholder">E.g. Kikkoman Soy Sauce</string>
     <string name="ingredients_brand_placeholder">E.g. Kikkoman</string>
+    <string name="ingredients_restaurant_label">Restaurant (optional)</string>
+    <string name="ingredients_restaurant_global">All restaurants</string>
     <string name="ingredients_description_placeholder">Ingredient description...</string>
     <string name="ingredients_allergens_label">Allergens (Click: Contains / May contain / Disable)</string>
     <string name="ingredients_clear_filters">Clear filters</string>

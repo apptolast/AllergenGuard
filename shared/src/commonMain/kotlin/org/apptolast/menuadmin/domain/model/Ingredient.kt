@@ -10,6 +10,8 @@ data class Ingredient(
     val description: String = "",
     val brand: String = "",
     val labelInfo: String = "",
+    // Optional single-restaurant scoping (Spec 002 Fase B). Blank = global/shared across the account.
+    val restaurantId: String = "",
     val allergens: List<IngredientAllergen> = emptyList(),
     val createdAt: Instant = Instant.DISTANT_PAST,
     val updatedAt: Instant = Instant.DISTANT_PAST,

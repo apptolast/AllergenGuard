@@ -143,6 +143,8 @@
     <string name="ingredients_product_name">Nombre del Producto</string>
     <string name="ingredients_name_placeholder">Ej. Salsa de Soja Kikkoman</string>
     <string name="ingredients_brand_placeholder">Ej. Kikkoman</string>
+    <string name="ingredients_restaurant_label">Restaurante (opcional)</string>
+    <string name="ingredients_restaurant_global">Todos los restaurantes</string>
     <string name="ingredients_description_placeholder">Descripcion del ingrediente...</string>
     <string name="ingredients_allergens_label">Alergenos (Click: Contiene / Puede contener / Desactivar)</string>
     <string name="ingredients_clear_filters">Limpiar filtros</string>

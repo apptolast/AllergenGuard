@@ -14,10 +14,12 @@ class IngredientFiltersTest {
         name: String,
         brand: String = "",
         allergens: List<String> = emptyList(),
+        restaurantId: String = "",
     ) = Ingredient(
-        id = "$name-$brand",
+        id = "$name-$brand-$restaurantId",
         name = name,
         brand = brand,
+        restaurantId = restaurantId,
         allergens = allergens.map { IngredientAllergen(allergenCode = it) },
     )
 
@@ -67,6 +69,32 @@ class IngredientFiltersTest {
         assertEquals(
             listOf(ketchup),
             filterIngredientsList(all, "", setOf(AllergenType.MUSTARD), setOf("Heinz")),
+        )
+    }
+
+    // Fase B — alcance por restaurante (un solo restaurante; blank = global/compartido).
+    private val salGlobal = ing("Sal")
+    private val salsaR1 = ing("Salsa", restaurantId = "r1")
+    private val otraR2 = ing("Otra", restaurantId = "r2")
+    private val scoped = listOf(salGlobal, salsaR1, otraR2)
+
+    // AC-06: el picker de la receta del restaurante R muestra globales + específicos de R.
+    @Test
+    fun pickerIncludesGlobalAndRestaurantSpecific() {
+        assertEquals(listOf(salGlobal, salsaR1), filterIngredientsForPicker("", scoped, restaurantId = "r1"))
+    }
+
+    @Test
+    fun pickerBlankRestaurantShowsAll() {
+        assertEquals(scoped, filterIngredientsForPicker("", scoped, restaurantId = ""))
+    }
+
+    // AC-05: la lista puede filtrarse por restaurante (globales + los de ese restaurante).
+    @Test
+    fun listFiltersByRestaurant() {
+        assertEquals(
+            listOf(salGlobal, salsaR1),
+            filterIngredientsList(scoped, "", emptySet(), emptySet(), filterRestaurantId = "r1"),
         )
     }
 }

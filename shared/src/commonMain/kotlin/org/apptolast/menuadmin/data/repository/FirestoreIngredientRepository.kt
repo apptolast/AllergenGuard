@@ -107,6 +107,7 @@ class FirestoreIngredientRepository(
             description = fields["description"] as? String ?: "",
             brand = fields["brand"] as? String ?: "",
             labelInfo = fields["labelInfo"] as? String ?: "",
+            restaurantId = fields["restaurantId"] as? String ?: "",
             allergens = allergens,
             createdAt = createTime ?: Instant.DISTANT_PAST,
             updatedAt = updateTime ?: Instant.DISTANT_PAST,
@@ -119,6 +120,7 @@ class FirestoreIngredientRepository(
             "brand" to brand,
             "labelInfo" to labelInfo,
             "description" to description,
+            "restaurantId" to restaurantId,
             "allergens" to allergens.map {
                 mapOf("code" to it.allergenCode, "level" to it.containmentLevel.apiValue)
             },

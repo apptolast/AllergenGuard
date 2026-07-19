@@ -6,6 +6,8 @@ import org.apptolast.menuadmin.domain.model.RecipeIngredient
 
 data class RecipesUiState(
     val isLoading: Boolean = true,
+    // Restaurant this editor is scoped to — used to limit the ingredient picker to global + own ingredients.
+    val restaurantId: String = "",
     val recipes: List<Recipe> = emptyList(),
     val allIngredients: List<Ingredient> = emptyList(),
     val availableCategories: List<String> = emptyList(),

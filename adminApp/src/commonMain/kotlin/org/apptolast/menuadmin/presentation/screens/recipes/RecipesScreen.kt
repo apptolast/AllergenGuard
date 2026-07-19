@@ -605,8 +605,7 @@ private fun RecipeEditorForm(
                     }
                     val matchingIngredients = when {
                         !ingredientFieldFocused -> emptyList()
-                        ingredientSearchQuery.isBlank() -> available
-                        else -> filterIngredientsForPicker(ingredientSearchQuery, available)
+                        else -> filterIngredientsForPicker(ingredientSearchQuery, available, uiState.restaurantId)
                     }
                     DropdownMenu(
                         expanded = matchingIngredients.isNotEmpty(),
