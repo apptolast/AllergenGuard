@@ -53,3 +53,48 @@ All admin endpoints require Bearer JWT. Prefix: `/api/v1`
 ./gradlew ktlintFormat           # Format code
 ./gradlew wasmJsBrowserRun       # Run in browser (dev server)
 ```
+
+## Guardarraíles KMP (SDD harness · build · test · convenciones)
+
+> Valores REALES auditados de este repo. El harness SDD (`sdd-flow`: `tdd-test-writer` /
+> `implementer` / `reviewer`) lee esta sección. Proyecto **web-only** (target principal `wasmJs`;
+> `:consumerApp` es móvil aparte). Estado de fase en `.claude/.sdd-state.json`.
+
+### Comandos build/test (valores reales)
+| Propósito | Comando |
+|---|---|
+| Compile check (gate rápido) | `./gradlew :adminApp:compileKotlinWasmJs` |
+| Tests de la feature (canónico, gate) | `./gradlew :adminApp:wasmJsTest` |
+| Tests en navegador (karma+Chrome headless) | `./gradlew :adminApp:wasmJsBrowserTest` |
+| Tests JS (target secundario) | `./gradlew :adminApp:jsTest` |
+| Todos los targets del módulo | `./gradlew :adminApp:allTests` |
+| Lint (gate) | `./gradlew :adminApp:ktlintCheck` |
+| Autoformat (uso local, NO gate) | `./gradlew :adminApp:ktlintFormat` |
+
+- **detekt**: no configurado → gate de `/validate` = **ktlintCheck + wasmJsTest + trazabilidad**.
+- **Gate de lint scoped a `:adminApp`**, nunca `./gradlew ktlintCheck` repo-wide: existe deuda ktlint
+  preexistente en `:shared`/`:consumerApp` (backing-property-naming, generados) que NO es de la feature.
+- `:adminApp` ktlint ya excluye `/generated/` (Compose `Res.kt`). Validar con `ktlintCheck` (respeta el
+  filtro), **nunca** con `ktlintFormat` (no lo respeta en ktlint-gradle 14.x).
+- CI: sin gate de calidad automático en PR todavía (validación local vía este flujo).
+
+### Stack de test
+- `kotlin.test` + `kotlinx-coroutines-test` (`runTest`) + `koin-test`. **Fakes a mano.**
+- **No hay Turbine ni ktor-client-mock aún** → si un `Scenario` necesita testear un `Flow`, añade
+  `libs.turbine` a `commonTest` como parte del `/plan` (no lo asumas disponible).
+- Los tests SDD viven en **`adminApp/src/commonTest`** (paquete `org.apptolast.menuadmin.*`), se ejecutan
+  con `:adminApp:wasmJsTest`. Ejemplos existentes: `ImportMapperTest`, `JsonExporterTest`, `AllergenFilterTest`.
+- `:shared` **no tiene** source-set de test todavía; si una feature necesita testear `:shared`, crear
+  `shared/src/commonTest` + deps es una tarea explícita del `/plan`.
+- Gherkin→test: cada `Scenario [AC-xx]` → una función `@Test` (nombre en backticks, Given/When/Then).
+
+### expect/actual
+- Común en `Foo.kt`; actuals en `Foo.wasmJs.kt` / `Foo.js.kt` (adminApp) y `Foo.android.kt` /
+  `Foo.ios.kt` (consumerApp/shared). Nombres lowercase-camelCase.
+- Sin `runBlocking`/`GlobalScope` en producción; wasmJs no tiene `String.format()` (formateo manual).
+
+### Arquitectura / DI / UI
+- Clean Architecture (domain/data/presentation), state hoisting, `StateFlow` en el ViewModel/root.
+- Koin (constructor injection). Módulos data/presentation/platform.
+- Previews `@Preview` de `androidx.compose.ui.tooling.preview` en commonMain.
+- Errores de UI vía `SnackbarController` + `ErrorSnackbarEffect` (no `Text` rojo inline).
