@@ -32,6 +32,7 @@ import com.apptolast.menufrontend.domain.model.Dish
 import com.apptolast.menufrontend.features.components.iconResource
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.menu_contains
+import androidx.compose.foundation.Image
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -143,11 +144,10 @@ private fun AllergenBadge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Icon(
+            Image(
                 painter = painterResource(allergen.iconResource()),
                 contentDescription = null,
-                modifier = Modifier.size(12.dp),
-                tint = contentColor,
+                modifier = Modifier.size(14.dp),
             )
             Text(
                 text = label,

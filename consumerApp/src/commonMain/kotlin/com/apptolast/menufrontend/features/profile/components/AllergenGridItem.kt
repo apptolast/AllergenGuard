@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
+import androidx.compose.foundation.Image
 import com.apptolast.menufrontend.features.components.iconResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -59,11 +60,10 @@ fun AllergenGridItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
+        Image(
             painter = painterResource(allergen.iconResource()),
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = content,
         )
         Spacer(Modifier.height(4.dp))
         Text(
