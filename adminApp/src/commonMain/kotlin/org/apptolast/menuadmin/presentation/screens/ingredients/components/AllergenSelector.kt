@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +31,7 @@ import org.apptolast.menuadmin.presentation.theme.Amber500
 import org.apptolast.menuadmin.presentation.theme.Blue100
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.imageResource
 
 /**
  * Allergen selector with containment level support.
@@ -93,9 +94,10 @@ private fun AllergenCard(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Image(
-            painter = painterResource(allergenType.iconResource()),
+            bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(42.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = allergenType.nameEs,

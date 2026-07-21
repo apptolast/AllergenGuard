@@ -27,8 +27,9 @@ import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.FilterQuality
 import com.apptolast.menufrontend.features.components.iconResource
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.imageResource
 
 /**
  * Larger, equal-width selectable allergen cell used by the profile edit sheet's 3-column grid.
@@ -61,9 +62,10 @@ fun AllergenGridItem(
         verticalArrangement = Arrangement.Center,
     ) {
         Image(
-            painter = painterResource(allergen.iconResource()),
+            bitmap = imageResource(allergen.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(40.dp),
+            filterQuality = FilterQuality.High,
         )
         Spacer(Modifier.height(4.dp))
         Text(

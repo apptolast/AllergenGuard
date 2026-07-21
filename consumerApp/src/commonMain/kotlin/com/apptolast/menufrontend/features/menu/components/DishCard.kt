@@ -33,7 +33,8 @@ import com.apptolast.menufrontend.features.components.iconResource
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.menu_contains
 import androidx.compose.foundation.Image
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.graphics.FilterQuality
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -145,9 +146,10 @@ private fun AllergenBadge(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Image(
-                painter = painterResource(allergen.iconResource()),
+                bitmap = imageResource(allergen.iconResource()),
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(18.dp),
+                filterQuality = FilterQuality.High,
             )
             Text(
                 text = label,

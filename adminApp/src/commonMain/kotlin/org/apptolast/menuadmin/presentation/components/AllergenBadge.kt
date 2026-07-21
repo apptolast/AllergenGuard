@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +34,7 @@ import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -84,9 +85,10 @@ fun AllergenBadge(
         horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp),
     ) {
         Image(
-            painter = painterResource(allergenType.iconResource()),
+            bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(if (compact) 15.dp else 20.dp),
+            modifier = Modifier.size(if (compact) 20.dp else 26.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = if (mayContain) {

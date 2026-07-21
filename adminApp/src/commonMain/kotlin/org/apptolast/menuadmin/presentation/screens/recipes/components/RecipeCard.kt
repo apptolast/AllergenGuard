@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +50,7 @@ import org.apptolast.menuadmin.presentation.components.iconResource
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -246,9 +247,10 @@ private fun SubRecipeRow(
                 ) {
                     allergenTypes.forEach { allergen ->
                         Image(
-                            painter = painterResource(allergen.iconResource()),
+                            bitmap = imageResource(allergen.iconResource()),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(24.dp),
+                            filterQuality = FilterQuality.High,
                         )
                     }
                 }
@@ -296,9 +298,10 @@ private fun IngredientRow(
             ) {
                 allergenTypes.forEach { allergen ->
                     Image(
-                        painter = painterResource(allergen.iconResource()),
+                        bitmap = imageResource(allergen.iconResource()),
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(24.dp),
+                        filterQuality = FilterQuality.High,
                     )
                 }
             }

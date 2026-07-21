@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,7 +31,7 @@ import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -68,9 +69,10 @@ fun AllergenSummaryCard(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Image(
-            painter = painterResource(allergenType.iconResource()),
+            bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(36.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = allergenType.nameEs.uppercase(),

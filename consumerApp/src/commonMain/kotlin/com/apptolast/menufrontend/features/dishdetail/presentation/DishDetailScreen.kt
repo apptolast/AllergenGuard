@@ -60,7 +60,8 @@ import com.apptolast.menufrontend.resources.dish_disclaimer
 import com.apptolast.menufrontend.resources.dish_ingredients
 import com.apptolast.menufrontend.resources.dish_safe_message
 import androidx.compose.foundation.Image
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.graphics.FilterQuality
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -345,9 +346,10 @@ private fun AllergenDetailBadge(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Image(
-            painter = painterResource(allergen.iconResource()),
+            bitmap = imageResource(allergen.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(38.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = label,
