@@ -97,6 +97,8 @@ import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.AllergenSummaryCard
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.SearchBar
+import org.apptolast.menuadmin.presentation.screens.ingredients.filterIngredientsForPicker
+import org.apptolast.menuadmin.presentation.screens.ingredients.ingredientPickerLabel
 import org.apptolast.menuadmin.presentation.screens.recipes.components.RecipeCard
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
@@ -295,6 +297,9 @@ fun RecipesContent(
             val ingredientLookup = remember(uiState.allIngredients) {
                 uiState.allIngredients.associateBy { it.id }
             }
+            val recipeLookup = remember(uiState.recipes) {
+                uiState.recipes.associateBy { it.id }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -313,6 +318,7 @@ fun RecipesContent(
                             ingredientLookup = ingredientLookup,
                             onClick = { onEditRecipe(recipe) },
                             modifier = Modifier.weight(1f),
+                            recipeLookup = recipeLookup,
                         )
                     }
                     val remainder = uiState.recipes.size % 3
@@ -603,8 +609,7 @@ private fun RecipeEditorForm(
                     }
                     val matchingIngredients = when {
                         !ingredientFieldFocused -> emptyList()
-                        ingredientSearchQuery.isBlank() -> available
-                        else -> available.filter { it.name.contains(ingredientSearchQuery, ignoreCase = true) }
+                        else -> filterIngredientsForPicker(ingredientSearchQuery, available, uiState.restaurantId)
                     }
                     DropdownMenu(
                         expanded = matchingIngredients.isNotEmpty(),
@@ -616,7 +621,7 @@ private fun RecipeEditorForm(
                     ) {
                         matchingIngredients.forEach { ingredient ->
                             DropdownMenuItem(
-                                text = { Text(ingredient.name) },
+                                text = { Text(ingredientPickerLabel(ingredient)) },
                                 trailingIcon = {
                                     Icon(
                                         imageVector = Icons.Filled.Add,

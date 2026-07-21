@@ -12,7 +12,9 @@ enum class AllergenType(
     val colorArgb: Long,
 ) {
     GLUTEN(1, "gluten", "GLUTEN", "Gluten", "Gluten", 0xE39E, 0xFFF59E0B),
-    CRUSTACEANS(2, "crustaceans", "CRUSTACEANS", "Crustáceos", "Crustaceans", 0xE4F7, 0xFFEF4444),
+    // 0xE649 = glifo `shrimp` (gamba) en lucide.ttf. Antes usaba 0xE4F7 (`shell`, una concha) que se
+    // confundía con un molusco. Ver Spec 004.
+    CRUSTACEANS(2, "crustaceans", "CRUSTACEANS", "Crustáceos", "Crustaceans", 0xE649, 0xFFEF4444),
     EGGS(3, "eggs", "EGGS", "Huevos", "Eggs", 0xE25D, 0xFFF97316),
     FISH(4, "fish", "FISH", "Pescado", "Fish", 0xE3A6, 0xFF3B82F6),
     PEANUTS(5, "peanuts", "PEANUTS", "Cacahuetes", "Peanuts", 0xE39B, 0xFF92400E),

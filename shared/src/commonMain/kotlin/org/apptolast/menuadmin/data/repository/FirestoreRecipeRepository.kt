@@ -8,11 +8,12 @@ import kotlinx.coroutines.flow.flow
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreClient
 import org.apptolast.menuadmin.data.remote.firebase.FirestoreDocument
 import org.apptolast.menuadmin.domain.model.AllergenType
-import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Recipe
+import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
 import org.apptolast.menuadmin.domain.repository.RecipeRepository
+import org.apptolast.menuadmin.domain.util.RecipeAllergenAggregator
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -85,20 +86,16 @@ class FirestoreRecipeRepository(
         loadedRestaurantId?.let { runCatching { refresh(it) } }
     }
 
-    /** code -> strongest containment level, derived from the selected ingredients (FREE_OF ignored). */
+    /**
+     * code -> strongest containment level. Aggregates the selected ingredients' allergens AND, for
+     * SUB_RECIPE components, the allergens of the referenced recipe (recursively) via
+     * [RecipeAllergenAggregator], resolved against the cached recipes of the restaurant. FREE_OF ignored.
+     */
     private suspend fun computeAllergens(recipe: Recipe): List<Map<String, Any?>> {
         val byId = ingredientRepository.getAllIngredients().first().associateBy { it.id }
-        val strongest = mutableMapOf<String, ContainmentLevel>()
-        recipe.ingredients.forEach { ri ->
-            byId[ri.ingredientId]?.allergens.orEmpty().forEach { a ->
-                if (a.containmentLevel == ContainmentLevel.FREE_OF) return@forEach
-                val cur = strongest[a.allergenCode]
-                if (cur == null || a.containmentLevel.ordinal < cur.ordinal) {
-                    strongest[a.allergenCode] = a.containmentLevel
-                }
-            }
-        }
-        return strongest.map { (code, level) -> mapOf("code" to code, "level" to level.apiValue) }
+        val recipesById = _recipes.value.associateBy { it.id }
+        return RecipeAllergenAggregator.computeAllergens(recipe, byId, recipesById)
+            .map { (code, level) -> mapOf("code" to code, "level" to level.apiValue) }
     }
 
     private fun FirestoreDocument.toRecipe(restaurantId: String): Recipe {
@@ -110,6 +107,11 @@ class FirestoreRecipeRepository(
                 ingredientName = m["name"] as? String ?: "",
                 quantity = (m["qty"] as? Double) ?: (m["qty"] as? Long)?.toDouble() ?: 0.0,
                 unit = m["unit"] as? String ?: "",
+                type = if ((m["type"] as? String) == "recipe") {
+                    RecipeComponentType.SUB_RECIPE
+                } else {
+                    RecipeComponentType.INGREDIENT
+                },
             )
         }
         val allergens = (fields["computedAllergens"] as? List<Any?>).orEmpty().mapNotNull { e ->
@@ -125,6 +127,7 @@ class FirestoreRecipeRepository(
             imageUrl = fields["imageUrl"] as? String,
             price = (fields["price"] as? Double) ?: (fields["price"] as? Long)?.toDouble() ?: 0.0,
             isActive = fields["active"] as? Boolean ?: true,
+            isSubRecipe = fields["isSubRecipe"] as? Boolean ?: false,
             ingredients = ingredients,
             computedAllergens = allergens,
             ingredientCount = ingredients.size,
@@ -148,9 +151,12 @@ class FirestoreRecipeRepository(
                     put("name", ri.ingredientName)
                     if (ri.quantity > 0) put("qty", ri.quantity)
                     if (ri.unit.isNotEmpty()) put("unit", ri.unit)
+                    // Persist the component type only for sub-recipes (backward-compatible: absent = ingredient).
+                    if (ri.type == RecipeComponentType.SUB_RECIPE) put("type", "recipe")
                 }
             },
             "computedAllergens" to computedAllergens,
+            "isSubRecipe" to isSubRecipe,
         )
 
     private companion object {

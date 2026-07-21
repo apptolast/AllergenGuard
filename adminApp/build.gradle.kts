@@ -14,7 +14,7 @@ plugins {
 }
 
 // Single source of truth for the admin platform version (exposed to code via BuildKonfig.APP_VERSION).
-version = "1.4.1"
+version = "1.4.2"
 
 // Load local.properties for BuildKonfig (EmailJS client config: public key + service/template ids).
 val localProperties: Properties by lazy {

@@ -49,7 +49,7 @@ import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
 import com.apptolast.menufrontend.domain.model.Dish
 import com.apptolast.menufrontend.features.components.allergenLabels
-import com.apptolast.menufrontend.features.components.icon
+import com.apptolast.menufrontend.features.components.iconResource
 import com.apptolast.menufrontend.features.dishdetail.data.DishDetailState
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.back
@@ -59,6 +59,9 @@ import com.apptolast.menufrontend.resources.dish_detail_title
 import com.apptolast.menufrontend.resources.dish_disclaimer
 import com.apptolast.menufrontend.resources.dish_ingredients
 import com.apptolast.menufrontend.resources.dish_safe_message
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.FilterQuality
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -342,11 +345,11 @@ private fun AllergenDetailBadge(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Icon(
-            imageVector = allergen.icon(),
+        Image(
+            bitmap = imageResource(allergen.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(28.dp),
-            tint = contentColor,
+            modifier = Modifier.size(38.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = label,

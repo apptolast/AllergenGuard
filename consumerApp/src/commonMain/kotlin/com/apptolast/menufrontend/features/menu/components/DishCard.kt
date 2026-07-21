@@ -29,9 +29,12 @@ import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
 import com.apptolast.menufrontend.domain.model.Dish
-import com.apptolast.menufrontend.features.components.icon
+import com.apptolast.menufrontend.features.components.iconResource
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.menu_contains
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.FilterQuality
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -44,7 +47,7 @@ fun DishCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.extendedColors
-    val isSafe = dish.allergens.none { it in userAllergens }
+    val isSafe = dish.isSafeFor(userAllergens)
     val titleColor = if (isSafe) colors.onSafeContainer else MaterialTheme.colorScheme.onSurface
     val secondaryColor =
         if (isSafe) colors.onSafeContainer.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
@@ -142,11 +145,11 @@ private fun AllergenBadge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Icon(
-                imageVector = allergen.icon(),
+            Image(
+                bitmap = imageResource(allergen.iconResource()),
                 contentDescription = null,
-                modifier = Modifier.size(12.dp),
-                tint = contentColor,
+                modifier = Modifier.size(18.dp),
+                filterQuality = FilterQuality.High,
             )
             Text(
                 text = label,

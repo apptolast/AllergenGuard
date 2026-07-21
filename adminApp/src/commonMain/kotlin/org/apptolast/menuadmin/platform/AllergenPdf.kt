@@ -41,6 +41,8 @@ data class AllergenPdfPayload(
     val notaText: String,
     val fileName: String,
     val columns: List<String>,
+    /** Stable key per column (AllergenType.apiCode) so the PDF renderer can map each column to its icon. */
+    val columnKeys: List<String>,
     val rows: List<AllergenPdfRow>,
     val restaurantLogoUrl: String? = null,
     val companyLogoUrl: String? = null,
@@ -84,6 +86,7 @@ fun buildAllergenPdfPayload(
         notaText = notaText,
         fileName = "menu-alergenos-${slugify(displayName)}.pdf",
         columns = allergens.map { it.nameEs },
+        columnKeys = allergens.map { it.apiCode },
         rows = rows,
         restaurantLogoUrl = menu.restaurantLogoUrl,
         companyLogoUrl = menu.companyLogoUrl,

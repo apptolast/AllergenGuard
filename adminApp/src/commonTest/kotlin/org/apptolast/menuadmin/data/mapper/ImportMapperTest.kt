@@ -7,6 +7,7 @@ import org.apptolast.menuadmin.data.dto.ImportDataDto
 import org.apptolast.menuadmin.data.dto.ImportIngredientDto
 import org.apptolast.menuadmin.data.dto.ImportRecipeDto
 import org.apptolast.menuadmin.domain.model.AllergenType
+import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -99,9 +100,10 @@ class ImportMapperTest {
         assertEquals(ParsedIngredientRef("300", "ingredient"), refs[2])
     }
 
+    // AC-01: la sub-receta (type:"recipe") se conserva como componente SUB_RECIPE con su nombre real,
+    // NO se aplana en sus ingredientes hoja ni se pierde su nombre.
     @Test
-    fun mapRecipe_flattensSubRecipeIngredients() {
-        // Parent uses ingredient 100 directly and sub-recipe 900; the sub-recipe owns ingredient 200.
+    fun mapRecipe_keepsSubRecipeAsComponentWithName() {
         val parent = ImportRecipeDto(
             id = JsonPrimitive("10"),
             name = "Tosta con Jamón",
@@ -120,43 +122,55 @@ class ImportMapperTest {
         )
         val ingredientLookup = mapOf(
             "100" to ImportMapper.mapIngredient(ImportIngredientDto(JsonPrimitive("100"), "Jamón"), now),
-            "200" to ImportMapper.mapIngredient(
-                ImportIngredientDto(JsonPrimitive("200"), "Tomate", contains = listOf("sulphites")),
-                now,
-            ),
         )
         val recipeLookup = mapOf("10" to parent, "900" to sub)
 
         val recipe = ImportMapper.mapRecipe(parent, ingredientLookup, recipeLookup, "rest-1", now)
 
         assertEquals("rest-1", recipe.restaurantId)
-        assertEquals(listOf("100", "200"), recipe.ingredients.map { it.ingredientId })
-        assertEquals("Tomate", recipe.ingredients[1].ingredientName)
+        assertEquals(listOf("100", "900"), recipe.ingredients.map { it.ingredientId })
+        assertEquals(RecipeComponentType.INGREDIENT, recipe.ingredients[0].type)
+        val subComp = recipe.ingredients[1]
+        assertEquals(RecipeComponentType.SUB_RECIPE, subComp.type)
+        assertEquals("Salmorejo", subComp.ingredientName)
     }
 
+    // AC-02: un ref a sub-receta SIN type:"recipe" (id pelado) que coincide con una receta hermana se
+    // resuelve como SUB_RECIPE con su nombre real (nunca "Ingrediente <id>").
     @Test
-    fun mapRecipe_deduplicatesIngredientsSharedWithSubRecipe() {
+    fun mapRecipe_resolvesBareIdRefToSubRecipe() {
         val parent = ImportRecipeDto(
             id = JsonPrimitive("10"),
             name = "Plato",
-            ingredientIds = listOf(
-                JsonPrimitive("100"),
-                buildJsonObject {
-                    put("id", "900")
-                    put("type", "recipe")
-                },
-            ),
+            ingredientIds = listOf(JsonPrimitive("100"), JsonPrimitive("900")),
         )
-        val sub = ImportRecipeDto(
-            id = JsonPrimitive("900"),
-            name = "Sub",
-            ingredientIds = listOf(JsonPrimitive("100")),
+        val sub = ImportRecipeDto(id = JsonPrimitive("900"), name = "Mayonesa casera")
+        val ingredientLookup = mapOf(
+            "100" to ImportMapper.mapIngredient(ImportIngredientDto(JsonPrimitive("100"), "Patata"), now),
         )
         val recipeLookup = mapOf("10" to parent, "900" to sub)
 
-        val recipe = ImportMapper.mapRecipe(parent, emptyMap(), recipeLookup, "rest-1", now)
+        val recipe = ImportMapper.mapRecipe(parent, ingredientLookup, recipeLookup, "rest-1", now)
 
-        assertEquals(listOf("100"), recipe.ingredients.map { it.ingredientId })
+        val comp = recipe.ingredients.first { it.ingredientId == "900" }
+        assertEquals(RecipeComponentType.SUB_RECIPE, comp.type)
+        assertEquals("Mayonesa casera", comp.ingredientName)
+    }
+
+    // AC-03: el placeholder "Ingrediente <id>" solo aparece cuando el id no está NI en ingredientes NI
+    // en recetas (único caso aceptable); si es una receta, se usa su nombre.
+    @Test
+    fun mapRecipe_placeholderNameOnlyWhenUnknownEverywhere() {
+        val parent = ImportRecipeDto(
+            id = JsonPrimitive("10"),
+            name = "Plato",
+            ingredientIds = listOf(JsonPrimitive("999")),
+        )
+
+        val recipe = ImportMapper.mapRecipe(parent, emptyMap(), mapOf("10" to parent), "rest-1", now)
+
+        assertEquals("Ingrediente 999", recipe.ingredients[0].ingredientName)
+        assertEquals(RecipeComponentType.INGREDIENT, recipe.ingredients[0].type)
     }
 
     @Test

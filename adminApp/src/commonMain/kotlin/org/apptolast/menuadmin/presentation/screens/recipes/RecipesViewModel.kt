@@ -49,6 +49,7 @@ class RecipesViewModel(
             .sorted()
         formState.copy(
             isLoading = false,
+            restaurantId = restaurantId,
             recipes = filtered,
             allIngredients = ingredients,
             availableCategories = categories,

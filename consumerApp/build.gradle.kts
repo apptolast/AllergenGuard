@@ -108,8 +108,8 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         // Tag-driven release: fastlane injects -PappVersionCode / -PappVersionName; defaults for dev.
-        versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 3
-        versionName = (project.findProperty("appVersionName") as String?) ?: "0.2.0"
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toInt() ?: 4
+        versionName = (project.findProperty("appVersionName") as String?) ?: "1.4.2"
 
         // Web OAuth client id (client_type 3) used as Credential Manager serverClientId. Empty when
         // not set → AndroidSocialAuthClient reports Google unavailable and hides the button.

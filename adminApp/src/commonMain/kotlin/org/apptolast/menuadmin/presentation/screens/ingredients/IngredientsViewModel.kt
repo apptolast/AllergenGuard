@@ -19,11 +19,13 @@ import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.repository.IngredientRepository
+import org.apptolast.menuadmin.domain.repository.RestaurantRepository
 import org.jetbrains.compose.resources.getString
 
 class IngredientsViewModel(
     private val ingredientRepository: IngredientRepository,
     private val accountHolder: CurrentAccountHolder,
+    private val restaurantRepository: RestaurantRepository,
 ) : ViewModel() {
     private val _formState = MutableStateFlow(IngredientsUiState())
 
@@ -31,23 +33,21 @@ class IngredientsViewModel(
         ingredientRepository.getAllIngredients(),
         _formState,
         accountHolder.session,
-    ) { ingredients, formState, session ->
-        var filtered = ingredients
-        if (formState.searchQuery.isNotBlank()) {
-            filtered = filtered.filter { ingredient ->
-                ingredient.name.contains(formState.searchQuery, ignoreCase = true) ||
-                    ingredient.brand.contains(formState.searchQuery, ignoreCase = true)
-            }
-        }
-        if (formState.filterAllergens.isNotEmpty()) {
-            filtered = filtered.filter { ingredient ->
-                ingredient.allergenTypes.any { it in formState.filterAllergens }
-            }
-        }
+        restaurantRepository.getAllRestaurants(),
+    ) { ingredients, formState, session, restaurants ->
+        val availableBrands = ingredients.map { it.brand }.filter { it.isNotBlank() }.distinct().sorted()
+        val filtered = filterIngredientsList(
+            ingredients = ingredients,
+            query = formState.searchQuery,
+            filterAllergens = formState.filterAllergens,
+            filterBrands = formState.filterBrands,
+        )
         formState.copy(
             isLoading = false,
             isAccountAdmin = session?.isAccountAdmin ?: false,
             ingredients = filtered.sortedBy { it.name.lowercase() },
+            availableBrands = availableBrands,
+            restaurants = restaurants.sortedBy { it.name.lowercase() },
         )
     }
         .catch { throwable ->
@@ -78,6 +78,16 @@ class IngredientsViewModel(
         _formState.value = _formState.value.copy(filterAllergens = emptySet())
     }
 
+    fun onToggleBrandFilter(brand: String) {
+        val current = _formState.value.filterBrands
+        val updated = if (brand in current) current - brand else current + brand
+        _formState.value = _formState.value.copy(filterBrands = updated)
+    }
+
+    fun onClearBrandFilters() {
+        _formState.value = _formState.value.copy(filterBrands = emptySet())
+    }
+
     fun onNewIngredient() {
         _formState.value = _formState.value.copy(
             isEditing = true,
@@ -86,6 +96,7 @@ class IngredientsViewModel(
             formDescription = "",
             formBrand = "",
             formLabelInfo = "",
+            formRestaurantId = "",
             formAllergens = emptyMap(),
             error = null,
         )
@@ -99,6 +110,7 @@ class IngredientsViewModel(
             formDescription = ingredient.description,
             formBrand = ingredient.brand,
             formLabelInfo = ingredient.labelInfo,
+            formRestaurantId = ingredient.restaurantId,
             formAllergens = ingredient.allergens.mapNotNull { allergen ->
                 AllergenType.fromApiCode(allergen.allergenCode)?.let { type ->
                     type to allergen.containmentLevel
@@ -132,6 +144,10 @@ class IngredientsViewModel(
 
     fun onFormBrandChange(value: String) {
         _formState.value = _formState.value.copy(formBrand = value)
+    }
+
+    fun onFormRestaurantChange(restaurantId: String) {
+        _formState.value = _formState.value.copy(formRestaurantId = restaurantId)
     }
 
     fun onFormLabelInfoChange(value: String) {
@@ -180,6 +196,7 @@ class IngredientsViewModel(
                             description = state.formDescription,
                             brand = state.formBrand,
                             labelInfo = state.formLabelInfo,
+                            restaurantId = state.formRestaurantId,
                             allergens = allergenList,
                         ),
                     )
@@ -190,6 +207,7 @@ class IngredientsViewModel(
                             description = state.formDescription,
                             brand = state.formBrand,
                             labelInfo = state.formLabelInfo,
+                            restaurantId = state.formRestaurantId,
                             allergens = allergenList,
                         ),
                     )
