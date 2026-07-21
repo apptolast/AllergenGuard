@@ -4,6 +4,45 @@
 > Corresponde a la **Tarea 5** solicitada: evaluar cómo impactan los cambios 001-004 en el consumer móvil y
 > actualizar su código. **Depende de la Spec 003** (contrato de datos).
 
+## Addendum — Iconografía de alérgenos (set oficial FSA)
+
+> Alcance ampliado a petición del usuario: unificar la iconografía de alérgenos en **todo el producto**
+> (consumer Android/iOS + admin web + PDF), reemplazando los iconos aproximados anteriores.
+
+**Origen de los iconos:** set oficial de iconos de alérgenos de la **UK Food Standards Agency (FSA)**
+— `gov.uk/government/publications/download-your-allergen-icons-and-posters` (versión *"Icons without allergens
+- colour"*, PNG). Cubren exactamente los 14 alérgenos EU.
+
+**Licencia:** **Open Government Licence v3.0 (OGL)** — permite copiar, publicar, distribuir y adaptar,
+incluido uso comercial, **con atribución obligatoria**. Texto de atribución a incluir en la app (pantalla
+*Acerca de / Legal*) y donde se publiquen los iconos:
+> *"Contains public sector information licensed under the Open Government Licence v3.0. Allergen icons ©
+> Crown copyright, Food Standards Agency."*
+> **⚠️ Pendiente del usuario:** añadir esta línea de atribución en la app antes de publicar en las tiendas.
+
+**Por qué se cambió** (motivo raíz): Material Icons (consumer) y la fuente Lucide (admin) **no tienen iconos
+específicos de alérgenos**, así que crustáceos/moluscos/pescado colisionaban (olas/plato) y huevos/lácteos
+(gotas). El set FSA es el estándar reconocido y resuelve la ambigüedad. *(Un primer intento con SVG propios
+falló: Compose Resources **no soporta SVG en Android** — `IllegalStateException: Android platform doesn't
+support SVG format` —; por eso se usan **PNG**.)*
+
+**Integración (dónde vive cada cosa):**
+- **Consumer** (Android/iOS): PNG en `consumerApp/src/commonMain/composeResources/drawable/allergen_*.png`
+  (256px, ~388KB total). `AllergenIcon.iconResource()` → `DrawableResource`; render con `Image` (sin tinte,
+  son insignias a color). El estado seguro/peligro lo da el fondo del chip, no el icono.
+- **Admin** (web/wasmJs): mismos PNG en `adminApp/src/commonMain/composeResources/drawable/`;
+  `AllergenType.iconResource()` (`presentation/components/AllergenIconRes.kt`); render con `Image`. Sustituye
+  a los glifos de la fuente Lucide en `AllergenBadge`/`AllergenSelector`/`AllergenSummaryCard`/`RecipeCard`
+  (la fuente `lucide.ttf` queda en desuso — candidata a limpieza posterior).
+- **PDF de alérgenos**: iconos FSA en la cabecera de cada columna (recomendación FSA). Embebidos como PNG
+  base64 (64px) en `adminApp/src/webMain/resources/allergen-icons.js` (`window.ALLERGEN_ICONS`, clave =
+  `apiCode`); dibujados con jsPDF `addImage` en `allergen-pdf.js`. El payload `AllergenPdfPayload` gana
+  `columnKeys` (apiCodes). Se omite el color de fondo de cabecera (solo los iconos).
+
+**Verificación:** los 14 iconos renderizan bien (revisados a imagen); consumer compila Android+iOS; admin
+compila wasmJs + tests + ktlint; JS del PDF con sintaxis válida y 14/14 data-URIs PNG válidos. **Verificación
+visual final del PDF y de la UI en dispositivo/navegador = pendiente del usuario.**
+
 ## Contexto y objetivo
 El consumerApp (`com.apptolast.menufrontend`, Android+iOS) lee del **mismo** Firestore (proyecto `menusmati`).
 Se analizó su capa de datos y UI para medir el impacto de las specs 001-004. **Hallazgo central: la
