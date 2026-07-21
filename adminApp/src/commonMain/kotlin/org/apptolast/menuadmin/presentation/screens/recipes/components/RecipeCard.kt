@@ -1,5 +1,6 @@
 package org.apptolast.menuadmin.presentation.screens.recipes.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,10 +45,11 @@ import org.apptolast.menuadmin.domain.model.Recipe
 import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
-import org.apptolast.menuadmin.presentation.components.LucideIcon
+import org.apptolast.menuadmin.presentation.components.iconResource
 import org.apptolast.menuadmin.presentation.theme.Blue500
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -243,7 +245,11 @@ private fun SubRecipeRow(
                     modifier = Modifier.padding(start = 12.dp),
                 ) {
                     allergenTypes.forEach { allergen ->
-                        LucideIcon(codepoint = allergen.icon, size = 16.sp, color = allergen.color)
+                        Image(
+                            painter = painterResource(allergen.iconResource()),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
                     }
                 }
             }
@@ -289,10 +295,10 @@ private fun IngredientRow(
                 modifier = Modifier.padding(start = 12.dp),
             ) {
                 allergenTypes.forEach { allergen ->
-                    LucideIcon(
-                        codepoint = allergen.icon,
-                        size = 16.sp,
-                        color = allergen.color,
+                    Image(
+                        painter = painterResource(allergen.iconResource()),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }
