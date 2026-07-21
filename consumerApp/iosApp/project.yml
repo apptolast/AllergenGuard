@@ -65,9 +65,6 @@ targets:
       - name: Compile Kotlin Framework
         basedOnDependencyAnalysis: false
         script: |
-            # Build guard (KMP IDE plugin): skip the redundant Gradle run when the IDE already built the framework.
-            # Single line on purpose: a uniformly-indented block survives YAML auto-formatting (nested if broke it).
-            if [ "YES" = "$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED" ]; then echo "Skipping Gradle build (OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES)"; exit 0; fi
           cd "$SRCROOT/../.."
           ./gradlew :consumerApp:embedAndSignAppleFrameworkForXcode
 
