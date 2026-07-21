@@ -29,9 +29,10 @@ import com.apptolast.menufrontend.core.theme.AllergenGuardTheme
 import com.apptolast.menufrontend.core.theme.extendedColors
 import com.apptolast.menufrontend.domain.model.Allergen
 import com.apptolast.menufrontend.domain.model.Dish
-import com.apptolast.menufrontend.features.components.icon
+import com.apptolast.menufrontend.features.components.iconResource
 import com.apptolast.menufrontend.resources.Res
 import com.apptolast.menufrontend.resources.menu_contains
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -143,7 +144,7 @@ private fun AllergenBadge(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
-                imageVector = allergen.icon(),
+                painter = painterResource(allergen.iconResource()),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp),
                 tint = contentColor,
