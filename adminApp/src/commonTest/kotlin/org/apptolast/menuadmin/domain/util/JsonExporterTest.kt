@@ -9,10 +9,12 @@ import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.model.Menu
 import org.apptolast.menuadmin.domain.model.Recipe
+import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 class JsonExporterTest {
@@ -159,7 +161,7 @@ class JsonExporterTest {
     }
 
     @Test
-    fun importExternalData_parsesLegacyQuotedIdsAndFlattensSubRecipes() {
+    fun importExternalData_parsesLegacyQuotedIdsAndKeepsSubRecipeComponents() {
         // Mirrors alergenos_backup_*.json: string ids and {"id","type":"recipe"} sub-recipe refs.
         val externalJson =
             """
@@ -185,11 +187,17 @@ class JsonExporterTest {
 
         assertEquals(2, result.ingredients.size)
         val tosta = result.recipes.first { it.name == "Tosta con Jamón" }
-        // The sub-recipe (Salmorejo) is flattened in, so its tomato ingredient appears on the parent.
+        // Spec 003: the sub-recipe (Salmorejo) is kept as a SUB_RECIPE component with its real name,
+        // NOT flattened into its leaf ingredients.
         assertEquals(
-            listOf("1778149024105", "1778149051695"),
+            listOf("1778149024105", "1778149237711"),
             tosta.ingredients.map { it.ingredientId },
         )
+        val salmorejoComp = tosta.ingredients.first { it.ingredientId == "1778149237711" }
+        assertEquals(RecipeComponentType.SUB_RECIPE, salmorejoComp.type)
+        assertEquals("Salmorejo", salmorejoComp.ingredientName)
+        // And Salmorejo is flagged as a sub-recipe at the collection level.
+        assertTrue(result.recipes.first { it.name == "Salmorejo" }.isSubRecipe)
         assertEquals("rest-1", tosta.restaurantId)
     }
 
