@@ -124,9 +124,8 @@ class MenuViewModel(
 
     private fun filterDishes(dishes: List<Dish>, filters: Set<Allergen>): List<Dish> {
         if (filters.isEmpty()) return dishes
-        return dishes.filter { dish ->
-            dish.allergens.none { it in filters }
-        }
+        // Fail-closed: a dish with an unknown allergen is treated as unsafe (isSafeFor), not shown as safe.
+        return dishes.filter { it.isSafeFor(filters) }
     }
 
     /** Dishes to display: all of them when [showUnsafe], otherwise only the ones safe for the filters. */

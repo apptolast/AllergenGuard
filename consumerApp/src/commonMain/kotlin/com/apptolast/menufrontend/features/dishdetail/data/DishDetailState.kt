@@ -13,6 +13,7 @@ data class DishDetailState(
     val dangerousAllergens: Set<Allergen>
         get() = dish?.allergens?.intersect(userAllergens) ?: emptySet()
 
+    // Fail-closed: show the danger banner if the dish matches a user allergen OR carries an unknown code.
     val containsUserAllergens: Boolean
-        get() = dangerousAllergens.isNotEmpty()
+        get() = dangerousAllergens.isNotEmpty() || (dish?.hasUnknownAllergen == true)
 }

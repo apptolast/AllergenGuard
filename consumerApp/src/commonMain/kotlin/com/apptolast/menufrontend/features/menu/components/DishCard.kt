@@ -44,7 +44,7 @@ fun DishCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.extendedColors
-    val isSafe = dish.allergens.none { it in userAllergens }
+    val isSafe = dish.isSafeFor(userAllergens)
     val titleColor = if (isSafe) colors.onSafeContainer else MaterialTheme.colorScheme.onSurface
     val secondaryColor =
         if (isSafe) colors.onSafeContainer.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
