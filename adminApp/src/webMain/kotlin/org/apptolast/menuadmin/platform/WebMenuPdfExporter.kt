@@ -168,13 +168,15 @@ private fun generateAllergenPdf(json: String): Promise<JsString> =
                 function rowLayout(row) {
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(8.5);
-                    var nameH = doc.getTextDimensions(row.name || '').h;
+                    var nameLines = doc.splitTextToSize(row.name || '', productW - 6);
+                    var nameH = doc.getTextDimensions(nameLines).h;
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(7);
                     var lines = doc.splitTextToSize('Ing: ' + (row.ingredients || ''), productW - 6);
                     var ingH = doc.getTextDimensions(lines).h;
                     return {
                         lines: lines,
+                        nameLines: nameLines,
                         nameH: nameH,
                         height: Math.max(11, ROW_TOP_PAD + nameH + ROW_NAME_GAP + ingH + ROW_BOT_PAD),
                     };
@@ -247,7 +249,7 @@ private fun generateAllergenPdf(json: String): Promise<JsString> =
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(8.5);
                     txt(dark);
-                    doc.text(row.name, margin + 3, y + ROW_TOP_PAD, { baseline: 'top' });
+                    doc.text(lay.nameLines, margin + 3, y + ROW_TOP_PAD, { baseline: 'top' });
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(7);
                     txt(gray);

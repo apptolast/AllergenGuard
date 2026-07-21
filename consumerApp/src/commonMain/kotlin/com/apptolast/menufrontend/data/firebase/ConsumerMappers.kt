@@ -63,9 +63,10 @@ internal fun FirestoreDocument.toDish(restaurantId: String): Dish {
     val ingredients = (fields["ingredients"] as? List<Any?>).orEmpty().mapNotNull {
         (it as? Map<String, Any?>)?.get("name") as? String
     }
-    val allergens = (fields["computedAllergens"] as? List<Any?>).orEmpty().mapNotNull {
-        ((it as? Map<String, Any?>)?.get("code") as? String)?.let(::allergenFromCode)
-    }.toSet()
+    val codes = (fields["computedAllergens"] as? List<Any?>).orEmpty().map {
+        (it as? Map<String, Any?>)?.get("code") as? String
+    }
+    val parsed = parseComputedAllergens(codes)
     return Dish(
         id = id,
         restaurantId = restaurantId,
@@ -75,6 +76,8 @@ internal fun FirestoreDocument.toDish(restaurantId: String): Dish {
         price = (fields["price"] as? Double) ?: (fields["price"] as? Long)?.toDouble() ?: 0.0,
         imageUrl = fields["imageUrl"] as? String,
         ingredients = ingredients,
-        allergens = allergens,
+        allergens = parsed.allergens,
+        isSubRecipe = fields["isSubRecipe"] as? Boolean ?: false,
+        hasUnknownAllergen = parsed.hasUnknown,
     )
 }

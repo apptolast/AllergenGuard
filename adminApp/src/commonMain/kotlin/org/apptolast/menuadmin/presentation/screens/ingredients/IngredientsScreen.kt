@@ -73,6 +73,8 @@ import menuadmin.adminapp.generated.resources.ingredients_new
 import menuadmin.adminapp.generated.resources.ingredients_no_allergens
 import menuadmin.adminapp.generated.resources.ingredients_paste_hint
 import menuadmin.adminapp.generated.resources.ingredients_product_name
+import menuadmin.adminapp.generated.resources.ingredients_restaurant_global
+import menuadmin.adminapp.generated.resources.ingredients_restaurant_label
 import menuadmin.adminapp.generated.resources.ingredients_save
 import menuadmin.adminapp.generated.resources.ingredients_scan_label
 import menuadmin.adminapp.generated.resources.ingredients_search
@@ -83,6 +85,7 @@ import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
+import org.apptolast.menuadmin.domain.model.Restaurant
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.ErrorSnackbarEffect
 import org.apptolast.menuadmin.presentation.components.SearchBar
@@ -104,6 +107,7 @@ fun IngredientsScreen(viewModel: IngredientsViewModel = koinViewModel()) {
         onFormLabelInfoChange = viewModel::onFormLabelInfoChange,
         onFormNameChange = viewModel::onFormNameChange,
         onFormBrandChange = viewModel::onFormBrandChange,
+        onFormRestaurantChange = viewModel::onFormRestaurantChange,
         onFormDescriptionChange = viewModel::onFormDescriptionChange,
         onToggleAllergen = viewModel::onToggleAllergen,
         onSaveIngredient = viewModel::onSaveIngredient,
@@ -112,6 +116,8 @@ fun IngredientsScreen(viewModel: IngredientsViewModel = koinViewModel()) {
         onEditIngredient = viewModel::onEditIngredient,
         onToggleAllergenFilter = viewModel::onToggleAllergenFilter,
         onClearAllergenFilters = viewModel::onClearAllergenFilters,
+        onToggleBrandFilter = viewModel::onToggleBrandFilter,
+        onClearBrandFilters = viewModel::onClearBrandFilters,
     )
 }
 
@@ -124,6 +130,7 @@ fun IngredientsContent(
     onFormLabelInfoChange: (String) -> Unit,
     onFormNameChange: (String) -> Unit,
     onFormBrandChange: (String) -> Unit,
+    onFormRestaurantChange: (String) -> Unit,
     onFormDescriptionChange: (String) -> Unit,
     onToggleAllergen: (AllergenType) -> Unit,
     onSaveIngredient: () -> Unit,
@@ -132,6 +139,8 @@ fun IngredientsContent(
     onEditIngredient: (Ingredient) -> Unit,
     onToggleAllergenFilter: (AllergenType) -> Unit,
     onClearAllergenFilters: () -> Unit,
+    onToggleBrandFilter: (String) -> Unit,
+    onClearBrandFilters: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (uiState.isLoading) {
@@ -321,6 +330,13 @@ fun IngredientsContent(
                     )
                 }
 
+                // Restaurant scope (Spec 002 Fase B): optional single restaurant; blank = global.
+                RestaurantScopeSelector(
+                    restaurants = uiState.restaurants,
+                    selectedRestaurantId = uiState.formRestaurantId,
+                    onSelect = onFormRestaurantChange,
+                )
+
                 // Description
                 OutlinedTextField(
                     value = uiState.formDescription,
@@ -429,6 +445,14 @@ fun IngredientsContent(
                 onClearFilters = onClearAllergenFilters,
             )
 
+            // Brand filter chips
+            BrandFilterBar(
+                availableBrands = uiState.availableBrands,
+                selectedBrands = uiState.filterBrands,
+                onToggleBrand = onToggleBrandFilter,
+                onClearBrands = onClearBrandFilters,
+            )
+
             // Grid of ingredient cards
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 280.dp),
@@ -503,6 +527,129 @@ private fun AllergenFilterBar(
             )
         }
     }
+}
+
+@Composable
+private fun BrandFilterBar(
+    availableBrands: List<String>,
+    selectedBrands: Set<String>,
+    onToggleBrand: (String) -> Unit,
+    onClearBrands: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (availableBrands.isEmpty()) return
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (selectedBrands.isNotEmpty()) {
+            ElevatedAssistChip(
+                onClick = onClearBrands,
+                label = {
+                    Text(
+                        text = stringResource(Res.string.ingredients_clear_filters),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.action_clear),
+                        modifier = Modifier.size(16.dp),
+                        tint = Red500,
+                    )
+                },
+                colors = AssistChipDefaults.elevatedAssistChipColors(labelColor = Red500),
+            )
+        }
+        availableBrands.forEach { brand ->
+            val selected = brand in selectedBrands
+            ElevatedAssistChip(
+                onClick = { onToggleBrand(brand) },
+                label = {
+                    Text(
+                        text = brand,
+                        fontSize = 13.sp,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                },
+                colors = if (selected) {
+                    AssistChipDefaults.elevatedAssistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        labelColor = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    AssistChipDefaults.elevatedAssistChipColors()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun RestaurantScopeSelector(
+    restaurants: List<Restaurant>,
+    selectedRestaurantId: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.ingredients_restaurant_label),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ScopeChip(
+                label = stringResource(Res.string.ingredients_restaurant_global),
+                selected = selectedRestaurantId.isBlank(),
+                onClick = { onSelect("") },
+            )
+            restaurants.forEach { restaurant ->
+                ScopeChip(
+                    label = restaurant.name,
+                    selected = restaurant.id == selectedRestaurantId,
+                    onClick = { onSelect(restaurant.id) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScopeChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    ElevatedAssistChip(
+        onClick = onClick,
+        label = {
+            Text(
+                text = label,
+                fontSize = 13.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            )
+        },
+        colors = if (selected) {
+            AssistChipDefaults.elevatedAssistChipColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                labelColor = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            AssistChipDefaults.elevatedAssistChipColors()
+        },
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -631,6 +778,7 @@ private fun IngredientsContentPreview() {
             onFormLabelInfoChange = {},
             onFormNameChange = {},
             onFormBrandChange = {},
+            onFormRestaurantChange = {},
             onFormDescriptionChange = {},
             onToggleAllergen = {},
             onSaveIngredient = {},
@@ -639,6 +787,8 @@ private fun IngredientsContentPreview() {
             onEditIngredient = {},
             onToggleAllergenFilter = {},
             onClearAllergenFilters = {},
+            onToggleBrandFilter = {},
+            onClearBrandFilters = {},
         )
     }
 }

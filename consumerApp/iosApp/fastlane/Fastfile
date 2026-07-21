@@ -193,6 +193,24 @@ platform :ios do
     UI.success "Uploaded App Store metadata#{skip_screenshots ? "" : " + screenshots"}."
   end
 
+  desc "Upload App Store metadata ONLY — no binary, no screenshots, no review submission."
+  lane :upload_metadata do
+    api_key = app_store_connect_api_key_token
+    upload_to_app_store(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      metadata_path: METADATA_PATH,
+      skip_binary_upload: true,
+      skip_metadata: false,
+      skip_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      force: true,
+    )
+    UI.success "Uploaded App Store metadata (screenshots skipped)."
+  end
+
   error do |lane, exception|
     UI.error "Lane `#{lane}` failed: #{exception.message}"
   end

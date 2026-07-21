@@ -13,6 +13,7 @@ import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.model.Recipe
+import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import kotlin.time.Instant
 
@@ -45,7 +46,14 @@ object ImportMapper {
             mapRecipe(it, ingredientLookup, recipeLookup, restaurantId, fallbackTimestamp)
         }
 
-        return ImportResult(ingredients = ingredients, recipes = recipes)
+        // Mark recipes that are referenced as a sub-recipe (component) by any other recipe (Spec 003).
+        val subRecipeIds = recipes
+            .flatMap { it.ingredients }
+            .filter { it.type == RecipeComponentType.SUB_RECIPE }
+            .mapTo(mutableSetOf()) { it.ingredientId }
+        val marked = recipes.map { it.copy(isSubRecipe = it.id in subRecipeIds) }
+
+        return ImportResult(ingredients = ingredients, recipes = marked)
     }
 
     fun mapIngredient(
@@ -79,19 +87,14 @@ object ImportMapper {
         restaurantId: String,
         fallbackTimestamp: Instant,
     ): Recipe {
-        // The domain model has no sub-recipes, so a `type == "recipe"` reference is flattened into its
-        // own ingredients (recursively). This preserves the allergens the sub-recipe contributes —
-        // dropping the link would silently under-report allergens on the parent dish.
-        val ingredientIds = linkedSetOf<String>()
-        collectIngredientIds(dto, recipeLookup, ingredientIds, mutableSetOf())
-
-        val recipeIngredients = ingredientIds.map { id ->
-            RecipeIngredient(
-                ingredientId = id,
-                ingredientName = ingredientLookup[id]?.name ?: "Ingrediente $id",
-                quantity = 0.0,
-                unit = "",
-            )
+        // Sub-recipes are first-class (Spec 003): a `type == "recipe"` ref — or a bare id that resolves
+        // to a sibling recipe — becomes a SUB_RECIPE component that keeps the sub-recipe's real name,
+        // instead of being flattened into anonymous "Ingrediente <id>" entries. Allergens are aggregated
+        // recursively later (RecipeAllergenAggregator), so nothing is under-reported.
+        val seen = linkedSetOf<String>()
+        val components = parseIngredientIds(dto.ingredientIds).mapNotNull { ref ->
+            if (!seen.add(ref.id)) return@mapNotNull null // dedup exact duplicate refs
+            resolveComponent(ref, ingredientLookup, recipeLookup)
         }
 
         return Recipe(
@@ -99,28 +102,43 @@ object ImportMapper {
             restaurantId = restaurantId,
             name = dto.name,
             category = dto.category,
-            ingredients = recipeIngredients,
-            ingredientCount = recipeIngredients.size,
+            ingredients = components,
+            ingredientCount = components.size,
             isActive = dto.active,
             createdAt = fallbackTimestamp,
             updatedAt = fallbackTimestamp,
         )
     }
 
-    /** Walks [dto]'s references, following `type == "recipe"` refs into their ingredients. */
-    private fun collectIngredientIds(
-        dto: ImportRecipeDto,
+    /**
+     * Resolves a single reference to a recipe component. It is a sub-recipe when the ref is explicitly
+     * `type == "recipe"`, or when a bare/untyped id is not a known ingredient but IS a known recipe
+     * (the "Ingrediente N" scenario B). The placeholder `Ingrediente <id>` is used only when the id is
+     * unknown in both catalogs.
+     */
+    private fun resolveComponent(
+        ref: ParsedIngredientRef,
+        ingredientLookup: Map<String, Ingredient>,
         recipeLookup: Map<String, ImportRecipeDto>,
-        out: LinkedHashSet<String>,
-        visited: MutableSet<String>,
-    ) {
-        if (!visited.add(dto.id.content)) return // cycle guard
-        parseIngredientIds(dto.ingredientIds).forEach { ref ->
-            if (ref.type == "recipe") {
-                recipeLookup[ref.id]?.let { collectIngredientIds(it, recipeLookup, out, visited) }
-            } else {
-                out.add(ref.id)
-            }
+    ): RecipeIngredient {
+        val isSubRecipe = ref.type == "recipe" ||
+            (ref.id !in ingredientLookup && ref.id in recipeLookup)
+        return if (isSubRecipe) {
+            RecipeIngredient(
+                ingredientId = ref.id,
+                ingredientName = recipeLookup[ref.id]?.name
+                    ?: ingredientLookup[ref.id]?.name
+                    ?: "Ingrediente ${ref.id}",
+                type = RecipeComponentType.SUB_RECIPE,
+            )
+        } else {
+            RecipeIngredient(
+                ingredientId = ref.id,
+                ingredientName = ingredientLookup[ref.id]?.name
+                    ?: recipeLookup[ref.id]?.name
+                    ?: "Ingrediente ${ref.id}",
+                type = RecipeComponentType.INGREDIENT,
+            )
         }
     }
 

@@ -3,6 +3,7 @@ package org.apptolast.menuadmin.presentation.screens.ingredients
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.domain.model.Ingredient
+import org.apptolast.menuadmin.domain.model.Restaurant
 
 data class IngredientsUiState(
     val isLoading: Boolean = true,
@@ -11,6 +12,9 @@ data class IngredientsUiState(
     val ingredients: List<Ingredient> = emptyList(),
     val searchQuery: String = "",
     val filterAllergens: Set<AllergenType> = emptySet(),
+    val filterBrands: Set<String> = emptySet(),
+    val availableBrands: List<String> = emptyList(),
+    val restaurants: List<Restaurant> = emptyList(),
     val isEditing: Boolean = false,
     val editingIngredient: Ingredient? = null,
     val isSaving: Boolean = false,
@@ -19,6 +23,7 @@ data class IngredientsUiState(
     val formDescription: String = "",
     val formBrand: String = "",
     val formLabelInfo: String = "",
+    val formRestaurantId: String = "",
     val formAllergens: Map<AllergenType, ContainmentLevel> = emptyMap(),
     val error: String? = null,
 )

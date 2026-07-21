@@ -71,6 +71,14 @@ Generate localized App Store screenshots on the simulator. The app's ScreenshotM
 
 Upload App Store metadata + any generated screenshots (no binary, no review submission).
 
+### ios upload_metadata
+
+```sh
+[bundle exec] fastlane ios upload_metadata
+```
+
+Upload App Store metadata ONLY — no binary, no screenshots, no review submission.
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

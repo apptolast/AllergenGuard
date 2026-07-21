@@ -1,11 +1,13 @@
 package org.apptolast.menuadmin.presentation.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +34,7 @@ import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.ContainmentLevel
 import org.apptolast.menuadmin.presentation.theme.MenuAdminTheme
 import org.apptolast.menuadmin.presentation.theme.color
+import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -80,10 +84,11 @@ fun AllergenBadge(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(if (compact) 5.dp else 8.dp),
     ) {
-        LucideIcon(
-            codepoint = allergenType.icon,
-            size = if (compact) 13.sp else 18.sp,
-            color = contentColor,
+        Image(
+            bitmap = imageResource(allergenType.iconResource()),
+            contentDescription = null,
+            modifier = Modifier.size(if (compact) 34.dp else 38.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = if (mayContain) {

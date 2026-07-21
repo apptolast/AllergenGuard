@@ -22,9 +22,7 @@ data class MenuState(
     val error: String? = null,
 ) {
     val safeDishCount: Int
-        get() = filteredDishes.count { dish ->
-            dish.allergens.none { it in userAllergens }
-        }
+        get() = filteredDishes.count { it.isSafeFor(userAllergens) }
 }
 
 sealed interface MenuAction {

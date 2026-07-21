@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.FilterQuality
+import org.jetbrains.compose.resources.imageResource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,11 +53,11 @@ fun AllergenFilterChip(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Icon(
-            imageVector = allergen.icon(),
+        Image(
+            bitmap = imageResource(allergen.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = content,
+            modifier = Modifier.size(22.dp),
+            filterQuality = FilterQuality.High,
         )
         Text(
             text = label,

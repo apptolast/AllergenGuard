@@ -36,9 +36,10 @@ class FirestoreRestaurantRepository(
         val recipeIds = (activeMenu.fields["recipeIds"] as? List<Any?>).orEmpty()
             .filterIsInstance<String>()
             .toSet()
-        val dishes = firestore.listDocuments("$COLLECTION/$restaurantId/recipes")
+        val allDishes = firestore.listDocuments("$COLLECTION/$restaurantId/recipes")
             .map { it.toDish(restaurantId) }
-            .filter { it.id in recipeIds }
+        // Defensive: only dishes in the published menu AND never sub-recipes (Spec 005 AC-04).
+        val dishes = visibleMenuDishes(allDishes, recipeIds)
         dishes.forEach { dishCache[it.id] = it }
         dishes
     }
