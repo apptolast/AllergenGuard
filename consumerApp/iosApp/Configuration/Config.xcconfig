@@ -6,5 +6,5 @@ PRODUCT_NAME=Allergen Guard
 // Must match the Firebase iOS app + GoogleService-Info.plist BUNDLE_ID.
 PRODUCT_BUNDLE_IDENTIFIER=com.apptolast.menufrontend
 
-CURRENT_PROJECT_VERSION=3
-MARKETING_VERSION=0.2.0
+CURRENT_PROJECT_VERSION=4
+MARKETING_VERSION=1.4.2
