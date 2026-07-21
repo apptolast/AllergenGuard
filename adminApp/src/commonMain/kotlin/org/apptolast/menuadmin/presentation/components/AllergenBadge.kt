@@ -87,7 +87,7 @@ fun AllergenBadge(
         Image(
             bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(if (compact) 20.dp else 26.dp),
+            modifier = Modifier.size(if (compact) 24.dp else 28.dp),
             filterQuality = FilterQuality.High,
         )
         Text(
