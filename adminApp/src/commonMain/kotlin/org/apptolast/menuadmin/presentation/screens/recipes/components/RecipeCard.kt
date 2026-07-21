@@ -249,7 +249,7 @@ private fun SubRecipeRow(
                         Image(
                             bitmap = imageResource(allergen.iconResource()),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(30.dp),
                             filterQuality = FilterQuality.High,
                         )
                     }
@@ -300,7 +300,7 @@ private fun IngredientRow(
                     Image(
                         bitmap = imageResource(allergen.iconResource()),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(30.dp),
                         filterQuality = FilterQuality.High,
                     )
                 }

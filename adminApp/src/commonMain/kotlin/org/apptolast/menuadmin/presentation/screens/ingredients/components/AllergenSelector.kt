@@ -96,7 +96,7 @@ private fun AllergenCard(
         Image(
             bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(42.dp),
+            modifier = Modifier.size(50.dp),
             filterQuality = FilterQuality.High,
         )
         Text(

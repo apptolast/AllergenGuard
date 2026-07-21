@@ -71,7 +71,7 @@ fun AllergenSummaryCard(
         Image(
             bitmap = imageResource(allergenType.iconResource()),
             contentDescription = null,
-            modifier = Modifier.size(36.dp),
+            modifier = Modifier.size(44.dp),
             filterQuality = FilterQuality.High,
         )
         Text(
