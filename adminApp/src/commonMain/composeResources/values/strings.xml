@@ -53,14 +53,14 @@
     <string name="recipes_subtitle">Manage your recipes and their ingredients</string>
     <string name="recipes_new">New Recipe</string>
     <string name="recipes_search">Search recipes...</string>
-    <string name="recipes_ingredients_count">%d ingredients</string>
+    <string name="recipes_ingredients_count">%1$d ingredients</string>
 
     <!-- Menus -->
     <string name="menus_title">Menus</string>
     <string name="menus_subtitle">Manage menus and their allergens</string>
     <string name="menus_new">New Menu</string>
     <string name="menus_allergen_matrix">Allergen Menu</string>
-    <string name="menus_dishes_count">%d dishes</string>
+    <string name="menus_dishes_count">%1$d dishes</string>
     <string name="menus_export_pdf">Export PDF</string>
     <string name="menus_export_json">Export JSON</string>
     <string name="menus_generate_adapted">Generate Adapted Menu (Free of...): Select a category and check the allergen table for each dish.</string>
@@ -75,7 +75,7 @@
     <string name="carta_safe_dishes">Safe Dishes</string>
     <string name="carta_unsafe_dishes">Dishes with Allergens</string>
     <string name="carta_safe_count">%1$d Safe Dishes out of %2$d total</string>
-    <string name="carta_all_dishes">All dishes (%d)</string>
+    <string name="carta_all_dishes">All dishes (%1$d)</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>
@@ -112,10 +112,10 @@
     <string name="action_add">Add</string>
 
     <!-- Time -->
-    <string name="time_minutes_ago">%d min ago</string>
-    <string name="time_hours_ago">%d h ago</string>
+    <string name="time_minutes_ago">%1$d min ago</string>
+    <string name="time_hours_ago">%1$d h ago</string>
     <string name="time_yesterday">Yesterday</string>
-    <string name="time_days_ago">%d days ago</string>
+    <string name="time_days_ago">%1$d days ago</string>
 
     <!-- Errors -->
     <string name="error_loading">Error loading data</string>

@@ -53,14 +53,14 @@
     <string name="recipes_subtitle">Gestiona tus recetas y sus ingredientes</string>
     <string name="recipes_new">Nueva Receta</string>
     <string name="recipes_search">Buscar recetas...</string>
-    <string name="recipes_ingredients_count">%d ingredientes</string>
+    <string name="recipes_ingredients_count">%1$d ingredientes</string>
 
     <!-- Menus -->
     <string name="menus_title">Menus</string>
     <string name="menus_subtitle">Gestiona los menus y sus alergenos</string>
     <string name="menus_new">Nuevo Menu</string>
     <string name="menus_allergen_matrix">Menu de Alergenos</string>
-    <string name="menus_dishes_count">%d platos</string>
+    <string name="menus_dishes_count">%1$d platos</string>
     <string name="menus_export_pdf">Exportar PDF</string>
     <string name="menus_export_json">Exportar JSON</string>
     <string name="menus_generate_adapted">Generar Menu Adaptado (Libre de...): Selecciona una categoria y consulta la tabla de alergenos para cada plato.</string>
@@ -75,7 +75,7 @@
     <string name="carta_safe_dishes">Platos Seguros</string>
     <string name="carta_unsafe_dishes">Platos con Alergenos</string>
     <string name="carta_safe_count">%1$d Platos Seguros de %2$d total</string>
-    <string name="carta_all_dishes">Todos los platos (%d)</string>
+    <string name="carta_all_dishes">Todos los platos (%1$d)</string>
 
     <!-- Allergens -->
     <string name="allergen_gluten">Gluten</string>
@@ -112,10 +112,10 @@
     <string name="action_add">Anadir</string>
 
     <!-- Time -->
-    <string name="time_minutes_ago">Hace %d min</string>
-    <string name="time_hours_ago">Hace %d h</string>
+    <string name="time_minutes_ago">Hace %1$d min</string>
+    <string name="time_hours_ago">Hace %1$d h</string>
     <string name="time_yesterday">Hace 1 dia</string>
-    <string name="time_days_ago">Hace %d dias</string>
+    <string name="time_days_ago">Hace %1$d dias</string>
 
     <!-- Errors -->
     <string name="error_loading">Error al cargar datos</string>
