@@ -54,6 +54,7 @@
     <string name="recipes_new">Nueva Receta</string>
     <string name="recipes_search">Buscar recetas...</string>
     <string name="recipes_ingredients_count">%1$d ingredientes</string>
+    <string name="recipecard_subrecipe_label">subelaboración</string>
 
     <!-- Menus -->
     <string name="menus_title">Menus</string>

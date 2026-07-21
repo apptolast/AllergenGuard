@@ -297,6 +297,9 @@ fun RecipesContent(
             val ingredientLookup = remember(uiState.allIngredients) {
                 uiState.allIngredients.associateBy { it.id }
             }
+            val recipeLookup = remember(uiState.recipes) {
+                uiState.recipes.associateBy { it.id }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -315,6 +318,7 @@ fun RecipesContent(
                             ingredientLookup = ingredientLookup,
                             onClick = { onEditRecipe(recipe) },
                             modifier = Modifier.weight(1f),
+                            recipeLookup = recipeLookup,
                         )
                     }
                     val remainder = uiState.recipes.size % 3

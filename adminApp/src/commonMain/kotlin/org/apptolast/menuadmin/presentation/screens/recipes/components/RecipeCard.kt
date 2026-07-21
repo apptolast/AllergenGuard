@@ -11,11 +11,20 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,10 +36,12 @@ import androidx.compose.ui.unit.sp
 import menuadmin.adminapp.generated.resources.Res
 import menuadmin.adminapp.generated.resources.recipecard_allergens_count
 import menuadmin.adminapp.generated.resources.recipecard_ingredients_count
+import menuadmin.adminapp.generated.resources.recipecard_subrecipe_label
 import org.apptolast.menuadmin.domain.model.AllergenType
 import org.apptolast.menuadmin.domain.model.Ingredient
 import org.apptolast.menuadmin.domain.model.IngredientAllergen
 import org.apptolast.menuadmin.domain.model.Recipe
+import org.apptolast.menuadmin.domain.model.RecipeComponentType
 import org.apptolast.menuadmin.domain.model.RecipeIngredient
 import org.apptolast.menuadmin.presentation.components.AllergenBadge
 import org.apptolast.menuadmin.presentation.components.LucideIcon
@@ -46,6 +57,8 @@ fun RecipeCard(
     ingredientLookup: Map<String, Ingredient>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    // Recipes by id, so SUB_RECIPE components can be expanded to show their own ingredients (Spec 003).
+    recipeLookup: Map<String, Recipe> = emptyMap(),
 ) {
     val shape = RoundedCornerShape(12.dp)
 
@@ -143,14 +156,23 @@ fun RecipeCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                // Ingredient rows
+                // Ingredient rows — sub-recipes render as expandable rows showing their own components.
                 recipe.ingredients.forEach { recipeIngredient ->
-                    val ingredient = ingredientLookup[recipeIngredient.ingredientId]
-                    val allergenTypes = ingredient?.allergenTypes ?: emptySet()
-                    IngredientRow(
-                        name = recipeIngredient.ingredientName,
-                        allergenTypes = allergenTypes,
-                    )
+                    if (recipeIngredient.type == RecipeComponentType.SUB_RECIPE) {
+                        val sub = recipeLookup[recipeIngredient.ingredientId]
+                        SubRecipeRow(
+                            name = recipeIngredient.ingredientName,
+                            allergenTypes = sub?.computedAllergens ?: emptySet(),
+                            components = sub?.ingredients ?: emptyList(),
+                            ingredientLookup = ingredientLookup,
+                        )
+                    } else {
+                        val ingredient = ingredientLookup[recipeIngredient.ingredientId]
+                        IngredientRow(
+                            name = recipeIngredient.ingredientName,
+                            allergenTypes = ingredient?.allergenTypes ?: emptySet(),
+                        )
+                    }
                 }
             }
         } else if (recipe.ingredientCount > 0) {
@@ -166,6 +188,75 @@ fun RecipeCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubRecipeRow(
+    name: String,
+    allergenTypes: Set<AllergenType>,
+    components: List<RecipeIngredient>,
+    ingredientLookup: Map<String, Ingredient>,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(vertical = 2.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = Blue500,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    text = name,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+                Text(
+                    text = stringResource(Res.string.recipecard_subrecipe_label),
+                    fontSize = 10.sp,
+                    color = Blue500,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
+            if (allergenTypes.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 12.dp),
+                ) {
+                    allergenTypes.forEach { allergen ->
+                        LucideIcon(codepoint = allergen.icon, size = 16.sp, color = allergen.color)
+                    }
+                }
+            }
+        }
+        if (expanded && components.isNotEmpty()) {
+            Column(modifier = Modifier.padding(start = 20.dp)) {
+                components.forEach { component ->
+                    val ing = ingredientLookup[component.ingredientId]
+                    IngredientRow(
+                        name = component.ingredientName,
+                        allergenTypes = ing?.allergenTypes ?: emptySet(),
+                    )
+                }
             }
         }
     }
@@ -252,6 +343,48 @@ private fun PreviewRecipeCard() {
                 ),
             ),
             onClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewRecipeCardWithSubRecipe() {
+    MenuAdminTheme {
+        RecipeCard(
+            recipe = Recipe(
+                id = "rec-sub-parent",
+                name = "Patatas Bravas Piconera",
+                category = "Tapas",
+                isActive = true,
+                computedAllergens = setOf(AllergenType.EGGS),
+                ingredients = listOf(
+                    RecipeIngredient("ing-p", "Patata"),
+                    RecipeIngredient(
+                        ingredientId = "sub-may",
+                        ingredientName = "Mayonesa de ajo frito y oloroso",
+                        type = RecipeComponentType.SUB_RECIPE,
+                    ),
+                ),
+            ),
+            ingredientLookup = mapOf(
+                "ing-p" to Ingredient(id = "ing-p", name = "Patata"),
+                "ing-huevo" to Ingredient(
+                    id = "ing-huevo",
+                    name = "Huevo",
+                    allergens = listOf(IngredientAllergen(allergenCode = "EGGS", allergenName = "Huevos")),
+                ),
+            ),
+            onClick = {},
+            recipeLookup = mapOf(
+                "sub-may" to Recipe(
+                    id = "sub-may",
+                    name = "Mayonesa de ajo frito y oloroso",
+                    isSubRecipe = true,
+                    computedAllergens = setOf(AllergenType.EGGS),
+                    ingredients = listOf(RecipeIngredient("ing-huevo", "Huevo")),
+                ),
+            ),
         )
     }
 }
