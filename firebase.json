@@ -13,5 +13,20 @@
     ],
     "storage": {
         "rules": "storage.rules"
-  }
+    },
+    "hosting": {
+        "site": "allergenguard-web",
+        "public": "adminApp/build/dist/wasmJs/productionExecutable",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
 }
